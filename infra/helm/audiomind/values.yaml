@@ -5,28 +5,23 @@
 
 nameOverride: ""
 fullnameOverride: ""
-
 # ---------------------------------------------------------------------------
 # Image registry used by CI/CD (F3-3 pushes here)
 # ---------------------------------------------------------------------------
 imageRegistry: ghcr.io/jgallego9
-
 # ---------------------------------------------------------------------------
 # api-gateway
 # ---------------------------------------------------------------------------
 apiGateway:
   image:
     repository: ghcr.io/jgallego9/audiomind-api-gateway
-    tag: latest
+    tag: sha-b5772f3
     pullPolicy: IfNotPresent
-
   replicaCount: 2
-
   service:
     type: ClusterIP
     port: 80
     targetPort: 8000
-
   resources:
     requests:
       cpu: 100m
@@ -34,14 +29,12 @@ apiGateway:
     limits:
       cpu: 500m
       memory: 512Mi
-
   # Horizontal Pod Autoscaler (requires metrics-server; see hpa.yaml)
   hpa:
     enabled: false
     minReplicas: 2
     maxReplicas: 10
     targetCPUUtilizationPercentage: 70
-
   # List (not map) to guarantee stable env-var order across renders → avoids
   # unnecessary pod restarts caused by non-deterministic Go map iteration.
   env:
@@ -61,21 +54,18 @@ apiGateway:
       value: "false"
     - name: OTEL_OTLP_ENDPOINT
       value: http://jaeger-collector:4318
-
   # Reference to a pre-existing K8s Secret that contains JWT_SECRET_KEY.
   # Create it once with:
   #   kubectl create secret generic audiomind-secrets \
   #     --from-literal=JWT_SECRET_KEY=<your-32-char-secret>
   existingSecret: audiomind-secrets
   secretKey: JWT_SECRET_KEY
-
   livenessProbe:
     httpGet:
       path: /health
       port: 8000
     initialDelaySeconds: 10
     periodSeconds: 15
-
   readinessProbe:
     httpGet:
       path: /ready
@@ -83,12 +73,10 @@ apiGateway:
     initialDelaySeconds: 5
     periodSeconds: 10
     failureThreshold: 3
-
   # PodDisruptionBudget: keep at least 1 pod available during voluntary disruptions.
   pdb:
     enabled: true
     minAvailable: 1
-
   # Ingress (requires ingress-nginx + cert-manager, F2-8)
   ingress:
     enabled: false
@@ -96,18 +84,15 @@ apiGateway:
     tls: false
     clusterIssuer: audiomind-ca-issuer
     annotations: {}
-
 # ---------------------------------------------------------------------------
 # worker
 # ---------------------------------------------------------------------------
 worker:
   image:
     repository: ghcr.io/jgallego9/audiomind-worker
-    tag: latest
+    tag: sha-b5772f3
     pullPolicy: IfNotPresent
-
   replicaCount: 1
-
   resources:
     requests:
       cpu: 100m
@@ -115,7 +100,6 @@ worker:
     limits:
       cpu: 1000m
       memory: 1Gi
-
   env:
     - name: QDRANT_COLLECTION
       value: transcriptions
@@ -123,12 +107,10 @@ worker:
       value: BAAI/bge-small-en-v1.5
     - name: LOG_LEVEL
       value: INFO
-
   # PodDisruptionBudget for worker.
   pdb:
     enabled: true
     minAvailable: 1
-
 # ---------------------------------------------------------------------------
 # Redis (Bitnami subchart)
 # https://github.com/bitnami/charts/tree/main/bitnami/redis
@@ -141,7 +123,6 @@ redis:
   master:
     persistence:
       enabled: false
-
 # ---------------------------------------------------------------------------
 # Qdrant (subchart)
 # https://github.com/qdrant/qdrant-helm
@@ -149,37 +130,30 @@ redis:
 qdrant:
   enabled: true
   replicaCount: 1
-
 # ---------------------------------------------------------------------------
 # ServiceAccount
 # ---------------------------------------------------------------------------
 serviceAccount:
   create: true
-  name: ""   # leave empty to derive from fullname
-
+  name: "" # leave empty to derive from fullname
 # ---------------------------------------------------------------------------
 # vLLM inference server (F2-4)
 # Disabled by default; enable via values-gpu.yaml overlay or set vllm.enabled=true
 # ---------------------------------------------------------------------------
 vllm:
   enabled: false
-
   image:
     repository: vllm/vllm-openai
     tag: "v0.6.6"
     pullPolicy: IfNotPresent
-
   replicaCount: 1
-
   # Model to load at startup.  Set to a public HF model or a locally mounted path.
   model: "mistralai/Mistral-7B-Instruct-v0.3"
-
   # HuggingFace token for gated models — read from the same pre-existing Secret
   # used by api-gateway (kubectl create secret generic audiomind-secrets ...).
   hfTokenSecret:
     name: audiomind-secrets
     key: HF_TOKEN
-
   resources:
     requests:
       cpu: "2000m"
@@ -189,21 +163,17 @@ vllm:
       cpu: "4000m"
       memory: 16Gi
       nvidia.com/gpu: "1"
-
   # Place vLLM pods on GPU-capable nodes.
   # GPU Operator + NFD (F2-3) label nodes with nvidia.com/gpu.present=true.
   nodeSelector:
     nvidia.com/gpu.present: "true"
-
   tolerations:
     - key: nvidia.com/gpu
       operator: Exists
       effect: NoSchedule
-
   service:
     type: ClusterIP
     port: 8000
-
   env:
     - name: VLLM_WORKER_MULTIPROC_METHOD
       value: spawn
@@ -211,21 +181,18 @@ vllm:
       value: "1"
     - name: HF_HOME
       value: /data/huggingface
-
   # PVC to cache HuggingFace model weights — avoids re-download on pod restart.
   persistence:
     enabled: true
     size: 30Gi
-    storageClass: ""   # "" → cluster default StorageClass
-
+    storageClass: "" # "" → cluster default StorageClass
   livenessProbe:
     httpGet:
       path: /health
       port: 8000
-    initialDelaySeconds: 120   # allow time for model loading
+    initialDelaySeconds: 120 # allow time for model loading
     periodSeconds: 30
     failureThreshold: 5
-
   readinessProbe:
     httpGet:
       path: /health
