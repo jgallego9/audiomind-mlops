@@ -1,0 +1,22 @@
+apiVersion: v2
+name: audiomind
+description: AudioMind MLOps Platform — async transcription + RAG search
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+
+maintainers:
+  - name: jgallego9
+
+dependencies:
+  # Bitnami Redis — standalone mode (master + replica disabled for kind)
+  - name: redis
+    version: "^20.0.0"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: redis.enabled
+
+  # Qdrant vector store
+  - name: qdrant
+    version: "^1.0.0"
+    repository: "https://qdrant.github.io/qdrant-helm"
+    condition: qdrant.enabled

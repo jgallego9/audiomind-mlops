@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "audiomind.worker.fullname" . }}
+  labels:
+    {{- include "audiomind.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+spec:
+  replicas: {{ .Values.worker.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "audiomind.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      labels:
+        {{- include "audiomind.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: worker
+    spec:
+      serviceAccountName: {{ include "audiomind.serviceAccountName" . }}
+      containers:
+        - name: worker
+          image: "{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}"
+          imagePullPolicy: {{ .Values.worker.image.pullPolicy }}
+          env:
+            # --- sourced from values ---
+            {{- range $key, $value := .Values.worker.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+            # --- internal service URLs derived from release name ---
+            - name: REDIS_URL
+              value: {{ include "audiomind.redisUrl" . | quote }}
+            - name: QDRANT_URL
+              value: {{ include "audiomind.qdrantUrl" . | quote }}
+          resources:
+            {{- toYaml .Values.worker.resources | nindent 12 }}

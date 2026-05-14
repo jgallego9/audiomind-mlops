@@ -1,0 +1,129 @@
+# ---------------------------------------------------------------------------
+# AudioMind Helm chart — base values
+# Override with values-dev.yaml or values-prod.yaml
+# ---------------------------------------------------------------------------
+
+nameOverride: ""
+fullnameOverride: ""
+
+# ---------------------------------------------------------------------------
+# Image registry used by CI/CD (F3-3 pushes here)
+# ---------------------------------------------------------------------------
+imageRegistry: ghcr.io/jgallego9
+
+# ---------------------------------------------------------------------------
+# api-gateway
+# ---------------------------------------------------------------------------
+apiGateway:
+  image:
+    repository: ghcr.io/jgallego9/audiomind-api-gateway
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  replicaCount: 2
+
+  service:
+    type: ClusterIP
+    port: 80
+    targetPort: 8000
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  # Horizontal Pod Autoscaler (requires metrics-server; see hpa.yaml)
+  hpa:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+
+  env:
+    JWT_ALGORITHM: HS256
+    JWT_ACCESS_TOKEN_EXPIRE_MINUTES: "30"
+    RATE_LIMIT_DEFAULT: 100/minute
+    RATE_LIMIT_AUTH: 10/minute
+    QDRANT_COLLECTION: transcriptions
+    EMBEDDING_MODEL: BAAI/bge-small-en-v1.5
+    OTEL_ENABLED: "false"
+    OTEL_OTLP_ENDPOINT: http://jaeger-collector:4318
+
+  # Reference to a pre-existing K8s Secret that contains JWT_SECRET_KEY.
+  # Create it once with:
+  #   kubectl create secret generic audiomind-secrets \
+  #     --from-literal=JWT_SECRET_KEY=<your-32-char-secret>
+  existingSecret: audiomind-secrets
+  secretKey: JWT_SECRET_KEY
+
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 10
+    periodSeconds: 15
+
+  readinessProbe:
+    httpGet:
+      path: /ready
+      port: 8000
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    failureThreshold: 3
+
+# ---------------------------------------------------------------------------
+# worker
+# ---------------------------------------------------------------------------
+worker:
+  image:
+    repository: ghcr.io/jgallego9/audiomind-worker
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  replicaCount: 1
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+  env:
+    QDRANT_COLLECTION: transcriptions
+    EMBEDDING_MODEL: BAAI/bge-small-en-v1.5
+    LOG_LEVEL: INFO
+
+# ---------------------------------------------------------------------------
+# Redis (Bitnami subchart)
+# https://github.com/bitnami/charts/tree/main/bitnami/redis
+# ---------------------------------------------------------------------------
+redis:
+  enabled: true
+  architecture: standalone
+  auth:
+    enabled: false
+  master:
+    persistence:
+      enabled: false
+
+# ---------------------------------------------------------------------------
+# Qdrant (subchart)
+# https://github.com/qdrant/qdrant-helm
+# ---------------------------------------------------------------------------
+qdrant:
+  enabled: true
+  replicaCount: 1
+  persistence:
+    enabled: false
+
+# ---------------------------------------------------------------------------
+# Service account
+# ---------------------------------------------------------------------------
+serviceAccount:
+  create: true
+  name: ""

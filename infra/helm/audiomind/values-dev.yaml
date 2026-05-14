@@ -1,0 +1,31 @@
+# ---------------------------------------------------------------------------
+# values-dev.yaml — kind cluster overlay
+#
+# Usage:
+#   helm install audiomind infra/helm/audiomind \
+#     -f infra/helm/audiomind/values-dev.yaml \
+#     --namespace audiomind --create-namespace
+# ---------------------------------------------------------------------------
+
+apiGateway:
+  image:
+    pullPolicy: Never   # images loaded via: kind load docker-image <image>
+  replicaCount: 1
+  service:
+    type: NodePort      # reachable from host via kind port mapping
+  hpa:
+    enabled: false
+
+worker:
+  image:
+    pullPolicy: Never
+  replicaCount: 1
+
+redis:
+  master:
+    persistence:
+      enabled: false
+
+qdrant:
+  persistence:
+    enabled: false
