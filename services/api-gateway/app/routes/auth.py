@@ -1,10 +1,11 @@
 from datetime import UTC, datetime, timedelta
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from jose import jwt  # type: ignore[import-untyped]
 from passlib.context import CryptContext  # type: ignore[import-untyped]
 
-from app.config import settings
+from app.config import Settings, get_settings
 from app.middleware.rate_limit import limiter
 from app.models.auth import LoginRequest, Token
 
@@ -24,7 +25,7 @@ def _verify_password(plain: str, hashed: str) -> bool:
     return result
 
 
-def _create_access_token(subject: str) -> str:
+def _create_access_token(subject: str, settings: Settings) -> str:
     expire = datetime.now(UTC) + timedelta(
         minutes=settings.jwt_access_token_expire_minutes
     )
@@ -38,7 +39,11 @@ def _create_access_token(subject: str) -> str:
 
 @router.post("/token", response_model=Token, summary="Issue JWT access token")
 @limiter.limit("10/minute")
-async def login(request: Request, body: LoginRequest) -> Token:
+async def login(
+    request: Request,
+    body: LoginRequest,
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> Token:
     """Authenticate and return a signed JWT.
 
     Rate-limited to 10 requests/minute per IP to mitigate brute-force attacks.
@@ -51,4 +56,4 @@ async def login(request: Request, body: LoginRequest) -> Token:
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    return Token(access_token=_create_access_token(body.username))
+    return Token(access_token=_create_access_token(body.username, settings))

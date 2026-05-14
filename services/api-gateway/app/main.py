@@ -5,9 +5,11 @@ from fastapi import FastAPI
 from slowapi import _rate_limit_exceeded_handler  # type: ignore[import-untyped]
 from slowapi.errors import RateLimitExceeded  # type: ignore[import-untyped]
 
-from app.config import settings
+from app.config import get_settings
 from app.middleware.rate_limit import limiter
 from app.routes import auth, health
+
+_settings = get_settings()
 
 
 @asynccontextmanager
@@ -18,8 +20,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
 
 
 app = FastAPI(
-    title=settings.app_name,
-    version=settings.app_version,
+    title=_settings.app_name,
+    version=_settings.app_version,
     lifespan=lifespan,
     docs_url="/docs",
     redoc_url="/redoc",

@@ -4,7 +4,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt  # type: ignore[import-untyped]
 
-from app.config import settings
+from app.config import Settings, get_settings
 from app.models.auth import TokenData
 
 _bearer_scheme = HTTPBearer()
@@ -12,6 +12,7 @@ _bearer_scheme = HTTPBearer()
 
 def get_current_user(
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(_bearer_scheme)],
+    settings: Annotated[Settings, Depends(get_settings)],
 ) -> TokenData:
     """Validate Bearer JWT and return the token payload.
 
