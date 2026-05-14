@@ -3,9 +3,12 @@ import json
 import logging
 from datetime import UTC, datetime
 
+from qdrant_client import AsyncQdrantClient
 from redis.asyncio import Redis
 from redis.exceptions import ResponseError
 
+from app.config import Settings
+from app.indexer import index_transcription
 from app.processors.transcribe import mock_transcribe
 
 _STREAM_KEY = "audiomind:jobs"
@@ -29,12 +32,15 @@ async def _ensure_consumer_group(redis: Redis) -> None:
 
 async def _process_message(
     redis: Redis,
+    qdrant: AsyncQdrantClient,
+    settings: Settings,
     msg_id: str,
     fields: dict[str, str],
 ) -> None:
     job_id: str = fields.get("job_id", "")
     audio_url: str = fields.get("audio_url", "")
     language: str = fields.get("language", "auto")
+    user: str = fields.get("user", "")
     job_key = f"{_JOB_KEY_PREFIX}:{job_id}"
 
     logger.info("job_start job_id=%s audio_url=%s", job_id, audio_url)
@@ -42,15 +48,28 @@ async def _process_message(
 
     try:
         result = await mock_transcribe(audio_url=audio_url, language=language)
+        completed_at = datetime.now(UTC).isoformat()
         await redis.hset(  # type: ignore[misc]
             job_key,
             mapping={
                 "status": "completed",
                 "result": json.dumps(result),
-                "completed_at": datetime.now(UTC).isoformat(),
+                "completed_at": completed_at,
             },
         )
         logger.info("job_done job_id=%s", job_id)
+        # Index the transcription for semantic search (best-effort).
+        transcript = str(result.get("transcript", ""))
+        await index_transcription(
+            qdrant,
+            settings,
+            job_id=job_id,
+            transcript=transcript,
+            language=str(result.get("language", language)),
+            audio_url=audio_url,
+            user=user,
+            created_at=completed_at,
+        )
     except Exception as exc:  # noqa: BLE001
         logger.exception("job_failed job_id=%s error=%s", job_id, exc)
         await redis.hset(  # type: ignore[misc]
@@ -65,7 +84,12 @@ async def _process_message(
         await redis.xack(_STREAM_KEY, _CONSUMER_GROUP, msg_id)
 
 
-async def _recover_pending(redis: Redis, consumer_id: str) -> None:
+async def _recover_pending(
+    redis: Redis,
+    qdrant: AsyncQdrantClient,
+    settings: Settings,
+    consumer_id: str,
+) -> None:
     """Re-claim messages that have been pending for >60 s (previous worker crash).
 
     Uses XAUTOCLAIM (Redis >= 6.2) to atomically steal stale PEL entries.
@@ -84,17 +108,19 @@ async def _recover_pending(redis: Redis, consumer_id: str) -> None:
                 "recovered_pending count=%d consumer=%s", len(messages), consumer_id
             )
             for msg_id, fields in messages:
-                await _process_message(redis, msg_id, fields)
+                await _process_message(redis, qdrant, settings, msg_id, fields)
     except Exception:  # noqa: BLE001
         logger.warning(
             "pending_recovery_skipped consumer=%s", consumer_id, exc_info=True
         )
 
 
-async def run_consumer(redis: Redis, consumer_id: str) -> None:
+async def run_consumer(
+    redis: Redis, consumer_id: str, qdrant: AsyncQdrantClient, settings: Settings
+) -> None:
     """Blocking consumer loop — reads from the Redis Stream and processes jobs."""
     await _ensure_consumer_group(redis)
-    await _recover_pending(redis, consumer_id)  # claim stale msgs from crashed workers
+    await _recover_pending(redis, qdrant, settings, consumer_id)  # claim stale msgs
     logger.info("consumer_ready consumer=%s", consumer_id)
 
     while True:
@@ -112,7 +138,7 @@ async def run_consumer(redis: Redis, consumer_id: str) -> None:
                 continue
             for _stream, messages in results:
                 for msg_id, fields in messages:
-                    await _process_message(redis, msg_id, fields)
+                    await _process_message(redis, qdrant, settings, msg_id, fields)
         except asyncio.CancelledError:
             logger.info("consumer_shutdown consumer=%s", consumer_id)
             break

@@ -2,6 +2,7 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from qdrant_client import AsyncQdrantClient
 from redis.asyncio import Redis
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -9,7 +10,7 @@ from slowapi.errors import RateLimitExceeded
 from app.config import get_settings
 from app.middleware.rate_limit import limiter
 from app.middleware.telemetry import setup_tracing, shutdown_tracing
-from app.routes import auth, health, jobs
+from app.routes import auth, health, jobs, search
 
 _settings = get_settings()
 
@@ -18,9 +19,13 @@ _settings = get_settings()
 async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     # startup
     app.state.redis = Redis.from_url(str(_settings.redis_url), decode_responses=True)
+    qdrant = AsyncQdrantClient(url=str(_settings.qdrant_url))
+    qdrant.set_model(_settings.embedding_model)
+    app.state.qdrant = qdrant
     yield
     # shutdown
     await app.state.redis.aclose()
+    await app.state.qdrant.close()
     shutdown_tracing()
 
 
@@ -41,3 +46,4 @@ setup_tracing(app, _settings)
 app.include_router(health.router)
 app.include_router(auth.router, prefix="/auth")
 app.include_router(jobs.router)
+app.include_router(search.router)

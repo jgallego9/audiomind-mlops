@@ -29,6 +29,11 @@ class Settings(BaseSettings):
     redis_url: RedisDsn = RedisDsn("redis://redis:6379/0")
     job_ttl_seconds: int = 3600  # how long job hashes live in Redis
 
+    # Qdrant — vector store for RAG pipeline
+    qdrant_url: AnyHttpUrl = AnyHttpUrl("http://qdrant:6333")
+    qdrant_collection: str = "transcriptions"
+    embedding_model: str = "BAAI/bge-small-en-v1.5"
+
     # OpenTelemetry
     otel_enabled: bool = True
     otel_service_name: str = "api-gateway"

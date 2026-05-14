@@ -27,7 +27,15 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 COPY services/worker/app ./app
 
-RUN useradd --no-create-home --shell /bin/false appuser
+# Pre-download the embedding model so the first job has no cold-start.
+ENV FASTEMBED_CACHE_PATH=/app/.models
+RUN python -c "
+from fastembed import TextEmbedding
+list(TextEmbedding('BAAI/bge-small-en-v1.5').embed(['warmup']))
+"
+
+RUN useradd --no-create-home --shell /bin/false appuser \
+    && chown -R appuser:appuser /app/.models
 USER appuser
 
 CMD ["python", "-m", "app.main"]

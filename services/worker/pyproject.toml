@@ -6,6 +6,8 @@ requires-python = ">=3.13"
 dependencies = [
     "redis[hiredis]>=5.0",
     "pydantic-settings>=2.6",
+    # Qdrant vector store (RAG pipeline)
+    "qdrant-client[fastembed]>=1.12",
 ]
 
 [tool.uv]

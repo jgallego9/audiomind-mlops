@@ -12,6 +12,8 @@ dependencies = [
     "pydantic-settings>=2.6",
     # Redis
     "redis[hiredis]>=5.0",
+    # Qdrant vector store (RAG pipeline)
+    "qdrant-client[fastembed]>=1.12",
     # OpenTelemetry
     "opentelemetry-api>=1.28",
     "opentelemetry-sdk>=1.28",

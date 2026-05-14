@@ -12,6 +12,7 @@ import logging
 import signal
 import uuid
 
+from qdrant_client import AsyncQdrantClient
 from redis.asyncio import Redis
 
 from app.config import get_settings
@@ -31,6 +32,8 @@ async def _main() -> None:
     logger.info("worker_start consumer=%s redis=%s", consumer_id, settings.redis_url)
 
     redis: Redis = Redis.from_url(str(settings.redis_url), decode_responses=True)
+    qdrant = AsyncQdrantClient(url=str(settings.qdrant_url))
+    qdrant.set_model(settings.embedding_model)
 
     loop = asyncio.get_running_loop()
     shutdown_event = asyncio.Event()
@@ -42,7 +45,9 @@ async def _main() -> None:
     for sig in (signal.SIGINT, signal.SIGTERM):
         loop.add_signal_handler(sig, _handle_signal)
 
-    consumer_task = asyncio.create_task(run_consumer(redis, consumer_id))
+    consumer_task = asyncio.create_task(
+        run_consumer(redis, consumer_id, qdrant, settings)
+    )
 
     # Block until a SIGINT/SIGTERM arrives.
     await shutdown_event.wait()
@@ -50,6 +55,7 @@ async def _main() -> None:
     consumer_task.cancel()
     await asyncio.gather(consumer_task, return_exceptions=True)
     await redis.aclose()
+    await qdrant.close()
 
     logger.info("worker_stopped consumer=%s", consumer_id)
 

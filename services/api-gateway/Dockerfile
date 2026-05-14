@@ -33,8 +33,18 @@ ENV PATH="/app/.venv/bin:$PATH"
 # Copy application source.
 COPY services/api-gateway/app ./app
 
+# Pre-download the embedding model so the first request has no cold-start.
+# Must run before switching to non-root user so files are owned by root and
+# readable by appuser.
+ENV FASTEMBED_CACHE_PATH=/app/.models
+RUN python -c "
+from fastembed import TextEmbedding
+list(TextEmbedding('BAAI/bge-small-en-v1.5').embed(['warmup']))
+"
+
 # Run as non-root user.
-RUN useradd --no-create-home --shell /bin/false appuser
+RUN useradd --no-create-home --shell /bin/false appuser \
+    && chown -R appuser:appuser /app/.models
 USER appuser
 
 EXPOSE 8000
