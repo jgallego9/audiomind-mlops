@@ -1,0 +1,60 @@
+"""AudioMind async inference worker.
+
+Consumes transcription jobs from the ``audiomind:jobs`` Redis Stream,
+processes them (mock ASR for now), and stores results in Redis Hashes.
+
+Usage:
+    python -m app.main
+"""
+
+import asyncio
+import logging
+import signal
+import uuid
+
+from redis.asyncio import Redis  # type: ignore[import-untyped]
+
+from app.config import get_settings
+from app.consumer import run_consumer
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)-8s %(name)s — %(message)s",
+)
+logger = logging.getLogger(__name__)
+
+
+async def _main() -> None:
+    settings = get_settings()
+    consumer_id = f"worker-{uuid.uuid4().hex[:8]}"
+
+    logger.info("worker_start consumer=%s redis=%s", consumer_id, settings.redis_url)
+
+    redis: Redis[str] = Redis.from_url(  # type: ignore[misc]
+        str(settings.redis_url), decode_responses=True
+    )
+
+    loop = asyncio.get_running_loop()
+    shutdown_event = asyncio.Event()
+
+    def _handle_signal() -> None:
+        logger.info("signal_received — initiating graceful shutdown")
+        shutdown_event.set()
+
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        loop.add_signal_handler(sig, _handle_signal)
+
+    consumer_task = asyncio.create_task(run_consumer(redis, consumer_id))
+
+    # Block until a SIGINT/SIGTERM arrives.
+    await shutdown_event.wait()
+
+    consumer_task.cancel()
+    await asyncio.gather(consumer_task, return_exceptions=True)
+    await redis.aclose()
+
+    logger.info("worker_stopped consumer=%s", consumer_id)
+
+
+if __name__ == "__main__":
+    asyncio.run(_main())

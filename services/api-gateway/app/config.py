@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import AnyHttpUrl, SecretStr
+from pydantic import AnyHttpUrl, RedisDsn, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -24,6 +24,10 @@ class Settings(BaseSettings):
     # Rate limiting (slowapi format: "N/period")
     rate_limit_default: str = "100/minute"
     rate_limit_auth: str = "10/minute"
+
+    # Redis
+    redis_url: RedisDsn = RedisDsn("redis://redis:6379/0")
+    job_ttl_seconds: int = 3600  # how long job hashes live in Redis
 
     # OpenTelemetry
     otel_enabled: bool = True

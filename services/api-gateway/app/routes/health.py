@@ -1,6 +1,6 @@
 import time
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 
 from app.models.health import CheckResult, HealthResponse, ReadyResponse
 
@@ -16,17 +16,32 @@ async def health() -> HealthResponse:
 
 
 @router.get("/ready", response_model=ReadyResponse, summary="Readiness probe")
-async def ready() -> ReadyResponse:
+async def ready(request: Request) -> ReadyResponse:
     """Check downstream dependencies and return readiness status.
 
-    Each dependency check is added here in subsequent tasks (Redis, Qdrant…).
     Returns 200 even when degraded so Kubernetes keeps routing traffic;
     the ``status`` field signals the actual health to consumers.
     """
     checks: dict[str, CheckResult] = {}
-    # TODO(F1-5): add Redis check
+
+    # Redis check
+    t0 = time.monotonic()
+    try:
+        await request.app.state.redis.ping()
+        checks["redis"] = CheckResult(
+            status="ok",
+            latency_ms=round((time.monotonic() - t0) * 1000, 2),
+        )
+    except Exception as exc:  # noqa: BLE001
+        checks["redis"] = CheckResult(
+            status="error",
+            latency_ms=round((time.monotonic() - t0) * 1000, 2),
+            message=str(exc),
+        )
+
     # TODO(F1-6): add Qdrant check
-    all_ok = all(c.status == "ok" for c in checks.values()) if checks else True
+
+    all_ok = all(c.status == "ok" for c in checks.values())
     return ReadyResponse(
         status="ready" if all_ok else "not_ready",
         checks=checks,

@@ -32,6 +32,8 @@ services:
       OTEL_SERVICE_NAME: "api-gateway"
       OTEL_OTLP_ENDPOINT: "http://jaeger:4318"
       OTEL_SAMPLE_RATE: "1.0"
+      # Redis (rate-limit store + job queue)
+      REDIS_URL: "redis://redis:6379/0"
     depends_on:
       redis:
         condition: service_healthy
@@ -39,6 +41,22 @@ services:
         condition: service_healthy
       jaeger:
         condition: service_started
+    restart: unless-stopped
+    networks:
+      - audiomind-net
+
+  # ── Worker ─────────────────────────────────────────────────────────────────
+  # Async Redis Streams consumer — processes transcription jobs
+  worker:
+    build:
+      context: .
+      dockerfile: services/worker/Dockerfile
+    environment:
+      REDIS_URL: "redis://redis:6379/0"
+      LOG_LEVEL: "INFO"
+    depends_on:
+      redis:
+        condition: service_healthy
     restart: unless-stopped
     networks:
       - audiomind-net

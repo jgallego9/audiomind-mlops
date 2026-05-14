@@ -10,6 +10,8 @@ dependencies = [
     "python-jose[cryptography]>=3.3",
     "passlib[bcrypt]>=1.7",
     "pydantic-settings>=2.6",
+    # Redis
+    "redis[hiredis]>=5.0",
     # OpenTelemetry
     "opentelemetry-api>=1.28",
     "opentelemetry-sdk>=1.28",
