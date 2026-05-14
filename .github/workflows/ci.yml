@@ -94,8 +94,9 @@ jobs:
     # Only build+push on pushes to main or release branches (not PRs).
     if: github.event_name == 'push'
     permissions:
-      packages: write   # GHCR push
+      packages: write            # GHCR push
       contents: read
+      security-events: write     # Trivy SARIF upload to Code Scanning
       # Uncomment for cloud OIDC (AWS/GCP/Azure):
       # id-token: write
     strategy:
@@ -179,8 +180,11 @@ jobs:
           # Falls back to GITHUB_TOKEN (will not re-trigger this workflow by default).
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up yq
-        uses: mikefarah/yq@v4.45.1
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/download/v4.45.1/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
 
       - name: Compute short SHA
         id: sha

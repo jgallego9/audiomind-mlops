@@ -37,10 +37,7 @@ COPY services/api-gateway/app ./app
 # Must run before switching to non-root user so files are owned by root and
 # readable by appuser.
 ENV FASTEMBED_CACHE_PATH=/app/.models
-RUN python -c "
-from fastembed import TextEmbedding
-list(TextEmbedding('BAAI/bge-small-en-v1.5').embed(['warmup']))
-"
+RUN python -c "from fastembed import TextEmbedding; list(TextEmbedding('BAAI/bge-small-en-v1.5').embed(['warmup']))"
 
 # Run as non-root user.
 RUN useradd --no-create-home --shell /bin/false appuser \
