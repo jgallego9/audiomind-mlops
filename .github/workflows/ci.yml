@@ -58,33 +58,22 @@ jobs:
       - name: Install uv
         run: pipx install uv
 
-      - name: Install dependencies (api-gateway)
-        working-directory: services/api-gateway
-        run: uv sync --frozen
-
-      - name: Install dependencies (worker)
-        working-directory: services/worker
-        run: uv sync --frozen
+      - name: Install all dependencies (workspace root)
+        run: uv sync --frozen --all-packages
 
       - name: Ruff lint
-        run: |
-          uv run --directory services/api-gateway ruff check services/api-gateway
-          uv run --directory services/worker     ruff check services/worker
+        run: uv run ruff check services/api-gateway services/worker
+
+      - name: Ruff format check
+        run: uv run ruff format --check services/api-gateway services/worker
 
       - name: Mypy typecheck
         run: |
-          uv run --directory services/api-gateway mypy services/api-gateway
-          uv run --directory services/worker     mypy services/worker
+          uv run --directory services/api-gateway mypy app/
+          uv run --directory services/worker     mypy app/
 
-      - name: Pytest (api-gateway)
-        working-directory: services/api-gateway
-        run: |
-          uv run pytest tests/ --cov=src --cov-report=xml --cov-fail-under=80 -q
-
-      - name: Pytest (worker)
-        working-directory: services/worker
-        run: |
-          uv run pytest tests/ --cov=src --cov-report=xml --cov-fail-under=80 -q
+      - name: Pytest
+        run: uv run pytest
 
       - name: Helm lint — audiomind chart
         run: |
@@ -92,9 +81,7 @@ jobs:
           helm lint infra/helm/audiomind
 
       - name: YAML lint — infra/k8s
-        run: |
-          pip install yamllint
-          yamllint -d relaxed infra/k8s/
+        run: uv run yamllint -d relaxed infra/k8s/
 
   # ---------------------------------------------------------------------------
   # Job 2 — Build Docker images and push to GHCR
