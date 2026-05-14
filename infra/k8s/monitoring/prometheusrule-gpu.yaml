@@ -1,0 +1,67 @@
+# PrometheusRule — NVIDIA GPU alerts.
+#
+# DCGM metric names (well-known, stable across versions):
+#   DCGM_FI_DEV_GPU_UTIL    — GPU utilisation (%)
+#   DCGM_FI_DEV_FB_USED     — Framebuffer memory used (MiB)
+#   DCGM_FI_DEV_FB_FREE     — Framebuffer memory free (MiB)
+#   DCGM_FI_DEV_GPU_TEMP    — GPU temperature (°C)
+#   DCGM_FI_DEV_POWER_USAGE — Power draw (W)
+#
+# Validated against: https://prometheus-operator.dev/docs/api-reference/api/
+# apiVersion: monitoring.coreos.com/v1  kind: PrometheusRule
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: audiomind-gpu
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: audiomind
+    release: audiomind-monitoring
+spec:
+  groups:
+    - name: audiomind.gpu
+      interval: 30s
+      rules:
+        - alert: GPUSustainedHighUtilization
+          expr: avg by (gpu, Hostname) (DCGM_FI_DEV_GPU_UTIL) > 95
+          for: 10m
+          labels:
+            severity: warning
+            team: audiomind
+          annotations:
+            summary: "GPU {{ $labels.gpu }} on {{ $labels.Hostname }} sustained > 95% utilisation for 10 min"
+            description: "Current utilisation: {{ $value }}%. Consider scaling vLLM replicas."
+
+        - alert: GPUHighVRAMUsage
+          expr: >
+            avg by (gpu, Hostname) (DCGM_FI_DEV_FB_USED)
+            /
+            (avg by (gpu, Hostname) (DCGM_FI_DEV_FB_USED) + avg by (gpu, Hostname) (DCGM_FI_DEV_FB_FREE))
+            > 0.90
+          for: 5m
+          labels:
+            severity: critical
+            team: audiomind
+          annotations:
+            summary: "GPU {{ $labels.gpu }} VRAM usage > 90%"
+            description: "VRAM {{ $value | humanizePercentage }} used on {{ $labels.Hostname }}. OOM risk."
+
+        - alert: GPUHighTemperature
+          expr: avg by (gpu, Hostname) (DCGM_FI_DEV_GPU_TEMP) > 85
+          for: 5m
+          labels:
+            severity: warning
+            team: audiomind
+          annotations:
+            summary: "GPU {{ $labels.gpu }} temperature > 85°C"
+            description: "Temperature: {{ $value }}°C on {{ $labels.Hostname }}. Check cooling."
+
+        - alert: GPUHighPowerDraw
+          expr: avg by (gpu, Hostname) (DCGM_FI_DEV_POWER_USAGE) > 400
+          for: 10m
+          labels:
+            severity: warning
+            team: audiomind
+          annotations:
+            summary: "GPU {{ $labels.gpu }} sustained power draw > 400W"
+            description: "Power: {{ $value }}W on {{ $labels.Hostname }}."

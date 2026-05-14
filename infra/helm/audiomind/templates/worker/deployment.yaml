@@ -30,5 +30,9 @@ spec:
               value: {{ include "audiomind.redisUrl" . | quote }}
             - name: QDRANT_URL
               value: {{ include "audiomind.qdrantUrl" . | quote }}
+          ports:
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP
           resources:
             {{- toYaml .Values.worker.resources | nindent 12 }}

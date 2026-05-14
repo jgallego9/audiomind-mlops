@@ -12,11 +12,14 @@ import logging
 import signal
 import uuid
 
+from prometheus_client import start_http_server
 from qdrant_client import AsyncQdrantClient
 from redis.asyncio import Redis
 
 from app.config import get_settings
 from app.consumer import run_consumer
+
+_METRICS_PORT = 9090
 
 logging.basicConfig(
     level=getattr(logging, get_settings().log_level.upper(), logging.INFO),
@@ -29,7 +32,15 @@ async def _main() -> None:
     settings = get_settings()
     consumer_id = f"worker-{uuid.uuid4().hex[:8]}"
 
-    logger.info("worker_start consumer=%s redis=%s", consumer_id, settings.redis_url)
+    logger.info(
+        "worker_start consumer=%s redis=%s metrics_port=%d",
+        consumer_id,
+        settings.redis_url,
+        _METRICS_PORT,
+    )
+
+    # Expose Prometheus metrics for scraping by PodMonitor
+    start_http_server(_METRICS_PORT)
 
     redis: Redis = Redis.from_url(str(settings.redis_url), decode_responses=True)
     qdrant = AsyncQdrantClient(url=str(settings.qdrant_url))

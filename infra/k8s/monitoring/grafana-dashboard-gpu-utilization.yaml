@@ -1,0 +1,163 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-gpu-utilization
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  gpu-utilization.json: |
+    {
+      "__inputs": [],
+      "__requires": [
+        {"type": "grafana", "id": "grafana", "name": "Grafana", "version": "10.0.0"},
+        {"type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "1.0.0"}
+      ],
+      "description": "NVIDIA GPU metrics from DCGM Exporter: utilisation, VRAM, temperature, power draw",
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [],
+      "panels": [
+        {
+          "id": 1,
+          "type": "timeseries",
+          "title": "GPU Utilisation (%)",
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "min": 0,
+              "max": 100,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {"color": "green", "value": null},
+                  {"color": "yellow", "value": 80},
+                  {"color": "red", "value": 95}
+                ]
+              }
+            }
+          },
+          "targets": [
+            {
+              "datasource": {"type": "prometheus"},
+              "expr": "avg by (gpu, Hostname) (DCGM_FI_DEV_GPU_UTIL)",
+              "legendFormat": "GPU {{ gpu }} — {{ Hostname }}"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "type": "timeseries",
+          "title": "VRAM Usage (%)",
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit",
+              "min": 0,
+              "max": 1,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {"color": "green", "value": null},
+                  {"color": "yellow", "value": 0.75},
+                  {"color": "red", "value": 0.90}
+                ]
+              }
+            }
+          },
+          "targets": [
+            {
+              "datasource": {"type": "prometheus"},
+              "expr": "avg by (gpu, Hostname) (DCGM_FI_DEV_FB_USED) / (avg by (gpu, Hostname) (DCGM_FI_DEV_FB_USED) + avg by (gpu, Hostname) (DCGM_FI_DEV_FB_FREE))",
+              "legendFormat": "GPU {{ gpu }} — {{ Hostname }}"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "type": "timeseries",
+          "title": "VRAM Used / Free (MiB)",
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+          "fieldConfig": {
+            "defaults": {"unit": "decmbytes"}
+          },
+          "targets": [
+            {
+              "datasource": {"type": "prometheus"},
+              "expr": "avg by (gpu, Hostname) (DCGM_FI_DEV_FB_USED)",
+              "legendFormat": "used — GPU {{ gpu }} {{ Hostname }}"
+            },
+            {
+              "datasource": {"type": "prometheus"},
+              "expr": "avg by (gpu, Hostname) (DCGM_FI_DEV_FB_FREE)",
+              "legendFormat": "free — GPU {{ gpu }} {{ Hostname }}"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "type": "timeseries",
+          "title": "GPU Temperature (°C)",
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "celsius",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {"color": "green", "value": null},
+                  {"color": "yellow", "value": 75},
+                  {"color": "red", "value": 85}
+                ]
+              }
+            }
+          },
+          "targets": [
+            {
+              "datasource": {"type": "prometheus"},
+              "expr": "avg by (gpu, Hostname) (DCGM_FI_DEV_GPU_TEMP)",
+              "legendFormat": "GPU {{ gpu }} — {{ Hostname }}"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "type": "timeseries",
+          "title": "Power Draw (W)",
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 16},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "watt",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {"color": "green", "value": null},
+                  {"color": "yellow", "value": 350},
+                  {"color": "red", "value": 400}
+                ]
+              }
+            }
+          },
+          "targets": [
+            {
+              "datasource": {"type": "prometheus"},
+              "expr": "avg by (gpu, Hostname) (DCGM_FI_DEV_POWER_USAGE)",
+              "legendFormat": "GPU {{ gpu }} — {{ Hostname }}"
+            }
+          ]
+        }
+      ],
+      "refresh": "30s",
+      "schemaVersion": 38,
+      "tags": ["audiomind", "gpu", "dcgm", "nvidia"],
+      "templating": {"list": []},
+      "time": {"from": "now-1h", "to": "now"},
+      "timepicker": {},
+      "timezone": "UTC",
+      "title": "AudioMind — GPU Utilisation (DCGM)",
+      "uid": "audiomind-gpu-utilization",
+      "version": 1
+    }

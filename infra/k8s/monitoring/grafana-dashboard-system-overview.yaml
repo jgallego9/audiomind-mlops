@@ -1,0 +1,195 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-system-overview
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  system-overview.json: |
+    {
+      "__inputs": [],
+      "__requires": [
+        {"type": "grafana", "id": "grafana", "name": "Grafana", "version": "10.0.0"},
+        {"type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "1.0.0"},
+        {"type": "datasource", "id": "loki", "name": "Loki", "version": "1.0.0"}
+      ],
+      "description": "AudioMind system overview: pod health, CPU/memory, API error rates, worker throughput",
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [],
+      "panels": [
+        {
+          "id": 1,
+          "type": "stat",
+          "title": "Pods Running (audiomind namespace)",
+          "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {"color": "red", "value": null},
+                  {"color": "green", "value": 1}
+                ]
+              }
+            }
+          },
+          "targets": [
+            {
+              "datasource": {"type": "prometheus"},
+              "expr": "count(kube_pod_status_phase{namespace=\"audiomind\",phase=\"Running\"})",
+              "legendFormat": "running pods"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "type": "stat",
+          "title": "API Gateway — Request Rate (req/s)",
+          "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+          "targets": [
+            {
+              "datasource": {"type": "prometheus"},
+              "expr": "sum(rate(http_requests_total{job=\"audiomind-api-gateway\"}[1m]))",
+              "legendFormat": "req/s"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "type": "stat",
+          "title": "API Gateway — 5xx Error Rate",
+          "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {"color": "green", "value": null},
+                  {"color": "yellow", "value": 0.01},
+                  {"color": "red", "value": 0.05}
+                ]
+              }
+            }
+          },
+          "targets": [
+            {
+              "datasource": {"type": "prometheus"},
+              "expr": "sum(rate(http_requests_total{job=\"audiomind-api-gateway\",status_code=~\"5..\"}[5m])) / sum(rate(http_requests_total{job=\"audiomind-api-gateway\"}[5m]))",
+              "legendFormat": "5xx rate"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "type": "stat",
+          "title": "Worker — Jobs Processed (last 5m)",
+          "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+          "targets": [
+            {
+              "datasource": {"type": "prometheus"},
+              "expr": "sum(increase(audiomind_worker_jobs_processed_total[5m]))",
+              "legendFormat": "jobs"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "type": "timeseries",
+          "title": "CPU Usage by Container (audiomind namespace)",
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+          "fieldConfig": {
+            "defaults": {"unit": "percentunit"}
+          },
+          "targets": [
+            {
+              "datasource": {"type": "prometheus"},
+              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"audiomind\",container!=\"\"}[1m])) by (container)",
+              "legendFormat": "{{ container }}"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "type": "timeseries",
+          "title": "Memory Usage by Container (audiomind namespace)",
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+          "fieldConfig": {
+            "defaults": {"unit": "bytes"}
+          },
+          "targets": [
+            {
+              "datasource": {"type": "prometheus"},
+              "expr": "sum(container_memory_working_set_bytes{namespace=\"audiomind\",container!=\"\"}) by (container)",
+              "legendFormat": "{{ container }}"
+            }
+          ]
+        },
+        {
+          "id": 7,
+          "type": "timeseries",
+          "title": "API Gateway — HTTP Latency p95 (by route)",
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+          "fieldConfig": {
+            "defaults": {"unit": "s"}
+          },
+          "targets": [
+            {
+              "datasource": {"type": "prometheus"},
+              "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"audiomind-api-gateway\"}[5m])) by (le, handler))",
+              "legendFormat": "p95 — {{ handler }}"
+            }
+          ]
+        },
+        {
+          "id": 8,
+          "type": "timeseries",
+          "title": "Worker — Job Duration p95",
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+          "fieldConfig": {
+            "defaults": {"unit": "s"}
+          },
+          "targets": [
+            {
+              "datasource": {"type": "prometheus"},
+              "expr": "histogram_quantile(0.95, sum(rate(audiomind_worker_job_duration_seconds_bucket[5m])) by (le))",
+              "legendFormat": "p95 job duration"
+            }
+          ]
+        },
+        {
+          "id": 9,
+          "type": "logs",
+          "title": "Application Logs (audiomind namespace)",
+          "gridPos": {"h": 10, "w": 24, "x": 0, "y": 20},
+          "options": {
+            "showTime": true,
+            "showLabels": true,
+            "wrapLogMessage": false,
+            "sortOrder": "Descending",
+            "dedupStrategy": "none"
+          },
+          "targets": [
+            {
+              "datasource": {"type": "loki"},
+              "expr": "{namespace=\"audiomind\"} | json | level != \"debug\"",
+              "legendFormat": ""
+            }
+          ]
+        }
+      ],
+      "refresh": "30s",
+      "schemaVersion": 38,
+      "tags": ["audiomind", "system", "overview"],
+      "templating": {"list": []},
+      "time": {"from": "now-1h", "to": "now"},
+      "timepicker": {},
+      "timezone": "UTC",
+      "title": "AudioMind — System Overview",
+      "uid": "audiomind-system-overview",
+      "version": 1
+    }

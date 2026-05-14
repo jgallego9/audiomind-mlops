@@ -1,8 +1,10 @@
 import asyncio
 import json
 import logging
+import time
 from datetime import UTC, datetime
 
+from prometheus_client import Counter, Histogram
 from qdrant_client import AsyncQdrantClient
 from redis.asyncio import Redis
 from redis.exceptions import ResponseError
@@ -16,6 +18,21 @@ _CONSUMER_GROUP = "audiomind:workers"
 _JOB_KEY_PREFIX = "audiomind:job"
 
 logger = logging.getLogger(__name__)
+
+# Prometheus metrics
+JOBS_PROCESSED_TOTAL = Counter(
+    "audiomind_worker_jobs_processed_total",
+    "Total number of jobs successfully processed",
+)
+JOBS_FAILED_TOTAL = Counter(
+    "audiomind_worker_jobs_failed_total",
+    "Total number of jobs that failed processing",
+)
+JOB_DURATION_SECONDS = Histogram(
+    "audiomind_worker_job_duration_seconds",
+    "Duration of job processing in seconds",
+    buckets=[0.1, 0.5, 1.0, 2.0, 5.0, 10.0, 30.0, 60.0, 120.0],
+)
 
 
 async def _ensure_consumer_group(redis: Redis) -> None:
@@ -46,6 +63,7 @@ async def _process_message(
     logger.info("job_start job_id=%s audio_url=%s", job_id, audio_url)
     await redis.hset(job_key, "status", "processing")  # type: ignore[misc]
 
+    start_time = time.monotonic()
     try:
         result = await mock_transcribe(audio_url=audio_url, language=language)
         completed_at = datetime.now(UTC).isoformat()
@@ -58,6 +76,7 @@ async def _process_message(
             },
         )
         logger.info("job_done job_id=%s", job_id)
+        JOBS_PROCESSED_TOTAL.inc()
         # Index the transcription for semantic search (best-effort).
         transcript = str(result.get("transcript", ""))
         await index_transcription(
@@ -72,6 +91,7 @@ async def _process_message(
         )
     except Exception as exc:  # noqa: BLE001
         logger.exception("job_failed job_id=%s error=%s", job_id, exc)
+        JOBS_FAILED_TOTAL.inc()
         await redis.hset(  # type: ignore[misc]
             job_key,
             mapping={
@@ -81,6 +101,7 @@ async def _process_message(
             },
         )
     finally:
+        JOB_DURATION_SECONDS.observe(time.monotonic() - start_time)
         await redis.xack(_STREAM_KEY, _CONSUMER_GROUP, msg_id)
 
 

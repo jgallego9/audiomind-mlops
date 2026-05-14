@@ -1,0 +1,86 @@
+# PrometheusRule — AudioMind SLO alerts.
+#
+# Alert thresholds:
+#   - P95 HTTP latency > 2s  → warning (5 min window)
+#   - 5xx error rate > 5%    → critical (5 min window)
+#   - Worker backlog / 0 jobs processed in 10 min → warning
+#
+# Metric names from prometheus_fastapi_instrumentator v7:
+#   http_request_duration_seconds_bucket{handler, method, status_code}
+#   http_requests_total{handler, method, status_code}
+#
+# Worker metrics (custom, defined in consumer.py):
+#   audiomind_worker_jobs_processed_total
+#   audiomind_worker_jobs_failed_total
+#
+# Validated against: https://prometheus-operator.dev/docs/api-reference/api/
+# apiVersion: monitoring.coreos.com/v1  kind: PrometheusRule
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: audiomind-slo
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: audiomind
+    release: audiomind-monitoring
+spec:
+  groups:
+    - name: audiomind.slo
+      interval: 30s
+      rules:
+        - alert: APIGatewayHighLatencyP95
+          expr: >
+            histogram_quantile(0.95,
+              sum(rate(http_request_duration_seconds_bucket{job="audiomind-api-gateway"}[5m]))
+              by (le)
+            ) > 2
+          for: 5m
+          labels:
+            severity: warning
+            team: audiomind
+          annotations:
+            summary: "API Gateway P95 latency > 2s"
+            description: "P95 latency is {{ $value | humanizeDuration }} (threshold: 2s)."
+            runbook_url: "https://github.com/jgallego9/audiomind-mlops/blob/main/docs/runbooks/latency.md"
+
+        - alert: APIGatewayHighErrorRate
+          expr: >
+            (
+              sum(rate(http_requests_total{job="audiomind-api-gateway",status_code=~"5.."}[5m]))
+              /
+              sum(rate(http_requests_total{job="audiomind-api-gateway"}[5m]))
+            ) > 0.05
+          for: 5m
+          labels:
+            severity: critical
+            team: audiomind
+          annotations:
+            summary: "API Gateway 5xx error rate > 5%"
+            description: "Error rate is {{ $value | humanizePercentage }} (threshold: 5%)."
+            runbook_url: "https://github.com/jgallego9/audiomind-mlops/blob/main/docs/runbooks/errors.md"
+
+        - alert: WorkerNoJobsProcessed
+          expr: >
+            increase(audiomind_worker_jobs_processed_total[10m]) == 0
+          for: 10m
+          labels:
+            severity: warning
+            team: audiomind
+          annotations:
+            summary: "AudioMind worker has not processed any jobs in 10 minutes"
+            description: "No successful jobs recorded. Check Redis Streams consumer and worker logs."
+
+        - alert: WorkerHighFailureRate
+          expr: >
+            (
+              rate(audiomind_worker_jobs_failed_total[5m])
+              /
+              (rate(audiomind_worker_jobs_processed_total[5m]) + rate(audiomind_worker_jobs_failed_total[5m]))
+            ) > 0.10
+          for: 5m
+          labels:
+            severity: warning
+            team: audiomind
+          annotations:
+            summary: "Worker job failure rate > 10%"
+            description: "{{ $value | humanizePercentage }} of jobs are failing."

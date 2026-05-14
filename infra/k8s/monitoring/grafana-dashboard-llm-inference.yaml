@@ -1,0 +1,167 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-llm-inference
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  llm-inference.json: |
+    {
+      "__inputs": [],
+      "__requires": [
+        {"type": "grafana", "id": "grafana", "name": "Grafana", "version": "10.0.0"},
+        {"type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "1.0.0"}
+      ],
+      "description": "AudioMind vLLM inference metrics: request latency, queue depth, KV-cache, token throughput",
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [],
+      "panels": [
+        {
+          "id": 1,
+          "type": "timeseries",
+          "title": "Requests In Flight",
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+          "options": {"tooltip": {"mode": "multi"}},
+          "targets": [
+            {
+              "datasource": {"type": "prometheus"},
+              "expr": "sum(vllm:num_requests_running) by (model_name)",
+              "legendFormat": "running — {{model_name}}"
+            },
+            {
+              "datasource": {"type": "prometheus"},
+              "expr": "sum(vllm:num_requests_waiting) by (model_name)",
+              "legendFormat": "waiting — {{model_name}}"
+            },
+            {
+              "datasource": {"type": "prometheus"},
+              "expr": "sum(vllm:num_requests_swapped) by (model_name)",
+              "legendFormat": "swapped — {{model_name}}"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "type": "timeseries",
+          "title": "E2E Request Latency (p50 / p95 / p99)",
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+          "fieldConfig": {
+            "defaults": {"unit": "s"}
+          },
+          "targets": [
+            {
+              "datasource": {"type": "prometheus"},
+              "expr": "histogram_quantile(0.50, sum(rate(vllm:e2e_request_latency_seconds_bucket[5m])) by (le, model_name))",
+              "legendFormat": "p50 — {{model_name}}"
+            },
+            {
+              "datasource": {"type": "prometheus"},
+              "expr": "histogram_quantile(0.95, sum(rate(vllm:e2e_request_latency_seconds_bucket[5m])) by (le, model_name))",
+              "legendFormat": "p95 — {{model_name}}"
+            },
+            {
+              "datasource": {"type": "prometheus"},
+              "expr": "histogram_quantile(0.99, sum(rate(vllm:e2e_request_latency_seconds_bucket[5m])) by (le, model_name))",
+              "legendFormat": "p99 — {{model_name}}"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "type": "timeseries",
+          "title": "Time to First Token (p50 / p95)",
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+          "fieldConfig": {
+            "defaults": {"unit": "s"}
+          },
+          "targets": [
+            {
+              "datasource": {"type": "prometheus"},
+              "expr": "histogram_quantile(0.50, sum(rate(vllm:time_to_first_token_seconds_bucket[5m])) by (le, model_name))",
+              "legendFormat": "p50 TTFT — {{model_name}}"
+            },
+            {
+              "datasource": {"type": "prometheus"},
+              "expr": "histogram_quantile(0.95, sum(rate(vllm:time_to_first_token_seconds_bucket[5m])) by (le, model_name))",
+              "legendFormat": "p95 TTFT — {{model_name}}"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "type": "timeseries",
+          "title": "Token Throughput (prompt + generation)",
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+          "fieldConfig": {
+            "defaults": {"unit": "reqps", "custom": {"displayName": "tokens/s"}}
+          },
+          "targets": [
+            {
+              "datasource": {"type": "prometheus"},
+              "expr": "sum(rate(vllm:prompt_tokens_total[1m])) by (model_name)",
+              "legendFormat": "prompt tokens/s — {{model_name}}"
+            },
+            {
+              "datasource": {"type": "prometheus"},
+              "expr": "sum(rate(vllm:generation_tokens_total[1m])) by (model_name)",
+              "legendFormat": "generation tokens/s — {{model_name}}"
+            }
+          ]
+        },
+        {
+          "id": 5,
+          "type": "gauge",
+          "title": "GPU KV-Cache Usage",
+          "gridPos": {"h": 8, "w": 6, "x": 0, "y": 16},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit",
+              "min": 0,
+              "max": 1,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {"color": "green", "value": null},
+                  {"color": "yellow", "value": 0.7},
+                  {"color": "red", "value": 0.9}
+                ]
+              }
+            }
+          },
+          "targets": [
+            {
+              "datasource": {"type": "prometheus"},
+              "expr": "avg(vllm:gpu_cache_usage_perc) by (model_name)",
+              "legendFormat": "{{model_name}}"
+            }
+          ]
+        },
+        {
+          "id": 6,
+          "type": "timeseries",
+          "title": "Request Success Rate by Finish Reason",
+          "gridPos": {"h": 8, "w": 18, "x": 6, "y": 16},
+          "targets": [
+            {
+              "datasource": {"type": "prometheus"},
+              "expr": "sum(rate(vllm:request_success_total[5m])) by (finished_reason, model_name)",
+              "legendFormat": "{{finished_reason}} — {{model_name}}"
+            }
+          ]
+        }
+      ],
+      "refresh": "30s",
+      "schemaVersion": 38,
+      "tags": ["audiomind", "vllm", "inference", "llm"],
+      "templating": {"list": []},
+      "time": {"from": "now-1h", "to": "now"},
+      "timepicker": {},
+      "timezone": "UTC",
+      "title": "AudioMind — LLM Inference (vLLM)",
+      "uid": "audiomind-llm-inference",
+      "version": 1
+    }

@@ -51,6 +51,9 @@ kube-prometheus-stack:
       # Scrape all ServiceMonitors / PodMonitors in all namespaces.
       serviceMonitorSelectorNilUsesHelmValues: false
       podMonitorSelectorNilUsesHelmValues: false
+      # Pick up PrometheusRules from all namespaces.
+      ruleSelectorNilUsesHelmValues: false
+      ruleNamespaceSelector: {}
 
       resources:
         requests:

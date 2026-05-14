@@ -8,6 +8,8 @@ dependencies = [
     "pydantic-settings>=2.6",
     # Qdrant vector store (RAG pipeline)
     "qdrant-client[fastembed]>=1.12",
+    # Prometheus metrics server
+    "prometheus-client>=0.21",
 ]
 
 [tool.uv]

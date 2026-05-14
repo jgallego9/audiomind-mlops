@@ -381,8 +381,38 @@ by the GPU Operator + Node Feature Discovery).
 
 ### Observability
 
-Jaeger UI: [http://localhost:16686](http://localhost:16686) — view distributed traces.  
+#### Tracing
+
+Jaeger UI: [http://localhost:16686](http://localhost:16686) — view distributed traces sent via OTLP from the api-gateway.  
 MLflow UI (mlops profile): [http://localhost:5001](http://localhost:5001)
+
+#### Metrics (Phase 4 — Prometheus)
+
+The platform ships full Prometheus observability:
+
+| Component | Scrape method | Metrics exposed |
+|---|---|---|
+| `api-gateway` | ServiceMonitor (`port: http`, `/metrics`) | HTTP request count, duration, status codes (prometheus_fastapi_instrumentator) |
+| `worker` | PodMonitor (`port: metrics`, port 9090) | `audiomind_worker_jobs_processed_total`, `audiomind_worker_jobs_failed_total`, `audiomind_worker_job_duration_seconds` |
+| `vLLM` | ServiceMonitor (`port: http`, `/metrics`) | `vllm:e2e_request_latency_seconds`, `vllm:num_requests_waiting`, `vllm:gpu_cache_usage_perc`, etc. |
+| DCGM Exporter | ServiceMonitor (`port: metrics`) | `DCGM_FI_DEV_GPU_UTIL`, `DCGM_FI_DEV_FB_USED`, `DCGM_FI_DEV_GPU_TEMP`, `DCGM_FI_DEV_POWER_USAGE` |
+
+All monitoring manifests are in `infra/k8s/monitoring/`:
+
+| File | Kind | Purpose |
+|---|---|---|
+| `servicemonitor-audiomind.yaml` | ServiceMonitor | Scrape api-gateway |
+| `podmonitor-audiomind-worker.yaml` | PodMonitor | Scrape worker (no Service needed) |
+| `servicemonitor-vllm.yaml` | ServiceMonitor | Scrape vLLM |
+| `servicemonitor-dcgm.yaml` | ServiceMonitor | Scrape DCGM Exporter |
+| `prometheusrule-audiomind.yaml` | PrometheusRule | SLO alerts (latency, error rate, worker backlog) |
+| `prometheusrule-vllm.yaml` | PrometheusRule | vLLM SLO alerts (latency, queue, KV-cache) |
+| `prometheusrule-gpu.yaml` | PrometheusRule | GPU alerts (util, VRAM, temperature, power) |
+| `grafana-dashboard-llm-inference.yaml` | ConfigMap | Grafana: vLLM latency, tokens, KV-cache |
+| `grafana-dashboard-gpu-utilization.yaml` | ConfigMap | Grafana: GPU util, VRAM, temp, power |
+| `grafana-dashboard-system-overview.yaml` | ConfigMap | Grafana: pod health, CPU/mem, error rates |
+
+Grafana is available at [http://localhost:3000](http://localhost:3000) after `make helm-monitoring-install`.
 
 ---
 

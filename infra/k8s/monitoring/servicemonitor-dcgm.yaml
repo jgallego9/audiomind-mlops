@@ -1,0 +1,33 @@
+# ServiceMonitor — scrapes NVIDIA DCGM Exporter deployed by GPU Operator.
+# The GPU Operator deploys dcgm-exporter as a DaemonSet in the gpu-operator
+# namespace. It exposes GPU metrics at /metrics on port 9400 (named "metrics").
+#
+# Key DCGM metric names:
+#   DCGM_FI_DEV_GPU_UTIL    — GPU utilisation %
+#   DCGM_FI_DEV_FB_USED     — Framebuffer VRAM used (MiB)
+#   DCGM_FI_DEV_FB_FREE     — Framebuffer VRAM free (MiB)
+#   DCGM_FI_DEV_GPU_TEMP    — GPU temperature (°C)
+#   DCGM_FI_DEV_POWER_USAGE — Power draw (W)
+#
+# Validated against: https://prometheus-operator.dev/docs/api-reference/api/
+# apiVersion: monitoring.coreos.com/v1  kind: ServiceMonitor
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: audiomind-dcgm-exporter
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: dcgm-exporter
+    app.kubernetes.io/component: gpu-metrics
+spec:
+  selector:
+    matchLabels:
+      app: nvidia-dcgm-exporter
+  namespaceSelector:
+    matchNames:
+      - gpu-operator
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+      honorLabels: false

@@ -1,0 +1,36 @@
+# ServiceMonitor — scrapes vLLM inference server /metrics endpoint.
+# vLLM exposes Prometheus metrics at /metrics on the same port as the
+# OpenAI-compatible API (default 8000, named "http").
+#
+# Metric names confirmed from vLLM source (v0.6.x):
+#   vllm:num_requests_running    — Gauge
+#   vllm:num_requests_waiting    — Gauge
+#   vllm:gpu_cache_usage_perc    — Gauge (0-1 scale)
+#   vllm:e2e_request_latency_seconds  — Histogram
+#   vllm:time_to_first_token_seconds  — Histogram
+#   vllm:prompt_tokens_total          — Counter
+#   vllm:generation_tokens_total      — Counter
+#   vllm:request_success_total        — Counter
+#
+# Validated against: https://prometheus-operator.dev/docs/api-reference/api/
+# apiVersion: monitoring.coreos.com/v1  kind: ServiceMonitor
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: audiomind-vllm
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: vllm
+    app.kubernetes.io/component: inference
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vllm
+  namespaceSelector:
+    matchNames:
+      - audiomind
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+      honorLabels: false

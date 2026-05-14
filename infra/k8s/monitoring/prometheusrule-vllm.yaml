@@ -1,0 +1,72 @@
+# PrometheusRule — vLLM inference SLO alerts.
+#
+# Metric names confirmed from vLLM v0.6.0 source:
+#   vllm:e2e_request_latency_seconds     — Histogram
+#   vllm:time_to_first_token_seconds     — Histogram
+#   vllm:num_requests_running            — Gauge
+#   vllm:num_requests_waiting            — Gauge
+#   vllm:num_requests_swapped            — Gauge
+#   vllm:gpu_cache_usage_perc            — Gauge (0-1 scale, NOT 0-100)
+#   vllm:cpu_cache_usage_perc            — Gauge
+#   vllm:prompt_tokens_total             — Counter
+#   vllm:generation_tokens_total         — Counter
+#   vllm:request_success_total           — Counter (label: finished_reason)
+#
+# Validated against: https://prometheus-operator.dev/docs/api-reference/api/
+# apiVersion: monitoring.coreos.com/v1  kind: PrometheusRule
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: audiomind-vllm-slo
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: vllm
+    release: audiomind-monitoring
+spec:
+  groups:
+    - name: audiomind.vllm
+      interval: 30s
+      rules:
+        - alert: vLLMHighE2ELatencyP95
+          expr: >
+            histogram_quantile(0.95,
+              sum(rate(vllm:e2e_request_latency_seconds_bucket[5m]))
+              by (le, model_name)
+            ) > 10
+          for: 5m
+          labels:
+            severity: warning
+            team: audiomind
+          annotations:
+            summary: "vLLM P95 end-to-end request latency > 10s"
+            description: "Model {{ $labels.model_name }} P95 latency is {{ $value | humanizeDuration }}."
+
+        - alert: vLLMHighQueueDepth
+          expr: sum(vllm:num_requests_waiting) by (model_name) > 50
+          for: 5m
+          labels:
+            severity: warning
+            team: audiomind
+          annotations:
+            summary: "vLLM request queue depth > 50"
+            description: "{{ $value }} requests waiting for model {{ $labels.model_name }}."
+
+        - alert: vLLMGPUKVCacheHigh
+          expr: avg(vllm:gpu_cache_usage_perc) by (model_name) > 0.90
+          for: 5m
+          labels:
+            severity: warning
+            team: audiomind
+          annotations:
+            summary: "vLLM GPU KV-cache usage > 90%"
+            description: "GPU KV-cache is {{ $value | humanizePercentage }} full for {{ $labels.model_name }}."
+
+        - alert: vLLMHighPreemptionRate
+          expr: rate(vllm:num_preemptions_total[5m]) > 5
+          for: 5m
+          labels:
+            severity: warning
+            team: audiomind
+          annotations:
+            summary: "vLLM high request preemption rate"
+            description: "{{ $value }} preemptions/s — KV-cache pressure too high."
