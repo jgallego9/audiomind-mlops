@@ -4,6 +4,7 @@ import logging
 from datetime import UTC, datetime
 
 from redis.asyncio import Redis
+from redis.exceptions import ResponseError
 
 from app.processors.transcribe import mock_transcribe
 
@@ -21,7 +22,7 @@ async def _ensure_consumer_group(redis: Redis) -> None:
         logger.info(
             "consumer_group_created group=%s stream=%s", _CONSUMER_GROUP, _STREAM_KEY
         )
-    except Exception as exc:  # noqa: BLE001
+    except ResponseError as exc:
         if "BUSYGROUP" not in str(exc):
             raise
 
@@ -85,7 +86,9 @@ async def _recover_pending(redis: Redis, consumer_id: str) -> None:
             for msg_id, fields in messages:
                 await _process_message(redis, msg_id, fields)
     except Exception:  # noqa: BLE001
-        logger.warning("pending_recovery_skipped consumer=%s", consumer_id)
+        logger.warning(
+            "pending_recovery_skipped consumer=%s", consumer_id, exc_info=True
+        )
 
 
 async def run_consumer(redis: Redis, consumer_id: str) -> None:

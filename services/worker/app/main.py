@@ -18,7 +18,7 @@ from app.config import get_settings
 from app.consumer import run_consumer
 
 logging.basicConfig(
-    level=logging.INFO,
+    level=getattr(logging, get_settings().log_level.upper(), logging.INFO),
     format="%(asctime)s %(levelname)-8s %(name)s — %(message)s",
 )
 logger = logging.getLogger(__name__)

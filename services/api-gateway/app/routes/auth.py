@@ -33,7 +33,7 @@ def _create_access_token(subject: str, settings: Settings) -> str:
 
 
 @router.post("/token", response_model=Token, summary="Issue JWT access token")
-@limiter.limit("10/minute")
+@limiter.limit(get_settings().rate_limit_auth)
 async def login(
     request: Request,
     body: LoginRequest,

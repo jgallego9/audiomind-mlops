@@ -1,9 +1,11 @@
 import json
 from datetime import UTC, datetime
+from typing import Annotated
 from uuid import uuid4
 
-from fastapi import APIRouter, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 
+from app.config import Settings, get_settings
 from app.dependencies.auth import CurrentUser
 from app.dependencies.redis import RedisClient
 from app.middleware.rate_limit import limiter
@@ -27,6 +29,7 @@ async def transcribe(
     body: TranscribeRequest,
     redis: RedisClient,
     current_user: CurrentUser,
+    settings: Annotated[Settings, Depends(get_settings)],
 ) -> TranscribeResponse:
     """Publish a transcription job to the Redis Stream and return the job ID.
 
@@ -47,7 +50,7 @@ async def transcribe(
             "created_at": created_at,
         },
     )
-    await redis.expire(job_key, 3600)
+    await redis.expire(job_key, settings.job_ttl_seconds)
 
     # Publish to the stream for the worker to consume.
     await redis.xadd(
