@@ -15,11 +15,14 @@ members = ["services/*"]
 
 [dependency-groups]
 dev = [
+    "fakeredis>=2.26",
+    "httpx>=0.28",
     "mypy>=2.0",
     "pydantic>=2.0",
     "pytest>=8.0",
     "pytest-asyncio>=0.24",
     "pytest-cov>=6.0",
+    "pytest-mock>=3.14",
     "ruff>=0.15",
     "pre-commit>=4.0",
 ]
@@ -76,7 +79,10 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 testpaths = ["services"]
 asyncio_mode = "auto"
-addopts = "--cov=services --cov-report=term-missing --cov-report=xml"
+# importlib avoids module-name collisions between same-named test packages
+# across multiple service directories.
+addopts = "--cov=services --cov-report=term-missing --cov-report=xml --import-mode=importlib"
+
 
 [tool.coverage.run]
 source = ["services"]
