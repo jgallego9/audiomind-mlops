@@ -1,9 +1,9 @@
 from datetime import UTC, datetime, timedelta
 from typing import Annotated
 
+import bcrypt
+import jwt
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from jose import jwt  # type: ignore[import-untyped]
-from passlib.context import CryptContext  # type: ignore[import-untyped]
 
 from app.config import Settings, get_settings
 from app.middleware.rate_limit import limiter
@@ -11,30 +11,25 @@ from app.models.auth import LoginRequest, Token
 
 router = APIRouter(tags=["auth"])
 
-_pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 # Demo credentials — in production replace with a database-backed user store.
-# Generate hash: python -c "from passlib.context import CryptContext; \
-#   print(CryptContext(schemes=['bcrypt']).hash('your-password'))"
+# Pre-hash at import time so the first request isn't slow.
 _DEMO_USERNAME = "admin"
-_DEMO_PASSWORD_HASH = _pwd_context.hash("demo-password")
+_DEMO_PASSWORD_HASH: bytes = bcrypt.hashpw(b"demo-password", bcrypt.gensalt())
 
 
-def _verify_password(plain: str, hashed: str) -> bool:
-    result: bool = _pwd_context.verify(plain, hashed)
-    return result
+def _verify_password(plain: str, hashed: bytes) -> bool:
+    return bool(bcrypt.checkpw(plain.encode(), hashed))
 
 
 def _create_access_token(subject: str, settings: Settings) -> str:
     expire = datetime.now(UTC) + timedelta(
         minutes=settings.jwt_access_token_expire_minutes
     )
-    encoded: str = jwt.encode(
+    return jwt.encode(
         {"sub": subject, "exp": expire},
         settings.jwt_secret_key.get_secret_value(),
         algorithm=settings.jwt_algorithm,
     )
-    return encoded
 
 
 @router.post("/token", response_model=Token, summary="Issue JWT access token")

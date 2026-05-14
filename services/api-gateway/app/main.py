@@ -2,9 +2,9 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from redis.asyncio import Redis  # type: ignore[import-untyped]
-from slowapi import _rate_limit_exceeded_handler  # type: ignore[import-untyped]
-from slowapi.errors import RateLimitExceeded  # type: ignore[import-untyped]
+from redis.asyncio import Redis
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 from app.config import get_settings
 from app.middleware.rate_limit import limiter
@@ -17,7 +17,7 @@ _settings = get_settings()
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     # startup
-    app.state.redis = Redis.from_url(str(_settings.redis_url), decode_responses=True)  # type: ignore[misc]
+    app.state.redis = Redis.from_url(str(_settings.redis_url), decode_responses=True)
     yield
     # shutdown
     await app.state.redis.aclose()

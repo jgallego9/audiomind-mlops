@@ -1,8 +1,9 @@
 from typing import Annotated
 
+import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import JWTError, jwt  # type: ignore[import-untyped]
+from jwt import InvalidTokenError
 
 from app.config import Settings, get_settings
 from app.models.auth import TokenData
@@ -33,8 +34,8 @@ def get_current_user(
         if not isinstance(subject, str):
             raise exc
         return TokenData(subject=subject)
-    except JWTError:
-        raise exc
+    except InvalidTokenError as err:
+        raise exc from err
 
 
 # Convenience alias for use in route signatures

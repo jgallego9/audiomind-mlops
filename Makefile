@@ -8,7 +8,7 @@
 # Dev setup
 # ---------------------------------------------------------------------------
 install:  ## Install workspace deps + dev tools (run once after clone)
-	uv sync --dev
+	uv sync --all-packages --dev
 
 lock:  ## Regenerate uv.lock after editing any pyproject.toml
 	uv lock
@@ -28,8 +28,9 @@ lint-fix:  ## Run ruff linter with auto-fix
 format:  ## Run ruff formatter
 	uv run ruff format .
 
-typecheck:  ## Run mypy type checker
-	uv run mypy services/
+typecheck:  ## Run mypy type checker per service (avoids dual-app namespace conflict)
+	cd services/api-gateway && uv run mypy app/
+	cd services/worker && uv run mypy app/
 
 pre-commit-run:  ## Run pre-commit on all files
 	uv run pre-commit run --all-files

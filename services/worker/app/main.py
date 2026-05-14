@@ -12,7 +12,7 @@ import logging
 import signal
 import uuid
 
-from redis.asyncio import Redis  # type: ignore[import-untyped]
+from redis.asyncio import Redis
 
 from app.config import get_settings
 from app.consumer import run_consumer
@@ -30,9 +30,7 @@ async def _main() -> None:
 
     logger.info("worker_start consumer=%s redis=%s", consumer_id, settings.redis_url)
 
-    redis: Redis[str] = Redis.from_url(  # type: ignore[misc]
-        str(settings.redis_url), decode_responses=True
-    )
+    redis: Redis = Redis.from_url(str(settings.redis_url), decode_responses=True)
 
     loop = asyncio.get_running_loop()
     shutdown_event = asyncio.Event()

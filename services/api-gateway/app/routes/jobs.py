@@ -1,6 +1,6 @@
 import json
+from datetime import UTC, datetime
 from uuid import uuid4
-from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, Request, status
 
@@ -33,7 +33,7 @@ async def transcribe(
     Poll ``GET /jobs/{job_id}`` for status and result.
     """
     job_id = str(uuid4())
-    created_at = datetime.now(timezone.utc).isoformat()
+    created_at = datetime.now(UTC).isoformat()
     job_key = f"{_JOB_KEY_PREFIX}:{job_id}"
 
     # Store initial metadata so the status endpoint is queryable immediately.
@@ -47,10 +47,10 @@ async def transcribe(
             "created_at": created_at,
         },
     )
-    await redis.expire(job_key, 3600)  # type: ignore[misc]
+    await redis.expire(job_key, 3600)
 
     # Publish to the stream for the worker to consume.
-    await redis.xadd(  # type: ignore[misc]
+    await redis.xadd(
         _STREAM_KEY,
         {
             "job_id": job_id,
@@ -79,7 +79,9 @@ async def get_job_status(
     data: dict[str, str] = await redis.hgetall(job_key)  # type: ignore[misc]
 
     if not data:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Job not found"
+        )
 
     if data.get("user") != current_user.subject:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")

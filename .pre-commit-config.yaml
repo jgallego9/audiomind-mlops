@@ -6,7 +6,7 @@ repos:
   # Ruff — linter (with auto-fix) + formatter
   # ---------------------------------------------------------------------------
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.0
+    rev: v0.15.12
     hooks:
       - id: ruff
         args: [--fix]
@@ -15,15 +15,22 @@ repos:
   # ---------------------------------------------------------------------------
   # Mypy — static type checker
   # ---------------------------------------------------------------------------
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.15.0
+  # Uses the project's own uv environment — no additional_dependencies needed.
+  # Run per-service to avoid duplicate 'app' module name conflict in mypy.
+  - repo: local
     hooks:
-      - id: mypy
-        additional_dependencies:
-          - pydantic[mypy]>=2.0
-          - types-redis
-        args: [--config-file=pyproject.toml]
-        pass_filenames: false  # mypy needs full project context
+      - id: mypy-api-gateway
+        name: mypy (api-gateway)
+        entry: bash -c "cd services/api-gateway && uv run --frozen mypy app/"
+        language: system
+        pass_filenames: false
+        types: [python]
+      - id: mypy-worker
+        name: mypy (worker)
+        entry: bash -c "cd services/worker && uv run --frozen mypy app/"
+        language: system
+        pass_filenames: false
+        types: [python]
 
   # ---------------------------------------------------------------------------
   # General hygiene

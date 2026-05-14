@@ -1,27 +1,16 @@
-from opentelemetry import trace  # type: ignore[import-untyped]
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import (  # type: ignore[import-untyped]
-    OTLPSpanExporter,
-)
-from opentelemetry.instrumentation.fastapi import (
-    FastAPIInstrumentor,  # type: ignore[import-untyped]
-)
-from opentelemetry.sdk.resources import (  # type: ignore[import-untyped]
-    SERVICE_NAME,
-    Resource,
-)
-from opentelemetry.sdk.trace import TracerProvider  # type: ignore[import-untyped]
-from opentelemetry.sdk.trace.export import (
-    BatchSpanProcessor,  # type: ignore[import-untyped]
-)
-from opentelemetry.sdk.trace.sampling import (  # type: ignore[import-untyped]
-    ParentBased,
-    TraceIdRatioBased,
-)
+from fastapi import FastAPI
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.sdk.resources import SERVICE_NAME, Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.sdk.trace.sampling import ParentBased, TraceIdRatioBased
 
 from app.config import Settings
 
 
-def setup_tracing(app: object, settings: Settings) -> None:
+def setup_tracing(app: FastAPI, settings: Settings) -> None:
     """Initialise OpenTelemetry tracing and auto-instrument the FastAPI app.
 
     Sends spans via OTLP/HTTP to Jaeger (or any OTLP-compatible collector).
@@ -42,7 +31,7 @@ def setup_tracing(app: object, settings: Settings) -> None:
     provider.add_span_processor(BatchSpanProcessor(exporter))
     trace.set_tracer_provider(provider)
 
-    FastAPIInstrumentor.instrument_app(  # type: ignore[arg-type]
+    FastAPIInstrumentor.instrument_app(
         app,
         tracer_provider=provider,
         excluded_urls="/health,/ready",  # skip probe noise from traces

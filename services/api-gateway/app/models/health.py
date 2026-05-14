@@ -9,7 +9,7 @@ class HealthResponse(BaseModel):
 
 
 class CheckResult(BaseModel):
-    status: Literal["ok", "degraded", "unavailable"]
+    status: Literal["ok", "degraded", "unavailable", "error"]
     latency_ms: float | None = None
     message: str | None = None
 

@@ -7,8 +7,8 @@ dependencies = [
     "fastapi>=0.115",
     "uvicorn[standard]>=0.34",
     "slowapi>=0.1.9",
-    "python-jose[cryptography]>=3.3",
-    "passlib[bcrypt]>=1.7",
+    "PyJWT>=2.9",
+    "bcrypt>=4.0",
     "pydantic-settings>=2.6",
     # Redis
     "redis[hiredis]>=5.0",
