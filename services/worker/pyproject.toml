@@ -1,0 +1,9 @@
+[project]
+name = "worker"
+version = "0.1.0"
+description = "AudioMind async inference worker (Redis Streams consumer)"
+requires-python = ">=3.13"
+dependencies = []
+
+[tool.uv]
+package = false

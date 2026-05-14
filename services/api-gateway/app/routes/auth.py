@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, HTTPException, Request, status
 from jose import jwt  # type: ignore[import-untyped]
@@ -25,7 +25,7 @@ def _verify_password(plain: str, hashed: str) -> bool:
 
 
 def _create_access_token(subject: str) -> str:
-    expire = datetime.now(timezone.utc) + timedelta(
+    expire = datetime.now(UTC) + timedelta(
         minutes=settings.jwt_access_token_expire_minutes
     )
     encoded: str = jwt.encode(

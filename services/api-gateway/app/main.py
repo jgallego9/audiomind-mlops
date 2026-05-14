@@ -11,7 +11,7 @@ from app.routes import auth, health
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     # startup — initialise clients here in future tasks (Redis, Qdrant…)
     yield
     # shutdown — close clients here

@@ -1,13 +1,16 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help install lint lint-fix format typecheck test ci \
+.PHONY: help install lock lint lint-fix format typecheck test ci \
         pre-commit-install pre-commit-run
 
 # ---------------------------------------------------------------------------
 # Dev setup
 # ---------------------------------------------------------------------------
-install:  ## Install all dependencies (dev included)
+install:  ## Install workspace deps + dev tools (run once after clone)
 	uv sync --dev
+
+lock:  ## Regenerate uv.lock after editing any pyproject.toml
+	uv lock
 
 pre-commit-install:  ## Install git pre-commit hooks
 	uv run pre-commit install

@@ -1,0 +1,19 @@
+[project]
+name = "api-gateway"
+version = "0.1.0"
+description = "AudioMind API Gateway"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.34",
+    "slowapi>=0.1.9",
+    "python-jose[cryptography]>=3.3",
+    "passlib[bcrypt]>=1.7",
+    "pydantic-settings>=2.6",
+]
+
+# Virtual project: this service is not distributed as a library.
+# uv installs its dependencies into the workspace virtualenv but does not
+# build or install the service itself as a Python package.
+[tool.uv]
+package = false
