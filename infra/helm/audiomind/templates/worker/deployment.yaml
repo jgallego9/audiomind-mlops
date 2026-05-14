@@ -23,11 +23,8 @@ spec:
           image: "{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}"
           imagePullPolicy: {{ .Values.worker.image.pullPolicy }}
           env:
-            # --- sourced from values ---
-            {{- range $key, $value := .Values.worker.env }}
-            - name: {{ $key }}
-              value: {{ $value | quote }}
-            {{- end }}
+            # --- sourced from values (list, stable order) ---
+            {{- toYaml .Values.worker.env | nindent 12 }}
             # --- internal service URLs derived from release name ---
             - name: REDIS_URL
               value: {{ include "audiomind.redisUrl" . | quote }}

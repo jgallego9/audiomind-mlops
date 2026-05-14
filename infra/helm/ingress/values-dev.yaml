@@ -1,0 +1,29 @@
+# Ingress — dev/kind overlay.
+# In kind the controller Service must be NodePort (no cloud LoadBalancer available).
+# kind port mappings expose :80 → host :8080 and :443 → host :8443 (see cluster.yaml).
+
+ingress-nginx:
+  controller:
+    service:
+      type: NodePort
+      nodePorts:
+        http: "30080"
+        https: "30443"
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+    metrics:
+      enabled: false   # no Prometheus in a minimal dev setup
+
+cert-manager:
+  resources:
+    requests:
+      cpu: 25m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 64Mi

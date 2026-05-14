@@ -1,0 +1,13 @@
+apiVersion: v2
+name: gpu-operator
+description: >
+  Wrapper chart for the NVIDIA GPU Operator. Manages NVIDIA drivers,
+  container toolkit, device plugin and DCGM exporter via a single Helm release.
+type: application
+version: 0.1.0
+appVersion: "24.9.2"   # maps to nvidia/gpu-operator chart version
+
+dependencies:
+  - name: gpu-operator
+    version: "24.9.2"   # semver without 'v' prefix as required by Helm
+    repository: "https://helm.ngc.nvidia.com/nvidia"

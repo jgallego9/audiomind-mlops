@@ -1,0 +1,14 @@
+apiVersion: v2
+name: keda
+description: >
+  Wrapper chart for KEDA (Kubernetes Event-driven Autoscaling).
+  Used by AudioMind to scale api-gateway on request latency (F2-5)
+  and worker on Redis Stream queue depth.
+type: application
+version: 0.1.0
+appVersion: "2.16.0"
+
+dependencies:
+  - name: keda
+    version: "2.16.0"
+    repository: "https://kedacore.github.io/charts"

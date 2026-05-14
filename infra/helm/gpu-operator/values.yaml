@@ -1,0 +1,63 @@
+# GPU Operator — base values (production-oriented).
+# Ref: https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/getting-started.html
+
+gpu-operator:
+  # ── Driver ─────────────────────────────────────────────────────────────────
+  driver:
+    enabled: true
+    # Pin version to avoid unintended driver upgrades mid-deployment.
+    # Update alongside cluster maintenance windows.
+    version: "550.127.05"
+    # Upgrade strategy: OnDelete means the driver DS pod is replaced only when
+    # the node is drained — safer for production GPU workloads.
+    upgradePolicy:
+      autoUpgrade: false
+
+  # ── Container Toolkit ──────────────────────────────────────────────────────
+  toolkit:
+    enabled: true
+
+  # ── Device Plugin ──────────────────────────────────────────────────────────
+  devicePlugin:
+    enabled: true
+    config:
+      # Default ConfigMap name created by the operator; override in values-dev
+      # to enable time-slicing (see values-dev.yaml).
+      name: ""
+      default: "any"
+
+  # ── DCGM Exporter ──────────────────────────────────────────────────────────
+  # Exposes GPU utilisation, VRAM and temperature as Prometheus metrics.
+  dcgmExporter:
+    enabled: true
+    serviceMonitor:
+      enabled: true   # requires kube-prometheus-stack (F2-7) to be installed
+
+  # ── DCGM (standalone) ──────────────────────────────────────────────────────
+  dcgm:
+    enabled: true
+
+  # ── Node Feature Discovery ─────────────────────────────────────────────────
+  # NFD is used by the operator to detect GPU-capable nodes and add labels
+  # (nvidia.com/gpu.present=true) consumed by vLLM nodeSelector (F2-4).
+  nfd:
+    enabled: true
+
+  # ── MIG (Multi-Instance GPU) ───────────────────────────────────────────────
+  # Off by default; enable per-node with: kubectl label node <n> nvidia.com/mig.config=all-1g.5gb
+  migManager:
+    enabled: false
+
+  # ── GFD (GPU Feature Discovery) ───────────────────────────────────────────
+  gfd:
+    enabled: true
+
+  # ── Operator itself ────────────────────────────────────────────────────────
+  operator:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi

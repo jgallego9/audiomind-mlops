@@ -27,11 +27,8 @@ spec:
               containerPort: 8000
               protocol: TCP
           env:
-            # --- sourced from values ---
-            {{- range $key, $value := .Values.apiGateway.env }}
-            - name: {{ $key }}
-              value: {{ $value | quote }}
-            {{- end }}
+            # --- sourced from values (list, stable order) ---
+            {{- toYaml .Values.apiGateway.env | nindent 12 }}
             # --- internal service URLs derived from release name ---
             - name: REDIS_URL
               value: {{ include "audiomind.redisUrl" . | quote }}

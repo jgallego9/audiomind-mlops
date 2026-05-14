@@ -1,0 +1,43 @@
+# ClusterIssuer — self-signed (dev / kind)
+#
+# Creates a self-signed CA used by cert-manager to issue TLS certificates
+# for Ingress objects in the kind cluster.
+#
+# Apply after cert-manager is ready:
+#   kubectl apply -f infra/k8s/cert-manager/
+#
+# Ref: https://cert-manager.io/docs/configuration/selfsigned/
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: selfsigned-issuer
+spec:
+  selfSigned: {}
+---
+# Self-signed CA certificate — used as the root for all dev certificates.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: audiomind-ca
+  namespace: cert-manager
+spec:
+  isCA: true
+  commonName: audiomind-dev-ca
+  secretName: audiomind-ca-secret
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  issuerRef:
+    name: selfsigned-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io
+---
+# CA-backed issuer — use this issuerRef in Ingress annotations.
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: audiomind-ca-issuer
+spec:
+  ca:
+    secretName: audiomind-ca-secret

@@ -1,0 +1,53 @@
+# KEDA ScaledObject — api-gateway
+#
+# Scales the api-gateway Deployment based on:
+#   1. HTTP request latency p95 (via Prometheus, requires kube-prometheus-stack F2-7)
+#   2. CPU utilisation as fallback
+#
+# Apply after both KEDA and audiomind chart are installed:
+#   kubectl apply -f infra/k8s/keda/ -n audiomind
+#
+# Ref: https://keda.sh/docs/latest/scalers/prometheus/
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: api-gateway-scaledobject
+  namespace: audiomind
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: audiomind-api-gateway   # matches audiomind.apiGateway.fullname helper
+
+  minReplicaCount: 2
+  maxReplicaCount: 10
+
+  # Wait 5 min after last scale-up before scaling down — prevents flapping.
+  cooldownPeriod: 300
+
+  # Evaluate triggers every 15 s.
+  pollingInterval: 15
+
+  triggers:
+    # ── Trigger 1: request latency p95 (Prometheus) ──────────────────────────
+    # Scale out when p95 latency exceeds 500 ms over the last 2 min.
+    # Metric: http_request_duration_seconds (from FastAPI + prometheus-fastapi-instrumentator)
+    - type: prometheus
+      metadata:
+        serverAddress: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+        metricName: http_request_latency_p95
+        # threshold: target value per replica; KEDA computes desired = metric / threshold
+        threshold: "0.5"
+        query: >-
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket{
+              job="audiomind-api-gateway"
+            }[2m])) by (le)
+          )
+
+    # ── Trigger 2: CPU utilisation fallback ──────────────────────────────────
+    # Ensures scaling still works when Prometheus is unavailable.
+    - type: cpu
+      metricType: Utilization
+      metadata:
+        value: "70"

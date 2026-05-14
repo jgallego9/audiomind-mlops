@@ -1,0 +1,194 @@
+# AudioMind Monitoring — base values.
+# Override with values-dev.yaml for kind clusters.
+
+# ---------------------------------------------------------------------------
+# kube-prometheus-stack
+# ---------------------------------------------------------------------------
+kubePrometheusStack:
+  enabled: true
+
+kube-prometheus-stack:
+  # ── Grafana ──────────────────────────────────────────────────────────────
+  grafana:
+    enabled: true
+    adminPassword: ""   # set via --set or external secret in production
+    defaultDashboardsTimezone: UTC
+
+    # Mount custom dashboards from ConfigMaps (F4-3).
+    # Dashboards are loaded from infra/helm/monitoring/dashboards/ via
+    # kube-prometheus-stack's sidecar mechanism.
+    sidecar:
+      dashboards:
+        enabled: true
+        label: grafana_dashboard
+        labelValue: "1"
+        searchNamespace: monitoring
+      datasources:
+        enabled: true
+
+    # Loki datasource — added alongside Prometheus so logs are searchable in Grafana.
+    # URL uses the known service FQDN (release name: audiomind-monitoring).
+    additionalDataSources:
+      - name: Loki
+        type: loki
+        url: http://audiomind-monitoring-loki.monitoring.svc.cluster.local:3100
+        access: proxy
+
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+  # ── Prometheus ───────────────────────────────────────────────────────────
+  prometheus:
+    prometheusSpec:
+      retention: 15d
+      retentionSize: 10GiB
+
+      # Scrape all ServiceMonitors / PodMonitors in all namespaces.
+      serviceMonitorSelectorNilUsesHelmValues: false
+      podMonitorSelectorNilUsesHelmValues: false
+
+      resources:
+        requests:
+          cpu: 200m
+          memory: 512Mi
+        limits:
+          cpu: 1000m
+          memory: 2Gi
+
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            accessModes: [ReadWriteOnce]
+            resources:
+              requests:
+                storage: 20Gi
+
+  # ── Alertmanager ─────────────────────────────────────────────────────────
+  alertmanager:
+    alertmanagerSpec:
+      resources:
+        requests:
+          cpu: 50m
+          memory: 64Mi
+        limits:
+          cpu: 200m
+          memory: 128Mi
+
+  # ── Node exporter ────────────────────────────────────────────────────────
+  nodeExporter:
+    enabled: true
+
+  # ── kube-state-metrics ───────────────────────────────────────────────────
+  kubeStateMetrics:
+    enabled: true
+
+# ---------------------------------------------------------------------------
+# Loki
+# Condition key (loki.enabled) and sub-chart values share the same YAML key.
+# Ref: https://helm.sh/docs/chart_template_guide/subcharts_and_globals/#overriding-values-from-a-parent-chart
+# ---------------------------------------------------------------------------
+loki:
+  enabled: true
+
+  loki:
+    auth_enabled: false
+    commonConfig:
+      replication_factor: 1
+    storage:
+      type: filesystem
+    schemaConfig:
+      configs:
+        - from: "2024-01-01"
+          store: tsdb
+          object_store: filesystem
+          schema: v13
+          index:
+            prefix: loki_index_
+            period: 24h
+
+  deploymentMode: SingleBinary
+
+  singleBinary:
+    replicas: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+  # Disable multi-component deployment in base (single-binary mode above)
+  read:
+    replicas: 0
+  write:
+    replicas: 0
+  backend:
+    replicas: 0
+
+# ---------------------------------------------------------------------------
+# Promtail
+# NOTE: values.yaml is NOT a Go template — {{ }} syntax is not processed here.
+# The Loki URL uses the known service FQDN derived from the release name
+# "audiomind-monitoring" (set in Makefile helm-monitoring-install target).
+# ---------------------------------------------------------------------------
+promtail:
+  enabled: true
+
+  config:
+    clients:
+      # Service name: <release>-loki — assumes release name is audiomind-monitoring.
+      - url: http://audiomind-monitoring-loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
+    snippets:
+      pipelineStages:
+        - cri: {}
+        # Parse structured JSON logs emitted by audiomind services.
+        - json:
+            expressions:
+              level: level
+              message: message
+              trace_id: trace_id
+        - labels:
+            level:
+            trace_id:
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+# ---------------------------------------------------------------------------
+# Jaeger
+# ---------------------------------------------------------------------------
+jaeger:
+  enabled: true
+
+  # all-in-one: suitable for dev and low-traffic environments.
+  # Switch to jaeger.collector + jaeger.query + Cassandra for production.
+  allInOne:
+    enabled: true
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+  # Disable production components in favour of all-in-one.
+  collector:
+    enabled: false
+  query:
+    enabled: false
+  agent:
+    enabled: false
+
+  storage:
+    type: memory   # use badger or Cassandra in production

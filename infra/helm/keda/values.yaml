@@ -1,0 +1,25 @@
+# KEDA — base values.
+# Ref: https://keda.sh/docs/latest/operate/helm/
+keda:
+  resources:
+    operator:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi
+    metricServer:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 256Mi
+
+  # Prometheus metrics endpoint for KEDA itself (scraped by kube-prometheus-stack, F2-7)
+  prometheus:
+    metricServer:
+      enabled: true
+    operator:
+      enabled: true

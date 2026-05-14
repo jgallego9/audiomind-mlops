@@ -1,0 +1,58 @@
+# Monitoring — dev/kind overlay.
+# Reduces resource footprint for local development.
+
+kube-prometheus-stack:
+  grafana:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+  prometheus:
+    prometheusSpec:
+      retention: 2d
+      retentionSize: 2GiB
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+      # Disable PVC in kind — use emptyDir instead.
+      storageSpec: {}
+
+  alertmanager:
+    enabled: false   # not needed in dev
+
+loki:
+  singleBinary:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+promtail:
+  resources:
+    requests:
+      cpu: 25m
+      memory: 32Mi
+    limits:
+      cpu: 100m
+      memory: 64Mi
+
+jaeger:
+  allInOne:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi

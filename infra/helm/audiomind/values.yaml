@@ -42,15 +42,25 @@ apiGateway:
     maxReplicas: 10
     targetCPUUtilizationPercentage: 70
 
+  # List (not map) to guarantee stable env-var order across renders → avoids
+  # unnecessary pod restarts caused by non-deterministic Go map iteration.
   env:
-    JWT_ALGORITHM: HS256
-    JWT_ACCESS_TOKEN_EXPIRE_MINUTES: "30"
-    RATE_LIMIT_DEFAULT: 100/minute
-    RATE_LIMIT_AUTH: 10/minute
-    QDRANT_COLLECTION: transcriptions
-    EMBEDDING_MODEL: BAAI/bge-small-en-v1.5
-    OTEL_ENABLED: "false"
-    OTEL_OTLP_ENDPOINT: http://jaeger-collector:4318
+    - name: JWT_ALGORITHM
+      value: HS256
+    - name: JWT_ACCESS_TOKEN_EXPIRE_MINUTES
+      value: "30"
+    - name: RATE_LIMIT_DEFAULT
+      value: 100/minute
+    - name: RATE_LIMIT_AUTH
+      value: 10/minute
+    - name: QDRANT_COLLECTION
+      value: transcriptions
+    - name: EMBEDDING_MODEL
+      value: BAAI/bge-small-en-v1.5
+    - name: OTEL_ENABLED
+      value: "false"
+    - name: OTEL_OTLP_ENDPOINT
+      value: http://jaeger-collector:4318
 
   # Reference to a pre-existing K8s Secret that contains JWT_SECRET_KEY.
   # Create it once with:
@@ -74,6 +84,19 @@ apiGateway:
     periodSeconds: 10
     failureThreshold: 3
 
+  # PodDisruptionBudget: keep at least 1 pod available during voluntary disruptions.
+  pdb:
+    enabled: true
+    minAvailable: 1
+
+  # Ingress (requires ingress-nginx + cert-manager, F2-8)
+  ingress:
+    enabled: false
+    host: audiomind.local
+    tls: false
+    clusterIssuer: audiomind-ca-issuer
+    annotations: {}
+
 # ---------------------------------------------------------------------------
 # worker
 # ---------------------------------------------------------------------------
@@ -94,9 +117,17 @@ worker:
       memory: 1Gi
 
   env:
-    QDRANT_COLLECTION: transcriptions
-    EMBEDDING_MODEL: BAAI/bge-small-en-v1.5
-    LOG_LEVEL: INFO
+    - name: QDRANT_COLLECTION
+      value: transcriptions
+    - name: EMBEDDING_MODEL
+      value: BAAI/bge-small-en-v1.5
+    - name: LOG_LEVEL
+      value: INFO
+
+  # PodDisruptionBudget for worker.
+  pdb:
+    enabled: true
+    minAvailable: 1
 
 # ---------------------------------------------------------------------------
 # Redis (Bitnami subchart)
@@ -118,12 +149,87 @@ redis:
 qdrant:
   enabled: true
   replicaCount: 1
-  persistence:
-    enabled: false
 
 # ---------------------------------------------------------------------------
-# Service account
+# ServiceAccount
 # ---------------------------------------------------------------------------
 serviceAccount:
   create: true
-  name: ""
+  name: ""   # leave empty to derive from fullname
+
+# ---------------------------------------------------------------------------
+# vLLM inference server (F2-4)
+# Disabled by default; enable via values-gpu.yaml overlay or set vllm.enabled=true
+# ---------------------------------------------------------------------------
+vllm:
+  enabled: false
+
+  image:
+    repository: vllm/vllm-openai
+    tag: "v0.6.6"
+    pullPolicy: IfNotPresent
+
+  replicaCount: 1
+
+  # Model to load at startup.  Set to a public HF model or a locally mounted path.
+  model: "mistralai/Mistral-7B-Instruct-v0.3"
+
+  # HuggingFace token for gated models — read from the same pre-existing Secret
+  # used by api-gateway (kubectl create secret generic audiomind-secrets ...).
+  hfTokenSecret:
+    name: audiomind-secrets
+    key: HF_TOKEN
+
+  resources:
+    requests:
+      cpu: "2000m"
+      memory: 8Gi
+      nvidia.com/gpu: "1"
+    limits:
+      cpu: "4000m"
+      memory: 16Gi
+      nvidia.com/gpu: "1"
+
+  # Place vLLM pods on GPU-capable nodes.
+  # GPU Operator + NFD (F2-3) label nodes with nvidia.com/gpu.present=true.
+  nodeSelector:
+    nvidia.com/gpu.present: "true"
+
+  tolerations:
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule
+
+  service:
+    type: ClusterIP
+    port: 8000
+
+  env:
+    - name: VLLM_WORKER_MULTIPROC_METHOD
+      value: spawn
+    - name: VLLM_TENSOR_PARALLEL_SIZE
+      value: "1"
+    - name: HF_HOME
+      value: /data/huggingface
+
+  # PVC to cache HuggingFace model weights — avoids re-download on pod restart.
+  persistence:
+    enabled: true
+    size: 30Gi
+    storageClass: ""   # "" → cluster default StorageClass
+
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 120   # allow time for model loading
+    periodSeconds: 30
+    failureThreshold: 5
+
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: 8000
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    failureThreshold: 10

@@ -1,0 +1,36 @@
+{{- if .Values.apiGateway.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "audiomind.apiGateway.fullname" . }}
+  labels:
+    {{- include "audiomind.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api-gateway
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    {{- if .Values.apiGateway.ingress.tls }}
+    cert-manager.io/cluster-issuer: {{ .Values.apiGateway.ingress.clusterIssuer | default "audiomind-ca-issuer" }}
+    {{- end }}
+    {{- with .Values.apiGateway.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ingressClassName: nginx
+  {{- if .Values.apiGateway.ingress.tls }}
+  tls:
+    - hosts:
+        - {{ .Values.apiGateway.ingress.host | quote }}
+      secretName: {{ include "audiomind.apiGateway.fullname" . }}-tls
+  {{- end }}
+  rules:
+    - host: {{ .Values.apiGateway.ingress.host | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "audiomind.apiGateway.fullname" . }}
+                port:
+                  number: {{ .Values.apiGateway.service.port }}
+{{- end }}

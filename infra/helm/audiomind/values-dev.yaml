@@ -15,11 +15,17 @@ apiGateway:
     type: NodePort      # reachable from host via kind port mapping
   hpa:
     enabled: false
+  # PDB with minAvailable: 1 blocks ALL voluntary disruptions when replicaCount: 1.
+  # Disable in dev to allow node drain and rolling upgrades.
+  pdb:
+    enabled: false
 
 worker:
   image:
     pullPolicy: Never
   replicaCount: 1
+  pdb:
+    enabled: false
 
 redis:
   master:
@@ -29,3 +35,23 @@ redis:
 qdrant:
   persistence:
     enabled: false
+
+# vLLM — disabled in kind dev cluster by default (no GPU available).
+# To test the chart rendering with vLLM:
+#   helm template audiomind infra/helm/audiomind -f values-dev.yaml --set vllm.enabled=true
+vllm:
+  enabled: false
+  image:
+    pullPolicy: Never   # image loaded via: kind load docker-image vllm/vllm-openai:v0.6.6
+  # Override GPU resources — kind nodes have no GPU device plugin.
+  resources:
+    requests:
+      cpu: "500m"
+      memory: 2Gi
+    limits:
+      cpu: "2000m"
+      memory: 4Gi
+  nodeSelector: {}   # remove GPU node requirement for kind
+  tolerations: []
+  persistence:
+    enabled: false   # avoid PVC dependency in dev

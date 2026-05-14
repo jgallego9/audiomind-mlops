@@ -1,0 +1,44 @@
+# GPU Operator — dev/kind overlay.
+#
+# kind nodes run as Docker containers and cannot load real kernel modules,
+# so the driver DaemonSet must be disabled.  Instead we rely on the host
+# Docker daemon already having NVIDIA Container Toolkit configured.
+#
+# Time-slicing lets multiple pods share a single GPU (useful on developer
+# laptops with a single GPU).
+#
+# Usage:
+#   make helm-gpu-operator HELM_GPU_VALUES=infra/helm/gpu-operator/values-dev.yaml
+
+gpu-operator:
+  # ── Driver ─────────────────────────────────────────────────────────────────
+  # Disable in-cluster driver management: kind nodes are containers; kernel
+  # module injection is not supported.
+  driver:
+    enabled: false
+
+  # ── Device Plugin time-slicing ─────────────────────────────────────────────
+  # Allows up to 4 pods to share 1 physical GPU.
+  # The ConfigMap is created separately; this value points to it.
+  devicePlugin:
+    config:
+      name: "time-slicing-config"
+      default: "any"
+
+  # ── DCGM Exporter ──────────────────────────────────────────────────────────
+  # Disable standalone DCGM in kind (no real GPU kernel interface).
+  dcgm:
+    enabled: false
+
+  dcgmExporter:
+    enabled: false   # no metrics to scrape without a real GPU
+
+  # ── Reduce resource footprint ──────────────────────────────────────────────
+  operator:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 128Mi

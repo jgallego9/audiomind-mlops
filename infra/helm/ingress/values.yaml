@@ -1,0 +1,34 @@
+# AudioMind Ingress — base values.
+
+ingressNginx:
+  enabled: true
+
+ingress-nginx:
+  controller:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    # Expose Prometheus metrics for kube-prometheus-stack (F2-7)
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+
+certManager:
+  enabled: true
+
+cert-manager:
+  # Required: installs CRDs (Certificate, ClusterIssuer, etc.)
+  crds:
+    enabled: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi

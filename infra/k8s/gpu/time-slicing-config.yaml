@@ -1,0 +1,21 @@
+# Time-slicing ConfigMap for NVIDIA Device Plugin.
+# Apply before installing the GPU Operator in a dev/kind environment:
+#   kubectl apply -f infra/k8s/gpu/time-slicing-config.yaml
+#
+# Allows up to 4 pods to share 1 physical GPU — useful on developer laptops.
+# Ref: https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/gpu-sharing.html
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: time-slicing-config
+  namespace: gpu-operator
+data:
+  any: |-
+    version: v1
+    flags:
+      migStrategy: none
+    sharing:
+      timeSlicing:
+        resources:
+          - name: nvidia.com/gpu
+            replicas: 4

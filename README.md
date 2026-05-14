@@ -289,36 +289,95 @@ docker compose --profile mlops --profile models up -d
 
 ### Kubernetes + Helm
 
-Phase 2 starts with a local multi-node kind cluster. Install these tools before
-using the Kubernetes targets:
+#### Prerequisites
 
-- Docker ≥ 24
-- `kind`
-- `kubectl`
-- Helm 3
+| Tool | Version | Install |
+|---|---|---|
+| Docker | ≥ 24 | [docs.docker.com](https://docs.docker.com/get-docker/) |
+| kind | ≥ 0.23 | `brew install kind` |
+| kubectl | ≥ 1.30 | `brew install kubectl` |
+| Helm | ≥ 4.0 | `brew install helm` |
+
+#### Local cluster
 
 ```bash
-# Create a local cluster named "audiomind" from infra/kind/cluster.yaml
+# Create a multi-node kind cluster (1 control-plane + 2 workers)
 make kind-up
 
-# Inspect cluster nodes and namespaces
+# Inspect nodes and namespaces
 make kind-status
 
-# Delete the local cluster
+# Delete the cluster
 make kind-down
 ```
 
-The kind cluster has 1 control-plane node and 2 worker nodes. Host ports
-`8080` and `8443` are reserved for the future local Ingress layer.
+Host ports `8080` (HTTP) and `8443` (HTTPS) are mapped to the control-plane node
+for use with ingress-nginx.
 
-Helm wrappers are already exposed for the next backlog step:
+#### Full local infra bootstrap
+
+Run these once after `make kind-up`:
 
 ```bash
+# Apply ResourceQuota + LimitRange to the audiomind namespace
+make infra-namespaces
+
+# Install ingress-nginx + cert-manager (self-signed TLS)
+make helm-ingress-install
+
+# Install kube-prometheus-stack + Loki + Jaeger
+make helm-monitoring-install
+
+# Install KEDA (event-driven autoscaler)
+make helm-keda-install
+
+# Install External Secrets Operator
+make helm-eso-install
+
+# Install the main audiomind chart (api-gateway + worker + Redis + Qdrant)
 make helm-install
-make helm-upgrade
+
+# Or bootstrap everything in one command:
+make infra-up
 ```
 
-They intentionally fail until `infra/helm/audiomind/Chart.yaml` exists in F2-2.
+#### Chart overview
+
+| Chart | Path | What it installs |
+|---|---|---|
+| `audiomind` | `infra/helm/audiomind/` | api-gateway, worker, Redis, Qdrant, vLLM (optional) |
+| `audiomind-monitoring` | `infra/helm/monitoring/` | kube-prometheus-stack, Loki, Promtail, Jaeger |
+| `gpu-operator` | `infra/helm/gpu-operator/` | NVIDIA driver, device plugin, DCGM exporter |
+| `keda` | `infra/helm/keda/` | KEDA autoscaler |
+| `audiomind-ingress` | `infra/helm/ingress/` | ingress-nginx, cert-manager |
+| `external-secrets` | `infra/helm/external-secrets/` | External Secrets Operator |
+
+Each chart has a `values.yaml` (base) and `values-dev.yaml` (kind overlay).
+Override the target values file with `HELM_VALUES=...`:
+
+```bash
+# Example: install with production overlay
+HELM_VALUES=infra/helm/audiomind/values-prod.yaml make helm-upgrade
+```
+
+#### GPU / vLLM
+
+vLLM is disabled by default. Enable it on a GPU-capable cluster:
+
+```bash
+# 1. Install GPU Operator first
+make helm-gpu-install
+
+# 2. Enable vLLM in the audiomind chart
+helm upgrade audiomind infra/helm/audiomind \
+  --namespace audiomind \
+  --reuse-values \
+  --set vllm.enabled=true \
+  --set vllm.model=mistralai/Mistral-7B-Instruct-v0.3
+```
+
+GPU nodes must be labelled `nvidia.com/gpu.present=true` (done automatically
+by the GPU Operator + Node Feature Discovery).
 
 ### Observability
 
@@ -331,33 +390,58 @@ MLflow UI (mlops profile): [http://localhost:5001](http://localhost:5001)
 
 ```
 audiomind-mlops/
-├── docker-compose.yml          # Multi-profile Compose stack
-├── pyproject.toml              # Workspace root — dev tooling config
+├── docker-compose.yml              # Multi-profile Compose stack
+├── pyproject.toml                  # Workspace root — dev tooling config
+├── Makefile                        # All dev + infra targets
 ├── infra/
-│   └── kind/
-│       └── cluster.yaml        # Local multi-node Kubernetes cluster
+│   ├── kind/
+│   │   └── cluster.yaml            # Local multi-node Kubernetes cluster
+│   ├── helm/
+│   │   ├── audiomind/              # Main chart: api-gateway, worker, Redis, Qdrant, vLLM
+│   │   │   ├── templates/
+│   │   │   │   ├── api-gateway/    # Deployment, Service, HPA, PDB, Ingress
+│   │   │   │   ├── worker/         # Deployment, PDB
+│   │   │   │   ├── vllm/           # Deployment, Service, PVC (GPU-optional)
+│   │   │   │   └── serviceaccount.yaml
+│   │   │   ├── Chart.yaml
+│   │   │   ├── values.yaml         # Base values
+│   │   │   └── values-dev.yaml     # kind overlay
+│   │   ├── monitoring/             # kube-prometheus-stack + Loki + Promtail + Jaeger
+│   │   ├── gpu-operator/           # NVIDIA GPU Operator
+│   │   ├── keda/                   # KEDA event-driven autoscaler
+│   │   ├── ingress/                # ingress-nginx + cert-manager
+│   │   └── external-secrets/       # External Secrets Operator
+│   └── k8s/
+│       ├── cert-manager/           # ClusterIssuer (self-signed dev, ACME prod)
+│       ├── external-secrets/       # SecretStore + ExternalSecret manifests
+│       ├── gpu/                    # time-slicing ConfigMap
+│       ├── keda/                   # ScaledObjects (api-gateway, worker)
+│       ├── namespaces/
+│       │   └── audiomind/          # ResourceQuota + LimitRange
+│       ├── argocd/                 # (F3) ApplicationSet, app-of-apps
+│       └── argo-rollouts/          # (F5) Canary Rollout manifests
 ├── scripts/
-│   └── demo.sh                 # End-to-end demo script
+│   └── demo.sh                     # End-to-end demo script
 ├── services/
-│   ├── api-gateway/            # FastAPI REST service
+│   ├── api-gateway/                # FastAPI REST service
 │   │   ├── app/
 │   │   │   ├── config.py
 │   │   │   ├── main.py
-│   │   │   ├── dependencies/   # auth, redis, qdrant
-│   │   │   ├── middleware/     # rate-limit, telemetry
-│   │   │   ├── models/         # Pydantic request/response models
-│   │   │   └── routes/         # health, auth, jobs, search
+│   │   │   ├── dependencies/       # auth, redis, qdrant
+│   │   │   ├── middleware/         # rate-limit, telemetry
+│   │   │   ├── models/             # Pydantic request/response models
+│   │   │   └── routes/             # health, auth, jobs, search
 │   │   ├── tests/
 │   │   ├── Dockerfile
 │   │   └── pyproject.toml
-│   └── worker/                 # Async Redis Streams consumer
+│   └── worker/                     # Async Redis Streams consumer
 │       ├── app/
 │       │   ├── config.py
 │       │   ├── main.py
-│       │   ├── consumer.py     # Stream consumer loop
-│       │   ├── indexer.py      # Qdrant indexing (best-effort)
+│       │   ├── consumer.py         # Stream consumer loop
+│       │   ├── indexer.py          # Qdrant indexing
 │       │   └── processors/
-│       │       └── transcribe.py  # Mock Whisper STT
+│       │       └── transcribe.py   # Mock Whisper STT
 │       ├── tests/
 │       ├── Dockerfile
 │       └── pyproject.toml

@@ -1,0 +1,33 @@
+apiVersion: v2
+name: audiomind-monitoring
+description: >
+  Umbrella chart for the AudioMind observability stack:
+  kube-prometheus-stack (Prometheus + Alertmanager + Grafana),
+  Loki (log aggregation), Promtail (log shipper) and Jaeger (tracing).
+type: application
+version: 0.1.0
+
+dependencies:
+  # Prometheus + Alertmanager + Grafana + node-exporter + kube-state-metrics
+  - name: kube-prometheus-stack
+    version: "69.3.2"
+    repository: "https://prometheus-community.github.io/helm-charts"
+    condition: kubePrometheusStack.enabled
+
+  # Loki — log aggregation backend
+  - name: loki
+    version: "6.29.0"
+    repository: "https://grafana.github.io/helm-charts"
+    condition: loki.enabled
+
+  # Promtail — log shipper DaemonSet
+  - name: promtail
+    version: "6.16.6"
+    repository: "https://grafana.github.io/helm-charts"
+    condition: promtail.enabled
+
+  # Jaeger — distributed tracing (all-in-one for dev; production uses Collector + Cassandra)
+  - name: jaeger
+    version: "3.3.3"
+    repository: "https://jaegertracing.github.io/helm-charts"
+    condition: jaeger.enabled

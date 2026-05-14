@@ -1,0 +1,19 @@
+# External Secrets Operator — base values.
+# Ref: https://external-secrets.io/latest/introduction/getting-started/
+external-secrets:
+  installCRDs: true
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+  # Expose Prometheus metrics
+  metrics:
+    service:
+      enabled: true
+    serviceMonitor:
+      enabled: true
