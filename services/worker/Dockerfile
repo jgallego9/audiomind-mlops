@@ -20,6 +20,9 @@ FROM python:3.13-slim
 
 ENV PYTHONUNBUFFERED=1
 
+# Apply all available OS security patches from Debian repos.
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 COPY --from=builder /app/.venv /app/.venv
