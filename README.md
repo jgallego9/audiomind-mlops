@@ -74,6 +74,7 @@ Model serving (--profile models):  Whisper ASR + Ollama LLM
 
 - Docker ≥ 24 with Compose V2
 - `jq` (demo script only)
+- Optional for Kubernetes work: `kind`, `kubectl`, and Helm 3
 
 ### 1 — Clone and configure
 
@@ -286,6 +287,39 @@ docker compose --profile mlops up -d
 docker compose --profile mlops --profile models up -d
 ```
 
+### Kubernetes + Helm
+
+Phase 2 starts with a local multi-node kind cluster. Install these tools before
+using the Kubernetes targets:
+
+- Docker ≥ 24
+- `kind`
+- `kubectl`
+- Helm 3
+
+```bash
+# Create a local cluster named "audiomind" from infra/kind/cluster.yaml
+make kind-up
+
+# Inspect cluster nodes and namespaces
+make kind-status
+
+# Delete the local cluster
+make kind-down
+```
+
+The kind cluster has 1 control-plane node and 2 worker nodes. Host ports
+`8080` and `8443` are reserved for the future local Ingress layer.
+
+Helm wrappers are already exposed for the next backlog step:
+
+```bash
+make helm-install
+make helm-upgrade
+```
+
+They intentionally fail until `infra/helm/audiomind/Chart.yaml` exists in F2-2.
+
 ### Observability
 
 Jaeger UI: [http://localhost:16686](http://localhost:16686) — view distributed traces.  
@@ -299,6 +333,9 @@ MLflow UI (mlops profile): [http://localhost:5001](http://localhost:5001)
 audiomind-mlops/
 ├── docker-compose.yml          # Multi-profile Compose stack
 ├── pyproject.toml              # Workspace root — dev tooling config
+├── infra/
+│   └── kind/
+│       └── cluster.yaml        # Local multi-node Kubernetes cluster
 ├── scripts/
 │   └── demo.sh                 # End-to-end demo script
 ├── services/
@@ -332,4 +369,3 @@ audiomind-mlops/
 ## License
 
 MIT © 2026
-

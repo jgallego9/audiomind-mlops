@@ -1,8 +1,15 @@
 .DEFAULT_GOAL := help
 
+KIND_CLUSTER_NAME ?= audiomind
+KIND_CONFIG ?= infra/kind/cluster.yaml
+HELM_RELEASE ?= audiomind
+HELM_NAMESPACE ?= audiomind
+HELM_CHART ?= infra/helm/audiomind
+
 .PHONY: help install lock lint lint-fix format typecheck test test-fast ci \
         pre-commit-install pre-commit-run \
-        up up-mlops up-all down logs ps build
+        up up-mlops up-all down logs ps build \
+        kind-up kind-status kind-down helm-install helm-upgrade
 
 # ---------------------------------------------------------------------------
 # Dev setup
@@ -67,6 +74,34 @@ logs:  ## Tail logs for all running services
 
 ps:  ## Show status of all services
 	docker compose ps
+
+# ---------------------------------------------------------------------------
+# Kubernetes + Helm
+# ---------------------------------------------------------------------------
+kind-up:  ## Create the local multi-node kind cluster
+	@command -v kind >/dev/null 2>&1 || { echo "ERROR: kind is required. Install it from https://kind.sigs.k8s.io/docs/user/quick-start/"; exit 127; }
+	@command -v docker >/dev/null 2>&1 || { echo "ERROR: Docker is required before creating the kind cluster."; exit 127; }
+	kind create cluster --name $(KIND_CLUSTER_NAME) --config $(KIND_CONFIG)
+
+kind-status:  ## Show local kind cluster nodes and namespaces
+	@command -v kubectl >/dev/null 2>&1 || { echo "ERROR: kubectl is required. Install it from https://kubernetes.io/docs/tasks/tools/"; exit 127; }
+	kubectl cluster-info --context kind-$(KIND_CLUSTER_NAME)
+	kubectl get nodes -o wide
+	kubectl get namespaces
+
+kind-down:  ## Delete the local kind cluster
+	@command -v kind >/dev/null 2>&1 || { echo "ERROR: kind is required. Install it from https://kind.sigs.k8s.io/docs/user/quick-start/"; exit 127; }
+	kind delete cluster --name $(KIND_CLUSTER_NAME)
+
+helm-install:  ## Install the AudioMind Helm release (available after F2-2)
+	@test -f $(HELM_CHART)/Chart.yaml || { echo "ERROR: Helm chart not found at $(HELM_CHART). Complete F2-2 before running this target."; exit 2; }
+	@command -v helm >/dev/null 2>&1 || { echo "ERROR: helm is required. Install it from https://helm.sh/docs/intro/install/"; exit 127; }
+	helm install $(HELM_RELEASE) $(HELM_CHART) --namespace $(HELM_NAMESPACE) --create-namespace
+
+helm-upgrade:  ## Upgrade the AudioMind Helm release (available after F2-2)
+	@test -f $(HELM_CHART)/Chart.yaml || { echo "ERROR: Helm chart not found at $(HELM_CHART). Complete F2-2 before running this target."; exit 2; }
+	@command -v helm >/dev/null 2>&1 || { echo "ERROR: helm is required. Install it from https://helm.sh/docs/intro/install/"; exit 127; }
+	helm upgrade $(HELM_RELEASE) $(HELM_CHART) --namespace $(HELM_NAMESPACE)
 
 # ---------------------------------------------------------------------------
 # CI gate (runs locally exactly what CI runs)
