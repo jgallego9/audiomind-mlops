@@ -55,12 +55,14 @@ async def test_ensure_consumer_group_ignores_busygroup(
 async def test_ensure_consumer_group_reraises_other_errors(
     fake_redis: FakeRedis,
 ) -> None:
+    # Given: xgroup_create raises an unrelated ResponseError
     with (
         patch.object(
             fake_redis,
             "xgroup_create",
             AsyncMock(side_effect=ResponseError("WRONGTYPE")),
         ),
+        # When / Then
         pytest.raises(ResponseError, match="WRONGTYPE"),
     ):
         await _ensure_consumer_group(fake_redis)
@@ -74,6 +76,7 @@ async def test_ensure_consumer_group_reraises_other_errors(
 async def test_process_message_success(
     fake_redis: FakeRedis, mock_qdrant: MagicMock, worker_settings: Settings
 ) -> None:
+    # Given: a pending job in Redis
     job_id = "job-success-1"
     await fake_redis.hset(
         f"{_JOB_PREFIX}:{job_id}",
@@ -85,6 +88,7 @@ async def test_process_message_success(
         },
     )
 
+    # When
     with patch(
         "app.consumer.mock_transcribe", AsyncMock(return_value=_FAST_TRANSCRIPTION)
     ):
@@ -101,6 +105,7 @@ async def test_process_message_success(
             },
         )
 
+    # Then
     data = await fake_redis.hgetall(f"{_JOB_PREFIX}:{job_id}")
     assert data["status"] == "completed"
     result = json.loads(data["result"])
@@ -110,7 +115,10 @@ async def test_process_message_success(
 async def test_process_message_indexes_to_qdrant(
     fake_redis: FakeRedis, mock_qdrant: MagicMock, worker_settings: Settings
 ) -> None:
+    # Given
     job_id = "job-idx-1"
+
+    # When
     with patch(
         "app.consumer.mock_transcribe", AsyncMock(return_value=_FAST_TRANSCRIPTION)
     ):
@@ -126,6 +134,8 @@ async def test_process_message_indexes_to_qdrant(
                 "user": "alice",
             },
         )
+
+    # Then
     mock_qdrant.add.assert_awaited_once()
     call_kwargs = mock_qdrant.add.call_args.kwargs
     assert call_kwargs["ids"] == [job_id]
@@ -134,7 +144,10 @@ async def test_process_message_indexes_to_qdrant(
 async def test_process_message_failure_sets_failed_status(
     fake_redis: FakeRedis, mock_qdrant: MagicMock, worker_settings: Settings
 ) -> None:
+    # Given: transcription raises a runtime error
     job_id = "job-fail-1"
+
+    # When
     with patch(
         "app.consumer.mock_transcribe", AsyncMock(side_effect=RuntimeError("bad audio"))
     ):
@@ -151,6 +164,7 @@ async def test_process_message_failure_sets_failed_status(
             },
         )
 
+    # Then
     data = await fake_redis.hgetall(f"{_JOB_PREFIX}:{job_id}")
     assert data["status"] == "failed"
     assert "bad audio" in data["error"]
@@ -159,11 +173,9 @@ async def test_process_message_failure_sets_failed_status(
 async def test_process_message_acknowledges_stream(
     fake_redis: FakeRedis, mock_qdrant: MagicMock, worker_settings: Settings
 ) -> None:
-    """Message must be ACKed even on failure."""
+    # Given: a message delivered to a consumer group (enters PEL)
     await _ensure_consumer_group(fake_redis)
     _ = await fake_redis.xadd(_STREAM, {"job_id": "j1", "type": "transcribe"})
-
-    # Consume from group so message enters PEL.
     msgs = await fake_redis.xreadgroup(
         groupname=_GROUP,
         consumername="w1",
@@ -173,6 +185,7 @@ async def test_process_message_acknowledges_stream(
     _, stream_msgs = msgs[0]
     actual_msg_id, fields = stream_msgs[0]
 
+    # When: processing fails
     with patch(
         "app.consumer.mock_transcribe", AsyncMock(side_effect=RuntimeError("err"))
     ):
@@ -180,6 +193,7 @@ async def test_process_message_acknowledges_stream(
             fake_redis, mock_qdrant, worker_settings, actual_msg_id, dict(fields)
         )
 
+    # Then: message must be ACKed even on failure
     pending = await fake_redis.xpending(_STREAM, _GROUP)
     assert pending["pending"] == 0
 
@@ -206,7 +220,7 @@ async def test_recover_pending_no_messages(
 async def test_run_consumer_processes_one_message(
     fake_redis: FakeRedis, mock_qdrant: MagicMock, worker_settings: Settings
 ) -> None:
-    """Seed a stream message, run the consumer, verify job completed."""
+    # Given: a pending job in Redis and a matching stream message
     job_id = "job-run-1"
     await fake_redis.hset(
         f"{_JOB_PREFIX}:{job_id}",
@@ -234,17 +248,17 @@ async def test_run_consumer_processes_one_message(
         processed.append(job_id)
         return _FAST_TRANSCRIPTION
 
-    # Run for one cycle then cancel.
+    # When: consumer runs until it processes one message, then is cancelled
     with patch("app.consumer.mock_transcribe", AsyncMock(side_effect=_fast_transcribe)):
         task = asyncio.create_task(
             run_consumer(fake_redis, "consumer-1", mock_qdrant, worker_settings)
         )
-        # Let it process one message.
         while not processed:
             await asyncio.sleep(0.05)
         task.cancel()
         with contextlib.suppress(asyncio.CancelledError):
             await task
 
+    # Then
     data = await fake_redis.hgetall(f"{_JOB_PREFIX}:{job_id}")
     assert data["status"] == "completed"

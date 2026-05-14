@@ -39,17 +39,20 @@ async def test_login_missing_body_returns_422(client: AsyncClient) -> None:
 
 
 async def test_token_allows_authenticated_request(client: AsyncClient) -> None:
-    """End-to-end: get a real token then use it on an authenticated endpoint."""
+    # Given: a valid token obtained from the login endpoint
     login = await client.post(
         "/auth/token", json={"username": "admin", "password": "demo-password"}
     )
     token = login.json()["access_token"]
 
+    # When: using that token on an authenticated endpoint
     response = await client.post(
         "/transcribe",
         json={"audio_url": "https://example.com/audio.mp3"},
         headers={"Authorization": f"Bearer {token}"},
     )
+
+    # Then
     assert response.status_code == 202
 
 

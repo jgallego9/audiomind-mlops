@@ -21,11 +21,14 @@ async def test_transcribe_returns_202_with_job_id(auth_client: AsyncClient) -> N
 async def test_transcribe_stores_job_in_redis(
     auth_client: AsyncClient, fake_redis: FakeRedis
 ) -> None:
+    # When
     response = await auth_client.post(
         "/transcribe",
         json={"audio_url": "https://example.com/audio.mp3", "language": "es"},
     )
     job_id = response.json()["job_id"]
+
+    # Then
     data = await fake_redis.hgetall(f"audiomind:job:{job_id}")
     assert data["status"] == "pending"
     assert data["language"] == "es"
@@ -35,9 +38,12 @@ async def test_transcribe_stores_job_in_redis(
 async def test_transcribe_publishes_to_stream(
     auth_client: AsyncClient, fake_redis: FakeRedis
 ) -> None:
+    # When
     await auth_client.post(
         "/transcribe", json={"audio_url": "https://example.com/audio.mp3"}
     )
+
+    # Then
     messages = await fake_redis.xrange("audiomind:jobs")
     assert len(messages) == 1
     _msg_id, fields = messages[0]
@@ -60,13 +66,16 @@ async def test_transcribe_no_auth_returns_4xx(client: AsyncClient) -> None:
 async def test_get_job_returns_pending_status(
     auth_client: AsyncClient, fake_redis: FakeRedis
 ) -> None:
-    # Create a job via the API.
+    # Given: a freshly submitted job
     create = await auth_client.post(
         "/transcribe", json={"audio_url": "https://example.com/audio.mp3"}
     )
     job_id = create.json()["job_id"]
 
+    # When
     response = await auth_client.get(f"/jobs/{job_id}")
+
+    # Then
     assert response.status_code == 200
     body = response.json()
     assert body["job_id"] == job_id
@@ -76,7 +85,7 @@ async def test_get_job_returns_pending_status(
 async def test_get_job_completed_includes_result(
     auth_client: AsyncClient, fake_redis: FakeRedis
 ) -> None:
-    """Seed a completed job directly in Redis and verify it is returned."""
+    # Given: a completed job seeded directly in Redis
     job_id = "completed-job-1"
     result_data = {"transcript": "hello world", "language": "en"}
     await fake_redis.hset(
@@ -92,7 +101,10 @@ async def test_get_job_completed_includes_result(
         },
     )
 
+    # When
     response = await auth_client.get(f"/jobs/{job_id}")
+
+    # Then
     assert response.status_code == 200
     body = response.json()
     assert body["status"] == "completed"
@@ -107,7 +119,7 @@ async def test_get_job_not_found_returns_404(auth_client: AsyncClient) -> None:
 async def test_get_job_other_users_job_returns_403(
     auth_client: AsyncClient, fake_redis: FakeRedis
 ) -> None:
-    """A user cannot access another user's job."""
+    # Given: a job owned by a different user
     job_id = "other-users-job"
     await fake_redis.hset(
         f"audiomind:job:{job_id}",
@@ -119,5 +131,7 @@ async def test_get_job_other_users_job_returns_403(
             "created_at": datetime.now(UTC).isoformat(),
         },
     )
+
+    # When / Then
     response = await auth_client.get(f"/jobs/{job_id}")
     assert response.status_code == 403

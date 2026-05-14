@@ -11,6 +11,7 @@ from app.indexer import index_transcription
 async def test_index_transcription_calls_qdrant_add(
     mock_qdrant: MagicMock, worker_settings: Settings
 ) -> None:
+    # When
     await index_transcription(
         mock_qdrant,
         worker_settings,
@@ -21,6 +22,8 @@ async def test_index_transcription_calls_qdrant_add(
         user="alice",
         created_at="2026-01-01T00:00:00+00:00",
     )
+
+    # Then
     mock_qdrant.add.assert_awaited_once()
     call_kwargs = mock_qdrant.add.call_args.kwargs
     assert call_kwargs["collection_name"] == worker_settings.qdrant_collection
@@ -34,9 +37,10 @@ async def test_index_transcription_calls_qdrant_add(
 async def test_index_transcription_swallows_exception(
     mock_qdrant: MagicMock, worker_settings: Settings
 ) -> None:
-    """Index failure must never propagate (best-effort semantic indexing)."""
+    # Given: Qdrant.add raises
     mock_qdrant.add = AsyncMock(side_effect=RuntimeError("qdrant-down"))
-    # Should not raise.
+
+    # When / Then: best-effort indexing — must not propagate
     await index_transcription(
         mock_qdrant,
         worker_settings,
@@ -53,9 +57,11 @@ async def test_index_transcription_swallows_exception(
 async def test_index_transcription_logs_exception(
     mock_qdrant: MagicMock, worker_settings: Settings, caplog: pytest.LogCaptureFixture
 ) -> None:
+    # Given: Qdrant.add raises
     mock_qdrant.add = AsyncMock(side_effect=RuntimeError("timeout"))
     import logging
 
+    # When
     with caplog.at_level(logging.ERROR, logger="app.indexer"):
         await index_transcription(
             mock_qdrant,
@@ -67,5 +73,7 @@ async def test_index_transcription_logs_exception(
             user="bob",
             created_at="2026-01-01T00:00:00+00:00",
         )
+
+    # Then
     assert "index_failed" in caplog.text
     assert "job-log" in caplog.text
