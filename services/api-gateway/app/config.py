@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import SecretStr
+from pydantic import AnyHttpUrl, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -24,6 +24,12 @@ class Settings(BaseSettings):
     # Rate limiting (slowapi format: "N/period")
     rate_limit_default: str = "100/minute"
     rate_limit_auth: str = "10/minute"
+
+    # OpenTelemetry
+    otel_enabled: bool = True
+    otel_service_name: str = "api-gateway"
+    otel_otlp_endpoint: AnyHttpUrl = AnyHttpUrl("http://jaeger:4318")  # OTLP/HTTP
+    otel_sample_rate: float = 1.0  # 1.0 = 100%; reduce in high-volume prod
 
 
 @lru_cache
