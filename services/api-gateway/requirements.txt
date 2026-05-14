@@ -1,0 +1,6 @@
+fastapi>=0.115
+uvicorn[standard]>=0.34
+slowapi>=0.1.9
+python-jose[cryptography]>=3.3
+passlib[bcrypt]>=1.7
+pydantic-settings>=2.6
