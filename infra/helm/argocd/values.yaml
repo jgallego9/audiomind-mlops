@@ -1,0 +1,71 @@
+# ArgoCD wrapper — values for all environments (base layer).
+# Override with values-dev.yaml or values-prod.yaml.
+argo-cd:
+  global:
+    domain: argocd.audiomind.local
+    logging:
+      format: json
+      level: info
+
+  # Run in insecure mode so Ingress can terminate TLS.
+  configs:
+    params:
+      server.insecure: "true"
+    # Allow ArgoCD to manage apps in all namespaces (required for ApplicationSet
+    # deploying to audiomind / monitoring / etc.).
+    cm:
+      application.resourceTrackingMethod: annotation
+
+  # Enable RBAC policy so only admin can access the UI.
+  # Password is set via --set or external-secrets in production.
+  #   htpasswd -nbBC 12 "" '<password>' | tr -d ':\n'
+  configs.secret:
+    argocdServerAdminPassword: ""
+
+  server:
+    # Expose via ClusterIP; Ingress (nginx) terminates TLS.
+    service:
+      type: ClusterIP
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      hostname: argocd.audiomind.local
+      annotations:
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+      extraTls:
+        - hosts:
+            - argocd.audiomind.local
+          secretName: argocd-tls
+
+  # ApplicationSet controller — bundled since argo-cd 4.0.0 / ArgoCD v2.3.
+  applicationSet:
+    replicas: 1
+
+  # Keep resource usage low for local kind cluster.
+  controller:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+
+  server:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+  repoServer:
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi

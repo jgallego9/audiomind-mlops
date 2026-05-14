@@ -1,0 +1,221 @@
+# .github/workflows/ci.yml
+#
+# CI/CD pipeline for AudioMind MLOps.
+#
+# Jobs:
+#   1. lint-test   — ruff + mypy + pytest (all branches & PRs)
+#   2. build-push  — Docker buildx → GHCR (push to main only)
+#   3. bump-tag    — yq bump image.tag in values.yaml → git commit (main only)
+#
+# Security model:
+#   - GHCR push uses GITHUB_TOKEN (no long-lived secrets needed for same-repo packages).
+#   - For external cloud providers (AWS/GCP/Azure), add
+#       permissions: id-token: write
+#     and swap to the provider's OIDC action (e.g. aws-actions/configure-aws-credentials@v4).
+
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - "release/**"
+  pull_request:
+    branches:
+      - main
+
+# Prevent redundant concurrent runs on the same branch.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Minimal default permissions (principle of least privilege).
+permissions:
+  contents: read
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/jgallego9/audiomind-mlops
+  PYTHON_VERSION: "3.13"
+
+# ---------------------------------------------------------------------------
+# Job 1 — lint + typecheck + test
+# ---------------------------------------------------------------------------
+jobs:
+  lint-test:
+    name: Lint, typecheck & test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install uv
+        run: pipx install uv
+
+      - name: Install dependencies (api-gateway)
+        working-directory: services/api-gateway
+        run: uv sync --frozen
+
+      - name: Install dependencies (worker)
+        working-directory: services/worker
+        run: uv sync --frozen
+
+      - name: Ruff lint
+        run: |
+          uv run --directory services/api-gateway ruff check services/api-gateway
+          uv run --directory services/worker     ruff check services/worker
+
+      - name: Mypy typecheck
+        run: |
+          uv run --directory services/api-gateway mypy services/api-gateway
+          uv run --directory services/worker     mypy services/worker
+
+      - name: Pytest (api-gateway)
+        working-directory: services/api-gateway
+        run: |
+          uv run pytest tests/ --cov=src --cov-report=xml --cov-fail-under=80 -q
+
+      - name: Pytest (worker)
+        working-directory: services/worker
+        run: |
+          uv run pytest tests/ --cov=src --cov-report=xml --cov-fail-under=80 -q
+
+      - name: Helm lint — audiomind chart
+        run: |
+          curl -sSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+          helm lint infra/helm/audiomind
+
+      - name: YAML lint — infra/k8s
+        run: |
+          pip install yamllint
+          yamllint -d relaxed infra/k8s/
+
+  # ---------------------------------------------------------------------------
+  # Job 2 — Build Docker images and push to GHCR
+  # ---------------------------------------------------------------------------
+  build-push:
+    name: Build & push Docker images
+    needs: lint-test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    # Only build+push on pushes to main or release branches (not PRs).
+    if: github.event_name == 'push'
+    permissions:
+      packages: write   # GHCR push
+      contents: read
+      # Uncomment for cloud OIDC (AWS/GCP/Azure):
+      # id-token: write
+    strategy:
+      matrix:
+        service:
+          - api-gateway
+          - worker
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          # GITHUB_TOKEN is automatically available; no extra secrets needed.
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_PREFIX }}/${{ matrix.service }}
+          tags: |
+            type=sha,prefix=sha-,format=short
+            type=ref,event=branch
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: services/${{ matrix.service }}
+          file: services/${{ matrix.service }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ env.IMAGE_PREFIX }}/${{ matrix.service }}:sha-${{ github.sha }}
+          format: sarif
+          output: trivy-${{ matrix.service }}.sarif
+          severity: CRITICAL,HIGH
+          # Fail the build on CRITICAL vulnerabilities.
+          exit-code: "1"
+          ignore-unfixed: true
+
+      - name: Upload Trivy SARIF report
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-${{ matrix.service }}.sarif
+          category: trivy-${{ matrix.service }}
+
+  # ---------------------------------------------------------------------------
+  # Job 3 — Bump image tag in Helm values and commit
+  # ---------------------------------------------------------------------------
+  bump-tag:
+    name: Bump Helm image tag
+    needs: build-push
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    # Only bump on main branch pushes.
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: write   # git push
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Use a deploy token or PAT so the commit triggers CI on the pushed branch.
+          # Falls back to GITHUB_TOKEN (will not re-trigger this workflow by default).
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up yq
+        uses: mikefarah/yq@v4.45.1
+
+      - name: Compute short SHA
+        id: sha
+        run: echo "short=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Bump api-gateway image tag
+        run: |
+          yq -i '.apiGateway.image.tag = "sha-${{ steps.sha.outputs.short }}"' \
+            infra/helm/audiomind/values.yaml
+
+      - name: Bump worker image tag
+        run: |
+          yq -i '.worker.image.tag = "sha-${{ steps.sha.outputs.short }}"' \
+            infra/helm/audiomind/values.yaml
+
+      - name: Commit & push
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add infra/helm/audiomind/values.yaml
+          # Exit cleanly if nothing changed (idempotent).
+          git diff --cached --quiet && exit 0
+          git commit --no-verify \
+            -m "chore(helm): bump image tags to sha-${{ steps.sha.outputs.short }} [skip ci]"
+          git push

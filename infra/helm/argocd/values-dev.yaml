@@ -1,0 +1,16 @@
+# values-dev.yaml — overrides for local kind cluster (no TLS, port-forward friendly).
+argo-cd:
+  global:
+    domain: localhost
+
+  configs:
+    params:
+      server.insecure: "true"
+
+  server:
+    # In dev, expose via NodePort so we can reach the UI without a full Ingress setup.
+    service:
+      type: NodePort
+      nodePortHttp: 30880
+    ingress:
+      enabled: false

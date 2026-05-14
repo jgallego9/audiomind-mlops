@@ -1,0 +1,93 @@
+# ApplicationSet: audiomind-auto-sync
+# Manages environments that use automated sync (dev).
+# Separate from audiomind-manual-sync to allow independent pause/resume.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: audiomind-auto-sync
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - list:
+        elements:
+          - env: dev
+            namespace: audiomind-dev
+            targetRevision: main
+  template:
+    metadata:
+      name: "audiomind-{{ .env }}"
+      namespace: argocd
+      labels:
+        app.kubernetes.io/name: audiomind
+        env: "{{ .env }}"
+    spec:
+      project: audiomind
+      source:
+        repoURL: https://github.com/jgallego9/audiomind-mlops.git
+        targetRevision: "{{ .targetRevision }}"
+        path: infra/helm/audiomind
+        helm:
+          valueFiles:
+            - values.yaml
+            - "values-{{ .env }}.yaml"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{ .namespace }}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+---
+# ApplicationSet: audiomind-manual-sync
+# Manages environments that require human approval before sync (staging, prod).
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: audiomind-manual-sync
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - list:
+        elements:
+          - env: staging
+            namespace: audiomind-staging
+            targetRevision: main
+          - env: prod
+            namespace: audiomind-prod
+            targetRevision: release/stable
+  template:
+    metadata:
+      name: "audiomind-{{ .env }}"
+      namespace: argocd
+      labels:
+        app.kubernetes.io/name: audiomind
+        env: "{{ .env }}"
+    spec:
+      project: audiomind
+      source:
+        repoURL: https://github.com/jgallego9/audiomind-mlops.git
+        targetRevision: "{{ .targetRevision }}"
+        path: infra/helm/audiomind
+        helm:
+          valueFiles:
+            - values.yaml
+            - "values-{{ .env }}.yaml"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{ .namespace }}"
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+        # No automated block — sync requires explicit human/CI approval.

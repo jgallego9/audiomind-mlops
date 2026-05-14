@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: audiomind
+  namespace: argocd
+  finalizers:
+    # Prevent deletion while Applications exist.
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  description: "AudioMind MLOps workloads — dev / staging / prod"
+
+  # Allowed source repos.
+  sourceRepos:
+    - https://github.com/jgallego9/audiomind-mlops.git
+
+  # Allowed destination clusters and namespaces.
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: audiomind-dev
+    - server: https://kubernetes.default.svc
+      namespace: audiomind-staging
+    - server: https://kubernetes.default.svc
+      namespace: audiomind-prod
+
+  # Allowed cluster-scoped resource kinds (none needed beyond namespaced resources).
+  clusterResourceWhitelist: []
+
+  # All namespaced resources are allowed.
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+
+  # Orphaned resources warning (helps detect manually applied resources).
+  orphanedResources:
+    warn: true

@@ -1,0 +1,7 @@
+# infra/k8s/envs/prod/app.yaml
+# Source of truth for the 'prod' environment.
+env: prod
+namespace: audiomind-prod
+targetRevision: release/stable # tracks a protected release branch — requires PR approval
+helmChartPath: infra/helm/audiomind
+autoSync: false               # manual approval required before production sync

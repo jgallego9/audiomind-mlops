@@ -26,6 +26,11 @@ HELM_INGRESS_NS         ?= ingress-nginx
 HELM_ESO_CHART          ?= infra/helm/external-secrets
 HELM_ESO_NS             ?= external-secrets
 
+HELM_ARGOCD_CHART       ?= infra/helm/argocd
+HELM_ARGOCD_VALUES      ?= $(HELM_ARGOCD_CHART)/values-dev.yaml
+HELM_ARGOCD_NS          ?= argocd
+ARGOCD_K8S_DIR          ?= infra/k8s/argocd
+
 .PHONY: help install lock lint lint-fix format typecheck test test-fast ci \
         pre-commit-install pre-commit-run \
         up up-mlops up-all down logs ps build \
@@ -36,6 +41,7 @@ HELM_ESO_NS             ?= external-secrets
         helm-keda-deps helm-keda-install \
         helm-ingress-deps helm-ingress-install \
         helm-eso-deps helm-eso-install \
+        helm-argocd-deps helm-argocd-install argocd-bootstrap argocd-port-forward \
         infra-up infra-namespaces
 
 # ---------------------------------------------------------------------------
@@ -259,6 +265,35 @@ infra-up:  ## Bootstrap the full local infra stack on a running kind cluster
 # CI gate (runs locally exactly what CI runs)
 # ---------------------------------------------------------------------------
 ci: lint typecheck test  ## Run full CI checks: lint + typecheck + test
+
+# ---------------------------------------------------------------------------
+# ArgoCD — GitOps controller (F3-1 … F3-5)
+# ---------------------------------------------------------------------------
+helm-argocd-deps:  ## Download ArgoCD chart dependency (argo/argo-cd 9.5.14)
+	@command -v helm >/dev/null 2>&1 || { echo "ERROR: helm is required."; exit 127; }
+	helm repo add argo https://argoproj.github.io/argo-helm 2>/dev/null || true
+	helm repo update
+	helm dependency build $(HELM_ARGOCD_CHART)
+
+helm-argocd-install:  ## Install ArgoCD into the 'argocd' namespace
+	$(MAKE) helm-argocd-deps
+	kubectl create namespace $(HELM_ARGOCD_NS) --dry-run=client -o yaml | kubectl apply -f -
+	helm upgrade --install argocd $(HELM_ARGOCD_CHART) \
+		--namespace $(HELM_ARGOCD_NS) \
+		-f $(HELM_ARGOCD_VALUES)
+	@echo "Waiting for ArgoCD server to become available..."
+	kubectl wait --for=condition=Available deployment/argocd-server \
+		-n $(HELM_ARGOCD_NS) --timeout=120s 2>/dev/null || true
+
+argocd-bootstrap:  ## Apply App-of-apps + AppProject + ApplicationSet (idempotent)
+	@command -v kubectl >/dev/null 2>&1 || { echo "ERROR: kubectl is required."; exit 127; }
+	kubectl apply -f $(ARGOCD_K8S_DIR)/project.yaml
+	kubectl apply -f $(ARGOCD_K8S_DIR)/applicationset.yaml
+	kubectl apply -f $(ARGOCD_K8S_DIR)/app-of-apps.yaml
+	@echo "✓ ArgoCD bootstrapped. Access the UI via: make argocd-port-forward"
+
+argocd-port-forward:  ## Forward ArgoCD UI to http://localhost:8080 (Ctrl-C to stop)
+	kubectl port-forward svc/argocd-server -n $(HELM_ARGOCD_NS) 8080:80
 
 # ---------------------------------------------------------------------------
 # Help

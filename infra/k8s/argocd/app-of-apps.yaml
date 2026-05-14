@@ -1,0 +1,39 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: audiomind-root
+  namespace: argocd
+  # This is the "bootstrap" application installed manually once.
+  # After installation, ArgoCD self-manages everything via GitOps.
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+  labels:
+    app.kubernetes.io/name: audiomind-root
+    app.kubernetes.io/component: gitops-bootstrap
+  # Remove the application AND its children when this object is deleted.
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/jgallego9/audiomind-mlops.git
+    targetRevision: HEAD
+    # Points at the directory containing all ArgoCD manifests:
+    # applicationset.yaml, project.yaml, and this file itself.
+    path: infra/k8s/argocd
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+
+  syncPolicy:
+    # Root app auto-syncs so new ApplicationSets and Projects are applied
+    # as soon as they are committed to main.
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false   # argocd namespace must already exist
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true

@@ -386,6 +386,83 @@ MLflow UI (mlops profile): [http://localhost:5001](http://localhost:5001)
 
 ---
 
+## CI/CD — GitHub Actions + ArgoCD GitOps
+
+[![CI](https://github.com/jgallego9/audiomind-mlops/actions/workflows/ci.yml/badge.svg)](https://github.com/jgallego9/audiomind-mlops/actions/workflows/ci.yml)
+[![GHCR api-gateway](https://ghcr.io/jgallego9/audiomind-mlops/api-gateway)](https://github.com/jgallego9/audiomind-mlops/pkgs/container/audiomind-mlops%2Fapi-gateway)
+
+### Pipeline overview
+
+```
+ git push / PR
+      │
+      ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  Job 1 — lint-test  (every event)                               │
+│  ruff · mypy · pytest --cov 80% · helm lint · yamllint          │
+└─────────────────────────────────┬───────────────────────────────┘
+                                  │ success (push only)
+                                  ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  Job 2 — build-push  (matrix: api-gateway, worker)             │
+│  docker buildx · push to GHCR · trivy scan (CRITICAL exit-1)   │
+│  upload SARIF → GitHub Security                                 │
+└─────────────────────────────────┬───────────────────────────────┘
+                                  │ success (main push only)
+                                  ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  Job 3 — bump-tag                                               │
+│  yq update values.yaml image tags · git commit [skip ci]       │
+└─────────────────────────────────┬───────────────────────────────┘
+                                  │
+                                  ▼
+┌─────────────────────────────────────────────────────────────────┐
+│  ArgoCD ApplicationSet  (polls repo every 3 min)               │
+│  audiomind-auto-sync → dev   (automated prune + selfHeal)       │
+│  audiomind-manual-sync → staging / prod (manual approval)       │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+Images are published to GHCR with these tags:
+
+| Tag | When |
+|---|---|
+| `sha-<short_sha>` | Every push |
+| `<branch>` | Every push |
+| `latest` | Push to `main` |
+
+### ArgoCD bootstrap (local kind cluster)
+
+```bash
+# 1. Start the cluster and install core infra
+make kind-up
+make infra-up           # includes helm-argocd-install
+
+# 2. Apply App-of-apps pattern (idempotent)
+make argocd-bootstrap
+
+# 3. Open the UI
+make argocd-port-forward        # → http://localhost:8080
+# Admin password:
+kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath='{.data.password}' | base64 -d && echo
+```
+
+ArgoCD version: **3.4.2** (Helm chart `argo/argo-cd` **9.5.14**).
+
+### Adding a new environment
+
+The ApplicationSet uses the [List generator](https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Generators-List/).
+To add a new environment:
+
+1. Add an entry to the appropriate ApplicationSet in [infra/k8s/argocd/applicationset.yaml](infra/k8s/argocd/applicationset.yaml).
+2. Create the overlay file `infra/helm/audiomind/values-<env>.yaml`.
+3. Commit and push — ArgoCD syncs within 3 minutes.
+
+No changes to the ApplicationSet controller or the CI pipeline are required.
+
+---
+
 ## Project Structure
 
 ```
