@@ -1,7 +1,8 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help install lock lint lint-fix format typecheck test ci \
-        pre-commit-install pre-commit-run
+.PHONY: help install lock lint lint-fix format typecheck test test-fast ci \
+        pre-commit-install pre-commit-run \
+        up up-mlops up-all down logs ps build
 
 # ---------------------------------------------------------------------------
 # Dev setup
@@ -41,6 +42,30 @@ test:  ## Run pytest with coverage
 
 test-fast:  ## Run pytest without coverage (faster)
 	uv run pytest --no-cov
+
+# ---------------------------------------------------------------------------
+# Docker Compose
+# ---------------------------------------------------------------------------
+build:  ## Build Docker images
+	docker compose build
+
+up:  ## Start core services (api-gateway, redis, qdrant, jaeger)
+	docker compose up -d
+
+up-mlops:  ## Start core + MLOps services (+ postgres, mlflow)
+	docker compose --profile mlops up -d
+
+up-all:  ## Start all services including AI models (+ whisper, ollama)
+	docker compose --profile mlops --profile models up -d
+
+down:  ## Stop and remove containers (preserves volumes)
+	docker compose down
+
+logs:  ## Tail logs for all running services
+	docker compose logs -f
+
+ps:  ## Show status of all services
+	docker compose ps
 
 # ---------------------------------------------------------------------------
 # CI gate (runs locally exactly what CI runs)

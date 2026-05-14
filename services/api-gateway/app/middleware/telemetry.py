@@ -2,11 +2,21 @@ from opentelemetry import trace  # type: ignore[import-untyped]
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import (  # type: ignore[import-untyped]
     OTLPSpanExporter,
 )
-from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor  # type: ignore[import-untyped]
-from opentelemetry.sdk.resources import SERVICE_NAME, Resource  # type: ignore[import-untyped]
+from opentelemetry.instrumentation.fastapi import (
+    FastAPIInstrumentor,  # type: ignore[import-untyped]
+)
+from opentelemetry.sdk.resources import (  # type: ignore[import-untyped]
+    SERVICE_NAME,
+    Resource,
+)
 from opentelemetry.sdk.trace import TracerProvider  # type: ignore[import-untyped]
-from opentelemetry.sdk.trace.export import BatchSpanProcessor  # type: ignore[import-untyped]
-from opentelemetry.sdk.trace.sampling import ParentBased, TraceIdRatioBased  # type: ignore[import-untyped]
+from opentelemetry.sdk.trace.export import (
+    BatchSpanProcessor,  # type: ignore[import-untyped]
+)
+from opentelemetry.sdk.trace.sampling import (  # type: ignore[import-untyped]
+    ParentBased,
+    TraceIdRatioBased,
+)
 
 from app.config import Settings
 

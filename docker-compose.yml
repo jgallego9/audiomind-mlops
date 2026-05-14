@@ -1,0 +1,180 @@
+# AudioMind MLOps — local development stack
+#
+# Profiles
+#   (none)           core services: api-gateway, redis, qdrant, jaeger
+#   --profile mlops  + PostgreSQL + MLflow tracking server
+#   --profile models + Whisper ASR (CPU) + Ollama (LLM)
+#
+# Quick start:
+#   cp .env.example .env        # fill in JWT_SECRET_KEY
+#   docker compose up -d        # core only
+#   docker compose --profile mlops --profile models up -d   # everything
+#
+# Override any port in .env, e.g. REDIS_PORT=6380
+
+services:
+  # ── api-gateway ────────────────────────────────────────────────────────────
+  api-gateway:
+    build:
+      context: .
+      dockerfile: services/api-gateway/Dockerfile
+    ports:
+      - "${API_GATEWAY_PORT:-8000}:8000"
+    environment:
+      # Secrets — set JWT_SECRET_KEY in your .env (never commit it)
+      JWT_SECRET_KEY: "${JWT_SECRET_KEY:-dev-insecure-change-me-before-any-real-use}"
+      JWT_ALGORITHM: "HS256"
+      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: "30"
+      RATE_LIMIT_DEFAULT: "100/minute"
+      RATE_LIMIT_AUTH: "10/minute"
+      # OpenTelemetry — points to the jaeger service defined below
+      OTEL_ENABLED: "true"
+      OTEL_SERVICE_NAME: "api-gateway"
+      OTEL_OTLP_ENDPOINT: "http://jaeger:4318"
+      OTEL_SAMPLE_RATE: "1.0"
+    depends_on:
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+      jaeger:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - audiomind-net
+
+  # ── Redis ───────────────────────────────────────────────────────────────────
+  # Rate-limit storage (slowapi) + async job queue (Redis Streams, F1-5)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - audiomind-net
+
+  # ── Qdrant ──────────────────────────────────────────────────────────────────
+  # Vector DB for RAG pipeline (F1-6)
+  qdrant:
+    image: qdrant/qdrant:v1.13.0
+    ports:
+      - "${QDRANT_HTTP_PORT:-6333}:6333"    # REST
+      - "${QDRANT_GRPC_PORT:-6334}:6334"    # gRPC
+    volumes:
+      - qdrant_data:/qdrant/storage
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:6333/readyz || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - audiomind-net
+
+  # ── Jaeger (all-in-one) ─────────────────────────────────────────────────────
+  # OTel trace collector + UI — http://localhost:16686
+  jaeger:
+    image: jaegertracing/all-in-one:1.65
+    ports:
+      - "${JAEGER_UI_PORT:-16686}:16686"    # Jaeger UI
+      - "4317:4317"                          # OTLP/gRPC
+      - "4318:4318"                          # OTLP/HTTP (← api-gateway target)
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    restart: unless-stopped
+    networks:
+      - audiomind-net
+
+  # ── PostgreSQL (mlops profile) ──────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    profiles: [mlops]
+    environment:
+      POSTGRES_DB: mlflow
+      POSTGRES_USER: mlflow
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-mlflow-dev}"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mlflow -d mlflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - audiomind-net
+
+  # ── MLflow tracking server (mlops profile) ──────────────────────────────────
+  # UI: http://localhost:5001
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.19.0
+    profiles: [mlops]
+    ports:
+      - "${MLFLOW_PORT:-5001}:5000"
+    command: >
+      mlflow server
+      --host 0.0.0.0
+      --port 5000
+      --backend-store-uri postgresql://mlflow:${POSTGRES_PASSWORD:-mlflow-dev}@postgres:5432/mlflow
+      --default-artifact-root /mlflow/artifacts
+    volumes:
+      - mlflow_artifacts:/mlflow/artifacts
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - audiomind-net
+
+  # ── Whisper ASR — CPU (models profile) ─────────────────────────────────────
+  # OpenAI-compatible /asr endpoint — http://localhost:9000/docs
+  # ASR_MODEL options: tiny | base | small | medium (larger = slower on CPU)
+  whisper-asr:
+    image: ahmetoner/whisper-asr-webservice:latest-cpu
+    profiles: [models]
+    ports:
+      - "${WHISPER_PORT:-9000}:9000"
+    environment:
+      ASR_MODEL: "${WHISPER_MODEL:-tiny}"
+      ASR_ENGINE: openai_whisper
+    volumes:
+      - whisper_models:/root/.cache/whisper
+    restart: unless-stopped
+    networks:
+      - audiomind-net
+
+  # ── Ollama — local LLM (models profile) ─────────────────────────────────────
+  # Pull model: docker compose exec ollama ollama pull llama3.2:1b
+  # OpenAI-compatible API: http://localhost:11434
+  ollama:
+    image: ollama/ollama:latest
+    profiles: [models]
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+    networks:
+      - audiomind-net
+
+# ── Networks ────────────────────────────────────────────────────────────────
+networks:
+  audiomind-net:
+    driver: bridge
+
+# ── Volumes ─────────────────────────────────────────────────────────────────
+volumes:
+  redis_data:
+  qdrant_data:
+  postgres_data:
+  mlflow_artifacts:
+  whisper_models:
+  ollama_data:
