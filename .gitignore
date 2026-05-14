@@ -181,6 +181,40 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+# ---------------------------------------------------------------------------
+# MLOps / Infrastructure
+# ---------------------------------------------------------------------------
+
+# Terraform — state files contain secrets, never commit
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+*.tfvars
+!*.tfvars.example
+
+# Helm chart tarballs
+*.tgz
+
+# Kubernetes secrets manifests
+*-secret.yaml
+*-secrets.yaml
+
+# MLflow artifacts
+mlruns/
+mlartifacts/
+
+# Docker
+.dockerignore
+
+# kind / kubeconfig
+kubeconfig*
+.kube/
+
+# Environment files (service-level)
+.env.*
+!.env.example
+
 # PyCharm
 #   JetBrains specific template is maintained in a separate JetBrains.gitignore that can
 #   be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
@@ -216,3 +250,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Local
+BACKLOG.md
