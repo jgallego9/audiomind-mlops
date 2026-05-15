@@ -1,0 +1,15 @@
+apiVersion: v2
+name: mlflow
+description: Wrapper chart – MLflow tracking server for AudioMind MLOps
+type: application
+version: 0.1.0
+appVersion: "3.7.0"
+
+# community-charts/mlflow v1.8.1 wraps MLflow 3.7.0
+# Repo: https://community-charts.github.io/helm-charts
+# Docs: https://artifacthub.io/packages/helm/community-charts/mlflow
+dependencies:
+  - name: mlflow
+    version: "1.8.1"
+    repository: "https://community-charts.github.io/helm-charts"
+    alias: mlflow

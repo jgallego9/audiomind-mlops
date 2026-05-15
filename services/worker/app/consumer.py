@@ -11,6 +11,7 @@ from redis.exceptions import ResponseError
 
 from app.config import Settings
 from app.indexer import index_transcription
+from app.mlflow_logger import log_inference_metrics
 from app.processors.transcribe import mock_transcribe
 
 _STREAM_KEY = "audiomind:jobs"
@@ -64,6 +65,7 @@ async def _process_message(
     await redis.hset(job_key, "status", "processing")  # type: ignore[misc]
 
     start_time = time.monotonic()
+    _elapsed: float = 0.0
     try:
         result = await mock_transcribe(audio_url=audio_url, language=language)
         completed_at = datetime.now(UTC).isoformat()
@@ -77,6 +79,18 @@ async def _process_message(
         )
         logger.info("job_done job_id=%s", job_id)
         JOBS_PROCESSED_TOTAL.inc()
+        _elapsed = time.monotonic() - start_time
+        tokens_per_second: float | None = None
+        token_count = result.get("token_count")
+        if isinstance(token_count, (int, float)) and _elapsed > 0:
+            tokens_per_second = float(token_count) / _elapsed
+        await log_inference_metrics(
+            settings,
+            job_id=job_id,
+            duration_seconds=_elapsed,
+            status="completed",
+            tokens_per_second=tokens_per_second,
+        )
         # Index the transcription for semantic search (best-effort).
         transcript = str(result.get("transcript", ""))
         await index_transcription(
@@ -100,8 +114,15 @@ async def _process_message(
                 "completed_at": datetime.now(UTC).isoformat(),
             },
         )
+        await log_inference_metrics(
+            settings,
+            job_id=job_id,
+            duration_seconds=time.monotonic() - start_time,
+            status="failed",
+            error_type=type(exc).__name__,
+        )
     finally:
-        JOB_DURATION_SECONDS.observe(time.monotonic() - start_time)
+        JOB_DURATION_SECONDS.observe(_elapsed or (time.monotonic() - start_time))
         await redis.xack(_STREAM_KEY, _CONSUMER_GROUP, msg_id)
 
 

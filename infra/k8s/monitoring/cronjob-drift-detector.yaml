@@ -1,0 +1,76 @@
+# cronjob-drift-detector.yaml — Kubernetes CronJob that runs Evidently drift
+# detection every 6 hours and pushes metrics to the Prometheus Push Gateway.
+#
+# The job:
+#   1. Samples recent and reference embedding vectors from Qdrant.
+#   2. Runs Evidently DataDriftPreset (PSI method).
+#   3. Pushes audiomind_embedding_drift_share and
+#      audiomind_embedding_drift_detected to the Prometheus Push Gateway.
+#   4. Exits non-zero (and the Job fails) when dataset drift is detected,
+#      which triggers a Prometheus alert via the PrometheusRule in
+#      prometheusrule-audiomind.yaml.
+#
+# Push Gateway is part of kube-prometheus-stack.  Metrics are scraped from
+# it by the existing prometheus-pushgateway ServiceMonitor.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: audiomind-drift-detector
+  namespace: audiomind
+  labels:
+    app.kubernetes.io/name: audiomind
+    app.kubernetes.io/component: drift-detector
+spec:
+  # Run every 6 hours
+  schedule: "0 */6 * * *"
+  # Keep the last 3 successful and 1 failed job for debugging
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  # If the previous job is still running, skip the new one
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      # Retry up to 2 times on failure before marking the Job as failed
+      backoffLimit: 2
+      # Kill the job after 10 minutes if it has not completed
+      activeDeadlineSeconds: 600
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: audiomind
+            app.kubernetes.io/component: drift-detector
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: audiomind
+          containers:
+            - name: drift-detector
+              image: ghcr.io/jgallego9/audiomind-mlops/drift-detector:latest
+              imagePullPolicy: Always
+              env:
+                - name: DRIFT_PUSHGATEWAY_URL
+                  value: "http://prometheus-pushgateway.monitoring.svc.cluster.local:9091"
+                - name: DRIFT_JOB_NAME
+                  value: "audiomind_drift_detector"
+                - name: DRIFT_QDRANT_URL
+                  value: "http://qdrant.audiomind.svc.cluster.local:6333"
+                - name: DRIFT_QDRANT_COLLECTION
+                  value: "audiomind"
+                - name: DRIFT_QDRANT_SAMPLE_SIZE
+                  value: "500"
+                - name: DRIFT_QDRANT_REFERENCE_SIZE
+                  value: "500"
+                - name: DRIFT_MLFLOW_TRACKING_URI
+                  value: "http://mlflow.mlflow.svc.cluster.local:80"
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 512Mi
+                limits:
+                  cpu: 500m
+                  memory: 1Gi
+              securityContext:
+                allowPrivilegeEscalation: false
+                runAsNonRoot: true
+                runAsUser: 1001
+                capabilities:
+                  drop: ["ALL"]

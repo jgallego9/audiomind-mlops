@@ -1,0 +1,66 @@
+# analysis-template-vllm.yaml — Prometheus-backed AnalysisTemplate for the
+# vLLM canary rollout.
+#
+# Validated against:
+#   https://argoproj.github.io/argo-rollouts/features/analysis/
+#
+# Two metrics:
+#   1. request-success-rate — vLLM HTTP 2xx / total requests >= 99 %
+#   2. p95-latency           — P95 end-to-end latency < 2 s
+#
+# Both use the Prometheus provider.  Prometheus returns vector results;
+# successCondition accesses result[0] to obtain the scalar value.
+# failureLimit: 3 → abort rollout after 3 consecutive failed measurements.
+# initialDelay: 2m → give the canary pods time to receive traffic before
+# the first measurement.
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: vllm-success-rate
+  namespace: audiomind
+spec:
+  args:
+    # Passed by the Rollout's analysis.args block so the Prometheus address can
+    # be overridden without editing this template.
+    - name: prometheus-url
+      value: http://prometheus-operated.monitoring.svc.cluster.local:9090
+
+  metrics:
+    # ── Metric 1: HTTP success rate ───────────────────────────────────────────
+    # Measures the fraction of non-5xx vLLM requests over the last 5 minutes.
+    # Sources: vLLM built-in OpenAI-compatible metrics exposed via
+    # ServiceMonitor servicemonitor-vllm (Phase 4).
+    - name: request-success-rate
+      interval: 5m
+      # Allow 2 min for Prometheus to collect baseline canary metrics.
+      initialDelay: 2m
+      # Prometheus vector → use result[0].
+      # Handle empty results (no traffic yet) as success.
+      successCondition: "len(result) == 0 || result[0] >= 0.99"
+      failureLimit: 3
+      provider:
+        prometheus:
+          address: "{{args.prometheus-url}}"
+          query: |
+            sum(rate(vllm:request_success_total{namespace="audiomind"}[5m]))
+            /
+            sum(rate(vllm:e2e_request_latency_seconds_count{namespace="audiomind"}[5m]))
+
+    # ── Metric 2: P95 end-to-end latency ─────────────────────────────────────
+    # Measures the P95 latency of vLLM requests.  Abort if > 2 s.
+    - name: p95-latency
+      interval: 5m
+      initialDelay: 2m
+      # Allow up to 2 s P95 latency; result is in seconds.
+      successCondition: "len(result) == 0 || result[0] < 2.0"
+      failureLimit: 3
+      provider:
+        prometheus:
+          address: "{{args.prometheus-url}}"
+          query: |
+            histogram_quantile(
+              0.95,
+              sum(
+                rate(vllm:e2e_request_latency_seconds_bucket{namespace="audiomind"}[5m])
+              ) by (le)
+            )

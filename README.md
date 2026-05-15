@@ -416,6 +416,84 @@ Grafana is available at [http://localhost:3000](http://localhost:3000) after `ma
 
 ---
 
+## MLOps Workflow (Phase 5)
+
+### Components
+
+| Component | Purpose | Location |
+|---|---|---|
+| MLflow tracking server | Experiment tracking, model registry, artifact store | `infra/helm/mlflow/` |
+| Argo Rollouts canary | Progressive model delivery (10 % → 50 % → 100 %) | `infra/k8s/argo-rollouts/` |
+| `AnalysisTemplate` | Prometheus-backed automated quality gate | `infra/k8s/argo-rollouts/analysis-template-vllm.yaml` |
+| `scripts/promote-model.sh` | One-command model promotion + canary trigger | `scripts/promote-model.sh` |
+| Drift detector CronJob | Evidently PSI drift detection every 6 h | `services/drift-detector/` + `infra/k8s/monitoring/cronjob-drift-detector.yaml` |
+| MLflow inference logger | Per-job metrics (latency, tokens/s, errors) from worker | `services/worker/app/mlflow_logger.py` |
+
+### Canary deploy — 10 % → 50 % → 100 %
+
+```
+scripts/promote-model.sh
+        │  ① MLflow: model-version → Production
+        │  ② kubectl argo rollouts set image
+        ▼
+  setWeight: 10  →  pause 5 min
+  setWeight: 50  →  pause 10 min  ◄── AnalysisRun starts here
+  setWeight: 100 (full promotion)
+        │
+  Every 5 min (background analysis):
+    vllm:request_success_rate ≥ 99 %  ✓
+    p95 latency < 2 s                 ✓
+    failureLimit: 3 → auto-rollback   ✗
+```
+
+### Model deployment steps
+
+```bash
+# 1 — Register model in MLflow (after training)
+python training/register_model.py --name audiomind-whisper --version 7
+
+# 2 — Build and push Docker image (done by CI, or manually)
+docker build -t ghcr.io/jgallego9/audiomind-mlops/worker:v2.0.0 services/worker/
+docker push ghcr.io/jgallego9/audiomind-mlops/worker:v2.0.0
+
+# 3 — Promote model + start canary rollout
+export MLFLOW_TRACKING_URI=http://mlflow.mlflow.svc.cluster.local:80
+./scripts/promote-model.sh \
+  --model-name audiomind-whisper \
+  --model-version 7 \
+  --image ghcr.io/jgallego9/audiomind-mlops/worker:v2.0.0
+
+# 4 — Watch canary progress
+kubectl argo rollouts get rollout audiomind-vllm -n audiomind --watch
+
+# 5 — Abort if needed (auto-rollback to stable)
+kubectl argo rollouts abort audiomind-vllm -n audiomind
+```
+
+Full runbook: [`docs/model-deploy-workflow.md`](docs/model-deploy-workflow.md)
+
+### MLflow inference evaluation metrics
+
+The worker logs a MLflow run for every completed inference job:
+
+| Metric | Description |
+|---|---|
+| `duration_seconds` | Wall-clock time for the job |
+| `tokens_per_second` | Throughput (when token count is available) |
+| `success` | `1.0` = completed, `0.0` = failed |
+| Tags | `model.name`, `model.version`, `job.id`, `job.status` |
+
+### Drift detection metrics (Prometheus)
+
+| Metric | Description |
+|---|---|
+| `audiomind_embedding_drift_share` | Fraction of drifted embedding dimensions (Evidently PSI) |
+| `audiomind_embedding_drift_detected` | `1` if dataset-level drift threshold crossed |
+
+Alert `EmbeddingDriftDetected` fires when `drift_share > 0.5` for 15 min.
+
+---
+
 ## CI/CD — GitHub Actions + ArgoCD GitOps
 
 [![CI](https://github.com/jgallego9/audiomind-mlops/actions/workflows/ci.yml/badge.svg)](https://github.com/jgallego9/audiomind-mlops/actions/workflows/ci.yml)
@@ -514,6 +592,7 @@ audiomind-mlops/
 │   │   │   ├── values.yaml         # Base values
 │   │   │   └── values-dev.yaml     # kind overlay
 │   │   ├── monitoring/             # kube-prometheus-stack + Loki + Promtail + Jaeger
+│   │   ├── mlflow/                 # (F5) MLflow tracking server wrapper chart
 │   │   ├── gpu-operator/           # NVIDIA GPU Operator
 │   │   ├── keda/                   # KEDA event-driven autoscaler
 │   │   ├── ingress/                # ingress-nginx + cert-manager
@@ -526,9 +605,14 @@ audiomind-mlops/
 │       ├── namespaces/
 │       │   └── audiomind/          # ResourceQuota + LimitRange
 │       ├── argocd/                 # (F3) ApplicationSet, app-of-apps
-│       └── argo-rollouts/          # (F5) Canary Rollout manifests
+│       ├── argo-rollouts/          # (F5) Rollout + AnalysisTemplate (canary vLLM)
+│       └── monitoring/             # (F4) ServiceMonitors, PrometheusRules, Grafana dashboards
+│                                   # (F5) CronJob drift-detector
 ├── scripts/
-│   └── demo.sh                     # End-to-end demo script
+│   ├── demo.sh                     # End-to-end demo script
+│   └── promote-model.sh            # (F5) MLflow promotion + canary trigger
+├── docs/
+│   └── model-deploy-workflow.md    # (F5) Step-by-step model deploy runbook
 ├── services/
 │   ├── api-gateway/                # FastAPI REST service
 │   │   ├── app/
@@ -545,11 +629,19 @@ audiomind-mlops/
 │       ├── app/
 │       │   ├── config.py
 │       │   ├── main.py
-│       │   ├── consumer.py         # Stream consumer loop
+│       │   ├── consumer.py         # Stream consumer loop + MLflow metrics logging
+│       │   ├── mlflow_logger.py    # (F5) Per-job MLflow run logger
 │       │   ├── indexer.py          # Qdrant indexing
 │       │   └── processors/
 │       │       └── transcribe.py   # Mock Whisper STT
 │       ├── tests/
+│       ├── Dockerfile
+│       └── pyproject.toml
+├── services/
+│   └── drift-detector/             # (F5) Evidently drift detection job
+│       ├── app/
+│       │   ├── settings.py
+│       │   └── main.py             # Qdrant sample → Evidently PSI → Pushgateway
 │       ├── Dockerfile
 │       └── pyproject.toml
 └── BACKLOG.md

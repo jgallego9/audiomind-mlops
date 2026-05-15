@@ -10,6 +10,8 @@ dependencies = [
     "qdrant-client[fastembed]>=1.12",
     # Prometheus metrics server
     "prometheus-client>=0.21",
+    # MLflow — inference metrics tracking
+    "mlflow>=3.0",
 ]
 
 [tool.uv]

@@ -1,0 +1,29 @@
+[project]
+name = "audiomind-drift-detector"
+version = "0.1.0"
+description = "Evidently-based data and embedding drift detector for AudioMind"
+requires-python = ">=3.11"
+dependencies = [
+    # Evidently v2 API: Report, DataDriftPreset, Dataset, DataDefinition
+    # Validated from: https://github.com/evidentlyai/evidently README
+    "evidently>=0.5",
+    # Prometheus push gateway client to expose drift metrics
+    "prometheus-client>=0.21",
+    # Data handling
+    "pandas>=2.0",
+    "numpy>=1.26",
+    # MLflow REST API access
+    "mlflow>=3.0",
+    # Redis access for reference data sampling
+    "redis[hiredis]>=5.0",
+    # Qdrant access for embedding snapshots
+    "qdrant-client>=1.12",
+    # Settings
+    "pydantic-settings>=2.6",
+]
+
+[project.scripts]
+detect-drift = "app.main:main"
+
+[tool.uv]
+package = false

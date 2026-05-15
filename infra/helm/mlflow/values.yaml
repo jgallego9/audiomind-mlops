@@ -1,0 +1,96 @@
+# values.yaml — AudioMind MLflow tracking server
+# All keys are under "mlflow:" because this is a wrapper chart; the key maps
+# to the subchart alias declared in Chart.yaml.
+#
+# Validated against community-charts/mlflow v1.8.1 (MLflow 3.7.0).
+# Reference: https://artifacthub.io/packages/helm/community-charts/mlflow
+
+mlflow:
+  replicaCount: 1
+
+  image:
+    repository: burakince/mlflow
+    pullPolicy: IfNotPresent
+    # tag defaults to appVersion (3.7.0)
+
+  # ── Backend store ────────────────────────────────────────────────────────────
+  backendStore:
+    # Run automatic DB migrations on startup (required for first install and
+    # when upgrading MLflow major versions).
+    databaseMigration: true
+    # Wait until Postgres is reachable before starting.
+    databaseConnectionCheck: true
+    postgres:
+      enabled: true
+      # Relies on the Bitnami PostgreSQL sub-dependency enabled below.
+      host: "mlflow-postgresql"
+      port: 5432
+      database: "mlflow"
+      user: "mlflow"
+      # IMPORTANT: override via --set or an ExternalSecret in production.
+      password: "mlflow"
+
+  # ── Artifact store ───────────────────────────────────────────────────────────
+  # Use MinIO (S3-compatible) as the artifact backend.
+  artifactRoot:
+    s3:
+      enabled: true
+      bucket: "mlflow"
+      # IMPORTANT: override via --set or an ExternalSecret in production.
+      awsAccessKeyId: "minioadmin"
+      awsSecretAccessKey: "minioadmin"
+
+  # Point the MLflow S3 client at the in-cluster MinIO instance.
+  extraEnvVars:
+    MLFLOW_S3_ENDPOINT_URL: "http://minio.audiomind.svc.cluster.local:9000"
+
+  # ── Auth ─────────────────────────────────────────────────────────────────────
+  # Disabled for local/staging; enable + set adminPassword for production.
+  auth:
+    enabled: false
+
+  # Opt-out of anonymous usage tracking.
+  telemetry:
+    enabled: false
+
+  # ── Service ──────────────────────────────────────────────────────────────────
+  service:
+    type: ClusterIP
+    port: 80
+    containerPort: 5000
+
+  # ── ServiceMonitor (Prometheus Operator) ─────────────────────────────────────
+  # Scraped by the kube-prometheus-stack release named "kube-prom-stack".
+  serviceMonitor:
+    enabled: true
+    namespace: "monitoring"
+    interval: "30s"
+    timeout: "10s"
+    telemetryPath: "/metrics"
+    # Must match the serviceMonitorSelector labels on the Prometheus CR.
+    labels:
+      release: "kube-prom-stack"
+
+  # ── Resources ────────────────────────────────────────────────────────────────
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  # ── Bitnami PostgreSQL subchart ──────────────────────────────────────────────
+  # Enabled here for development/staging only.  Use an external RDS in
+  # production and set backendStore.postgres.host accordingly.
+  postgresql:
+    enabled: true
+    auth:
+      database: "mlflow"
+      username: "mlflow"
+      # IMPORTANT: change in production.
+      password: "mlflow"
+    primary:
+      persistence:
+        enabled: true
+        size: 5Gi

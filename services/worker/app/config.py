@@ -20,6 +20,12 @@ class Settings(BaseSettings):
     qdrant_collection: str = "transcriptions"
     embedding_model: str = "BAAI/bge-small-en-v1.5"
 
+    # MLflow — inference metrics tracking
+    mlflow_tracking_uri: str = "http://mlflow.mlflow.svc.cluster.local:80"
+    mlflow_model_name: str = "audiomind-whisper"
+    mlflow_model_version: str = "1"
+    mlflow_experiment_name: str = "audiomind-inference"
+
 
 @lru_cache
 def get_settings() -> Settings:
