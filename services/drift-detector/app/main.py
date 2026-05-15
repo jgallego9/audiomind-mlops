@@ -55,8 +55,7 @@ def _sample_vectors(
     )
     if not records:
         raise RuntimeError(
-            f"No vectors found in Qdrant collection '{collection}' "
-            f"at offset={offset}"
+            f"No vectors found in Qdrant collection '{collection}' at offset={offset}"
         )
     vectors = [r.vector for r in records]
     dim = len(vectors[0])
