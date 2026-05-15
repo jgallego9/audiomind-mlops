@@ -44,7 +44,9 @@ def _patch_load_pipelines():
 # ---------------------------------------------------------------------------
 
 
-async def test_list_pipelines_returns_pipeline(_patch_load_pipelines, client: AsyncClient) -> None:
+async def test_list_pipelines_returns_pipeline(
+    _patch_load_pipelines, client: AsyncClient
+) -> None:
     resp = await client.get("/v1/pipelines")
     assert resp.status_code == 200
     body = resp.json()

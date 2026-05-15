@@ -32,7 +32,12 @@ async def test_run_single_step_returns_output() -> None:
         mock_resp = MagicMock()
         mock_resp.json.return_value = {
             "outputs": [
-                {"name": "transcript", "datatype": "BYTES", "shape": [1], "data": ["hello"]}
+                {
+                    "name": "transcript",
+                    "datatype": "BYTES",
+                    "shape": [1],
+                    "data": ["hello"],
+                }
             ]
         }
         mock_resp.raise_for_status = MagicMock()
@@ -72,11 +77,15 @@ async def test_run_passes_previous_output_as_next_input() -> None:
         resp = MagicMock()
         if "step-a" in url:
             resp.json.return_value = {
-                "outputs": [{"name": "mid", "datatype": "BYTES", "shape": [1], "data": ["v"]}]
+                "outputs": [
+                    {"name": "mid", "datatype": "BYTES", "shape": [1], "data": ["v"]}
+                ]
             }
         else:
             resp.json.return_value = {
-                "outputs": [{"name": "final", "datatype": "BYTES", "shape": [1], "data": ["ok"]}]
+                "outputs": [
+                    {"name": "final", "datatype": "BYTES", "shape": [1], "data": ["ok"]}
+                ]
             }
         resp.raise_for_status = MagicMock()
         return resp

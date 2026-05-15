@@ -116,9 +116,7 @@ async def _process_message(
     try:
         msg = PipelineJobMessage.model_validate(fields)
     except ValidationError:
-        logger.exception(
-            "pipeline_message_invalid msg_id=%s fields=%s", msg_id, fields
-        )
+        logger.exception("pipeline_message_invalid msg_id=%s fields=%s", msg_id, fields)
         await redis.xack(stream, _CONSUMER_GROUP, msg_id)
         return
 
@@ -126,9 +124,7 @@ async def _process_message(
     job_key = f"{job_key_prefix}:{job_id}"
     payload: dict[str, Any] = json.loads(msg.payload)
 
-    logger.info(
-        "pipeline_job_start job_id=%s pipeline=%s", job_id, pipeline_name
-    )
+    logger.info("pipeline_job_start job_id=%s pipeline=%s", job_id, pipeline_name)
     await redis.hset(job_key, "status", "processing")  # type: ignore[misc]
 
     try:
@@ -143,9 +139,7 @@ async def _process_message(
             },
         )
         await redis.expire(job_key, job_ttl_seconds)
-        logger.info(
-            "pipeline_job_done job_id=%s pipeline=%s", job_id, pipeline_name
-        )
+        logger.info("pipeline_job_done job_id=%s pipeline=%s", job_id, pipeline_name)
     except Exception as exc:  # noqa: BLE001
         logger.exception(
             "pipeline_job_failed job_id=%s pipeline=%s error=%s",

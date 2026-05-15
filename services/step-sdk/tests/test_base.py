@@ -86,9 +86,7 @@ def test_infer_echoes_input(client: TestClient) -> None:
 
 def test_infer_unknown_model_returns_404(client: TestClient) -> None:
     payload = {
-        "inputs": [
-            {"name": "x", "shape": [1], "datatype": "BYTES", "data": ["y"]}
-        ]
+        "inputs": [{"name": "x", "shape": [1], "datatype": "BYTES", "data": ["y"]}]
     }
     resp = client.post("/v2/models/wrong/infer", json=payload)
     assert resp.status_code == 404
@@ -96,9 +94,7 @@ def test_infer_unknown_model_returns_404(client: TestClient) -> None:
 
 def test_infer_without_id_omits_id_field(client: TestClient) -> None:
     payload = {
-        "inputs": [
-            {"name": "x", "shape": [1], "datatype": "FP32", "data": [1.0]}
-        ]
+        "inputs": [{"name": "x", "shape": [1], "datatype": "FP32", "data": [1.0]}]
     }
     resp = client.post("/v2/models/echo/infer", json=payload)
     assert resp.status_code == 200

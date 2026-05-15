@@ -44,4 +44,3 @@ class PipelineJobMessage(BaseModel):
     pipeline_id: str
     payload: str  # JSON-encoded dict[str, Any]
     user: str
-

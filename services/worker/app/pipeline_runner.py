@@ -64,9 +64,7 @@ class PipelineRunner:
                         )
                         return False
                 except httpx.RequestError:
-                    logger.warning(
-                        "step_unreachable step=%s url=%s", step.id, step.url
-                    )
+                    logger.warning("step_unreachable step=%s url=%s", step.id, step.url)
                     return False
         return True
 
