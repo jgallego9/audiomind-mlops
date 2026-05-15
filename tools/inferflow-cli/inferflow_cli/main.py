@@ -110,7 +110,9 @@ def _load_yaml_file(path: pathlib.Path) -> dict[str, Any]:
         _exit_with_error(f"Invalid YAML in {path}: {exc}")
 
 
-def _default_dirs(repo_root: pathlib.Path) -> tuple[pathlib.Path, pathlib.Path, pathlib.Path]:
+def _default_dirs(
+    repo_root: pathlib.Path,
+) -> tuple[pathlib.Path, pathlib.Path, pathlib.Path]:
     """Return tasks/steps/pipelines directories.
 
     :param repo_root: Repository root.
@@ -205,7 +207,9 @@ def _pipeline_step_defs(repo_root: pathlib.Path, name: str) -> list[dict[str, An
     return list(raw.get("steps", []))
 
 
-def _request_json(method: str, url: str, payload: dict[str, Any] | None = None) -> dict[str, Any]:
+def _request_json(
+    method: str, url: str, payload: dict[str, Any] | None = None
+) -> dict[str, Any]:
     """Issue an HTTP request and parse JSON response.
 
     :param method: HTTP method.
@@ -273,7 +277,9 @@ def _bump_semver(version: str, kind: str) -> str:
 
 
 @app.command()
-def init(non_interactive: bool = typer.Option(False, help="Skip interactive prompts.")) -> None:
+def init(
+    non_interactive: bool = typer.Option(False, help="Skip interactive prompts."),
+) -> None:
     """Initialize or validate inferflow.yaml in the current repository."""
     repo_root = _repo_root()
     config_path = repo_root / "inferflow.yaml"
@@ -388,9 +394,18 @@ def task_new(
     output_name = "output"
 
     if not non_interactive:
-        description = questionary.text("Task description", default=description).ask() or description
-        input_name = questionary.text("Primary input tensor name", default=input_name).ask() or input_name
-        output_name = questionary.text("Primary output tensor name", default=output_name).ask() or output_name
+        description = (
+            questionary.text("Task description", default=description).ask()
+            or description
+        )
+        input_name = (
+            questionary.text("Primary input tensor name", default=input_name).ask()
+            or input_name
+        )
+        output_name = (
+            questionary.text("Primary output tensor name", default=output_name).ask()
+            or output_name
+        )
 
     task_dir.mkdir(parents=True, exist_ok=True)
     schema = {
@@ -479,10 +494,10 @@ def step_new(
     (app_root / "config.py").write_text(
         "from pydantic_settings import BaseSettings, SettingsConfigDict\n\n\n"
         "class Settings(BaseSettings):\n"
-        "    \"\"\"Runtime settings for the scaffolded step.\n\n"
+        '    """Runtime settings for the scaffolded step.\n\n'
         "    :param model_config: Prefix for environment variables.\n"
-        "    \"\"\"\n\n"
-        f"    model_config = SettingsConfigDict(env_prefix=\"{task.upper().replace('-', '_')}_STEP_\")\n",
+        '    """\n\n'
+        f'    model_config = SettingsConfigDict(env_prefix="{task.upper().replace("-", "_")}_STEP_")\n',
         encoding="utf-8",
     )
     (app_root / "step.py").write_text(
@@ -493,30 +508,30 @@ def step_new(
         "if TYPE_CHECKING:\n"
         "    from app.config import Settings\n\n\n"
         f"class {task.title().replace('-', '').replace('_', '')}{implementation.title().replace('-', '').replace('_', '')}Step(BaseStep):\n"
-        "    \"\"\"Scaffolded step implementation.\"\"\"\n\n"
+        '    """Scaffolded step implementation."""\n\n'
         "    def __init__(self, settings: Settings) -> None:\n"
         "        self._settings = settings\n\n"
         "    @property\n"
         "    def name(self) -> str:\n"
-        f"        return \"{step_name}\"\n\n"
+        f'        return "{step_name}"\n\n'
         "    @property\n"
         "    def version(self) -> str:\n"
-        "        return \"1\"\n\n"
+        '        return "1"\n\n'
         "    @property\n"
         "    def task(self) -> str:\n"
-        f"        return \"{task}\"\n\n"
+        f'        return "{task}"\n\n'
         "    @property\n"
         "    def implementation(self) -> str:\n"
-        f"        return \"{implementation}\"\n\n"
+        f'        return "{implementation}"\n\n'
         "    @property\n"
         "    def inputs(self) -> list[MetadataTensor]:\n"
-        f"        return [MetadataTensor(name=\"{input_name}\", datatype=\"BYTES\", shape=[1])]\n\n"
+        f'        return [MetadataTensor(name="{input_name}", datatype="BYTES", shape=[1])]\n\n'
         "    @property\n"
         "    def outputs(self) -> list[MetadataTensor]:\n"
-        f"        return [MetadataTensor(name=\"{output_name}\", datatype=\"BYTES\", shape=[1])]\n\n"
+        f'        return [MetadataTensor(name="{output_name}", datatype="BYTES", shape=[1])]\n\n'
         "    async def predict(self, request: InferRequest) -> InferResponse:\n"
-        "        \"\"\"Implement model inference.\"\"\"\n"
-        "        raise NotImplementedError(\"Implement predict() for this step\")\n",
+        '        """Implement model inference."""\n'
+        '        raise NotImplementedError("Implement predict() for this step")\n',
         encoding="utf-8",
     )
     (app_root / "main.py").write_text(
@@ -526,21 +541,20 @@ def step_new(
         "from app.step import "
         f"{task.title().replace('-', '').replace('_', '')}{implementation.title().replace('-', '').replace('_', '')}Step\n\n\n"
         "def create_app() -> FastAPI:\n"
-        "    \"\"\"Create FastAPI app for this step.\n\n"
+        '    """Create FastAPI app for this step.\n\n'
         "    :returns: FastAPI instance exposing KServe V2 endpoints.\n"
-        "    \"\"\"\n"
+        '    """\n'
         "    settings = Settings()\n"
         "    step = "
         f"{task.title().replace('-', '').replace('_', '')}{implementation.title().replace('-', '').replace('_', '')}Step(settings)\n"
         "    return step.build_app()\n\n\n"
         "app = create_app()\n\n"
-        "if __name__ == \"__main__\":\n"
-        "    uvicorn.run(\"app.main:app\", host=\"0.0.0.0\", port=8080, log_level=\"info\")\n",
+        'if __name__ == "__main__":\n'
+        '    uvicorn.run("app.main:app", host="0.0.0.0", port=8080, log_level="info")\n',
         encoding="utf-8",
     )
     (tests_root / "test_step.py").write_text(
-        "def test_scaffold_placeholder() -> None:\n"
-        "    assert True\n",
+        "def test_scaffold_placeholder() -> None:\n    assert True\n",
         encoding="utf-8",
     )
     (step_root / "VERSION").write_text("0.1.0\n", encoding="utf-8")
@@ -562,14 +576,14 @@ def step_new(
     )
     (step_root / "pyproject.toml").write_text(
         "[project]\n"
-        f"name = \"step-{step_name}\"\n"
-        "version = \"0.1.0\"\n"
-        f"description = \"Inferflow step: {task} via {implementation}\"\n"
-        "requires-python = \">=3.13\"\n"
+        f'name = "step-{step_name}"\n'
+        'version = "0.1.0"\n'
+        f'description = "Inferflow step: {task} via {implementation}"\n'
+        'requires-python = ">=3.13"\n'
         "dependencies = [\n"
-        "  \"inferflow-step-sdk\",\n"
-        "  \"pydantic-settings>=2.0\",\n"
-        "  \"uvicorn[standard]>=0.30\",\n"
+        '  "inferflow-step-sdk",\n'
+        '  "pydantic-settings>=2.0",\n'
+        '  "uvicorn[standard]>=0.30",\n'
         "]\n\n"
         "[tool.uv]\npackage = false\n\n"
         "[tool.uv.sources]\n"
@@ -585,7 +599,7 @@ def step_new(
         "RUN uv pip install --no-cache -r pyproject.toml\n"
         "COPY app/ ./app/\n"
         "EXPOSE 8080\n"
-        "CMD [\"python\", \"-m\", \"app.main\"]\n",
+        'CMD ["python", "-m", "app.main"]\n',
         encoding="utf-8",
     )
 
@@ -676,7 +690,9 @@ def step_push(
 @step_app.command("show")
 def step_show(
     name: str = typer.Argument(..., help="Step name."),
-    url: str | None = typer.Option(None, help="Step URL base (default: inferred host)."),
+    url: str | None = typer.Option(
+        None, help="Step URL base (default: inferred host)."
+    ),
 ) -> None:
     """Fetch live metadata from a running step endpoint.
 
@@ -728,12 +744,16 @@ def pipeline_new(name: str = typer.Argument(..., help="Pipeline name.")) -> None
             {"id": "step-1", "task": "replace-me", "url": "http://replace-me:8000"},
         ],
     }
-    pipeline_path.write_text(yaml.safe_dump(template, sort_keys=False), encoding="utf-8")
+    pipeline_path.write_text(
+        yaml.safe_dump(template, sort_keys=False), encoding="utf-8"
+    )
     console.print(f"[green]Created {pipeline_path}[/green]")
 
 
 @pipeline_app.command("validate")
-def pipeline_validate(name: str = typer.Argument(..., help="Pipeline directory name.")) -> None:
+def pipeline_validate(
+    name: str = typer.Argument(..., help="Pipeline directory name."),
+) -> None:
     """Validate task compatibility across sequential pipeline steps."""
     repo_root = _repo_root()
     steps = _pipeline_step_defs(repo_root, name)
@@ -882,7 +902,9 @@ def pipeline_deploy(
     if target.deploy == "argocd":
         if not target.argocd_app:
             _exit_with_error("argocd_app is required for deploy: argocd")
-        output = _run_command(["argocd", "app", "sync", target.argocd_app], cwd=repo_root)
+        output = _run_command(
+            ["argocd", "app", "sync", target.argocd_app], cwd=repo_root
+        )
         console.print(output)
         return
 
@@ -1004,7 +1026,9 @@ def pipeline_scale(
 def pipeline_rollback(
     name: str = typer.Argument(..., help="Pipeline name (informational)."),
     env: str = typer.Option("dev", help="Target environment key."),
-    revision: int = typer.Option(0, help="Helm revision to roll back to (0 = previous)."),
+    revision: int = typer.Option(
+        0, help="Helm revision to roll back to (0 = previous)."
+    ),
 ) -> None:
     """Rollback Helm release for runtime chart.
 
@@ -1053,7 +1077,9 @@ def models_prefetch(name: str = typer.Argument(..., help="Pipeline name.")) -> N
     repo_root = _repo_root()
     step_defs = _pipeline_step_defs(repo_root, name)
 
-    with Progress(SpinnerColumn(), TextColumn("{task.description}"), transient=True) as progress:
+    with Progress(
+        SpinnerColumn(), TextColumn("{task.description}"), transient=True
+    ) as progress:
         for step in step_defs:
             step_id = str(step.get("id", "step"))
             url = str(step.get("url", "")).rstrip("/")

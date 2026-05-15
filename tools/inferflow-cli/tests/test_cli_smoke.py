@@ -32,7 +32,11 @@ class TestCLISmokeBasic:
             text=True,
         )
         assert result.returncode == 0
-        assert "Inferflow" in result.stdout or "Commands" in result.stdout or len(result.stdout) > 0
+        assert (
+            "Inferflow" in result.stdout
+            or "Commands" in result.stdout
+            or len(result.stdout) > 0
+        )
 
     def test_init_help(self, cli_command: list[str], repo_root: Path) -> None:
         """Verify init command help is available."""
@@ -65,7 +69,9 @@ class TestCLITaskDiscovery:
 class TestCLIPipelineValidation:
     """Pipeline validation commands."""
 
-    def test_pipeline_list_succeeds(self, cli_command: list[str], repo_root: Path) -> None:
+    def test_pipeline_list_succeeds(
+        self, cli_command: list[str], repo_root: Path
+    ) -> None:
         """Verify `inferflow pipeline list` completes without error."""
         result = subprocess.run(
             [*cli_command, "pipeline", "list"],
@@ -77,7 +83,9 @@ class TestCLIPipelineValidation:
         # Expect output with pipeline names
         assert "audio-rag" in result.stdout or "image-search" in result.stdout
 
-    def test_pipeline_validate_existing(self, cli_command: list[str], repo_root: Path) -> None:
+    def test_pipeline_validate_existing(
+        self, cli_command: list[str], repo_root: Path
+    ) -> None:
         """Verify `inferflow pipeline validate <existing>` succeeds."""
         result = subprocess.run(
             [*cli_command, "pipeline", "validate", "image-search"],
@@ -88,7 +96,9 @@ class TestCLIPipelineValidation:
         assert result.returncode == 0
         assert "valid" in result.stdout.lower()
 
-    def test_pipeline_validate_nonexistent(self, cli_command: list[str], repo_root: Path) -> None:
+    def test_pipeline_validate_nonexistent(
+        self, cli_command: list[str], repo_root: Path
+    ) -> None:
         """Verify `inferflow pipeline validate <nonexistent>` fails with clear message."""
         result = subprocess.run(
             [*cli_command, "pipeline", "validate", "nonexistent-pipeline-xyz"],
@@ -105,7 +115,9 @@ class TestCLIPipelineValidation:
 class TestCLIErrorMessages:
     """Error message clarity."""
 
-    def test_task_show_nonexistent_message(self, cli_command: list[str], repo_root: Path) -> None:
+    def test_task_show_nonexistent_message(
+        self, cli_command: list[str], repo_root: Path
+    ) -> None:
         """Verify error message for missing task is actionable."""
         result = subprocess.run(
             [*cli_command, "task", "show", "nonexistent-task"],
@@ -121,7 +133,9 @@ class TestCLIErrorMessages:
 class TestCLIDefaults:
     """Default values and safe modes."""
 
-    def test_init_noninteractive_flag_recognized(self, cli_command: list[str], repo_root: Path) -> None:
+    def test_init_noninteractive_flag_recognized(
+        self, cli_command: list[str], repo_root: Path
+    ) -> None:
         """Verify `inferflow init --non-interactive` flag is recognized."""
         result = subprocess.run(
             [*cli_command, "init", "--help"],
