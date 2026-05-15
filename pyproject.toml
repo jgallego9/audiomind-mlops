@@ -1,5 +1,5 @@
 [project]
-name = "audiomind-mlops"
+name = "inferflow-mlops"
 version = "0.1.0"
 description = "MLOps platform: audio → Whisper STT → LLM analysis → RAG search"
 requires-python = ">=3.13"

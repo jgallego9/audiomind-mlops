@@ -35,7 +35,7 @@ permissions:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ghcr.io/jgallego9/audiomind-mlops
+  IMAGE_PREFIX: ghcr.io/jgallego9/inferflow
   PYTHON_VERSION: "3.13"
 
 # ---------------------------------------------------------------------------
@@ -127,6 +127,7 @@ jobs:
           tags: |
             type=sha,prefix=sha-,format=short
             type=ref,event=branch
+            type=semver,pattern={{version}}
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
 
       - name: Build and push
@@ -195,18 +196,24 @@ jobs:
             https://github.com/mikefarah/yq/releases/download/v4.45.1/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
 
-      - name: Compute short SHA
-        id: sha
-        run: echo "short=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+      - name: Resolve release tag or fallback
+        id: release
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF}" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Bump api-gateway image tag
         run: |
-          yq -i '.apiGateway.image.tag = "sha-${{ steps.sha.outputs.short }}"' \
+          yq -i '.apiGateway.image.tag = "${{ steps.release.outputs.tag }}"' \
             infra/helm/audiomind/values.yaml
 
       - name: Bump worker image tag
         run: |
-          yq -i '.worker.image.tag = "sha-${{ steps.sha.outputs.short }}"' \
+          yq -i '.worker.image.tag = "${{ steps.release.outputs.tag }}"' \
             infra/helm/audiomind/values.yaml
 
       - name: Commit & push
@@ -217,5 +224,5 @@ jobs:
           # Exit cleanly if nothing changed (idempotent).
           git diff --cached --quiet && exit 0
           git commit --no-verify \
-            -m "chore(helm): bump image tags to sha-${{ steps.sha.outputs.short }} [skip ci]"
+            -m "chore(helm): bump image tags to ${{ steps.release.outputs.tag }} [skip ci]"
           git push

@@ -15,9 +15,9 @@ resolution-markers = [
 members = [
     "api-gateway",
     "audiomind-drift-detector",
-    "audiomind-mlops",
     "audiomind-shared",
     "inferflow-cli",
+    "inferflow-mlops",
     "inferflow-step-sdk",
     "step-audio-transcribe-whisper",
     "step-text-embed-fastembed",
@@ -285,49 +285,6 @@ requires-dist = [
     { name = "prometheus-client", specifier = ">=0.21" },
     { name = "pydantic-settings", specifier = ">=2.6" },
     { name = "qdrant-client", specifier = ">=1.12" },
-]
-
-[[package]]
-name = "audiomind-mlops"
-version = "0.1.0"
-source = { virtual = "." }
-
-[package.dev-dependencies]
-dev = [
-    { name = "audiomind-shared" },
-    { name = "fakeredis" },
-    { name = "httpx" },
-    { name = "inferflow-step-sdk" },
-    { name = "mypy" },
-    { name = "pre-commit" },
-    { name = "pydantic" },
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "pytest-cov" },
-    { name = "pytest-mock" },
-    { name = "ruff" },
-    { name = "types-pyyaml" },
-    { name = "yamllint" },
-]
-
-[package.metadata]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "audiomind-shared", editable = "services/shared" },
-    { name = "fakeredis", specifier = ">=2.26" },
-    { name = "httpx", specifier = ">=0.28" },
-    { name = "inferflow-step-sdk", editable = "services/step-sdk" },
-    { name = "mypy", specifier = ">=2.0" },
-    { name = "pre-commit", specifier = ">=4.0" },
-    { name = "pydantic", specifier = ">=2.0" },
-    { name = "pytest", specifier = ">=8.0" },
-    { name = "pytest-asyncio", specifier = ">=0.24" },
-    { name = "pytest-cov", specifier = ">=6.0" },
-    { name = "pytest-mock", specifier = ">=3.14" },
-    { name = "ruff", specifier = ">=0.15" },
-    { name = "types-pyyaml", specifier = ">=6.0" },
-    { name = "yamllint", specifier = ">=1.38.0" },
 ]
 
 [[package]]
@@ -1533,6 +1490,49 @@ requires-dist = [
     { name = "questionary", specifier = ">=2.1" },
     { name = "rich", specifier = ">=13.9" },
     { name = "typer", specifier = ">=0.12" },
+]
+
+[[package]]
+name = "inferflow-mlops"
+version = "0.1.0"
+source = { virtual = "." }
+
+[package.dev-dependencies]
+dev = [
+    { name = "audiomind-shared" },
+    { name = "fakeredis" },
+    { name = "httpx" },
+    { name = "inferflow-step-sdk" },
+    { name = "mypy" },
+    { name = "pre-commit" },
+    { name = "pydantic" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-cov" },
+    { name = "pytest-mock" },
+    { name = "ruff" },
+    { name = "types-pyyaml" },
+    { name = "yamllint" },
+]
+
+[package.metadata]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "audiomind-shared", editable = "services/shared" },
+    { name = "fakeredis", specifier = ">=2.26" },
+    { name = "httpx", specifier = ">=0.28" },
+    { name = "inferflow-step-sdk", editable = "services/step-sdk" },
+    { name = "mypy", specifier = ">=2.0" },
+    { name = "pre-commit", specifier = ">=4.0" },
+    { name = "pydantic", specifier = ">=2.0" },
+    { name = "pytest", specifier = ">=8.0" },
+    { name = "pytest-asyncio", specifier = ">=0.24" },
+    { name = "pytest-cov", specifier = ">=6.0" },
+    { name = "pytest-mock", specifier = ">=3.14" },
+    { name = "ruff", specifier = ">=0.15" },
+    { name = "types-pyyaml", specifier = ">=6.0" },
+    { name = "yamllint", specifier = ">=1.38.0" },
 ]
 
 [[package]]

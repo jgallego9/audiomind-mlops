@@ -1,9 +1,9 @@
 .DEFAULT_GOAL := help
 
-KIND_CLUSTER_NAME   ?= audiomind
+KIND_CLUSTER_NAME   ?= inferflow
 KIND_CONFIG         ?= infra/kind/cluster.yaml
-HELM_RELEASE        ?= audiomind
-HELM_NAMESPACE      ?= audiomind
+HELM_RELEASE        ?= inferflow
+HELM_NAMESPACE      ?= inferflow
 HELM_CHART          ?= infra/helm/audiomind
 HELM_VALUES         ?= $(HELM_CHART)/values-dev.yaml
 
@@ -179,7 +179,7 @@ helm-monitoring-deps:  ## Download monitoring chart dependencies (kube-prometheu
 
 helm-monitoring-install:  ## Install the monitoring stack
 	$(MAKE) helm-monitoring-deps
-	helm upgrade --install audiomind-monitoring $(HELM_MONITORING_CHART) \
+	helm upgrade --install inferflow-monitoring $(HELM_MONITORING_CHART) \
 		--namespace $(HELM_MONITORING_NS) --create-namespace \
 		-f $(HELM_MONITORING_VALUES)
 
@@ -231,11 +231,11 @@ helm-ingress-deps:  ## Download ingress-nginx + cert-manager chart dependencies
 
 helm-ingress-install:  ## Install ingress-nginx and cert-manager
 	$(MAKE) helm-ingress-deps
-	helm upgrade --install audiomind-ingress $(HELM_INGRESS_CHART) \
+	helm upgrade --install inferflow-ingress $(HELM_INGRESS_CHART) \
 		--namespace $(HELM_INGRESS_NS) --create-namespace \
 		-f $(HELM_INGRESS_VALUES)
 	@echo "Waiting for cert-manager webhook..."
-	kubectl wait --for=condition=Available deployment/audiomind-ingress-cert-manager-webhook \
+	kubectl wait --for=condition=Available deployment/inferflow-ingress-cert-manager-webhook \
 		-n $(HELM_INGRESS_NS) --timeout=120s 2>/dev/null || true
 	kubectl apply -f infra/k8s/cert-manager/
 

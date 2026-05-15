@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700" role="img" aria-label="Inferflow 3-layer architecture">
+  <defs>
+    <style>
+      .title { font: 700 34px Verdana, sans-serif; fill: #0f172a; }
+      .layer { fill: #f8fafc; stroke: #94a3b8; stroke-width: 2; rx: 14; }
+      .label { font: 700 24px Verdana, sans-serif; fill: #0f172a; }
+      .body { font: 18px Verdana, sans-serif; fill: #334155; }
+      .arrow { stroke: #0ea5e9; stroke-width: 3; marker-end: url(#arrow); }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#0ea5e9"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="700" fill="#eef2ff"/>
+  <text x="50" y="56" class="title">Inferflow MLOps - Step / Pipeline / Runtime</text>
+
+  <rect x="90" y="100" width="1020" height="160" class="layer"/>
+  <text x="120" y="145" class="label">Step Layer</text>
+  <text x="120" y="182" class="body">Reusable KServe V2 steps in steps/&lt;task&gt;-&lt;impl&gt;/</text>
+  <text x="120" y="214" class="body">Examples: audio-transcribe-whisper, text-embed-fastembed, vision-clip</text>
+
+  <rect x="90" y="290" width="1020" height="160" class="layer"/>
+  <text x="120" y="335" class="label">Pipeline Layer</text>
+  <text x="120" y="372" class="body">Declarative pipelines in pipelines/&lt;name&gt;/pipeline.yaml</text>
+  <text x="120" y="404" class="body">Examples: audio-rag, image-search</text>
+
+  <rect x="90" y="480" width="1020" height="170" class="layer"/>
+  <text x="120" y="525" class="label">Runtime Layer</text>
+  <text x="120" y="562" class="body">api-gateway + worker + Redis Streams + Qdrant + Helm + ArgoCD</text>
+  <text x="120" y="594" class="body">Per-step autoscaling, CI/CD, tracing, and policy checks</text>
+
+  <line x1="600" y1="262" x2="600" y2="286" class="arrow"/>
+  <line x1="600" y1="452" x2="600" y2="476" class="arrow"/>
+</svg>

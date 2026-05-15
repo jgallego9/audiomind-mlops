@@ -1,0 +1,33 @@
+name: Feature request
+description: Propose a new capability or improvement.
+title: "feat: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What user pain does this solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the desired behavior and rough design.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What alternatives were evaluated and why they were rejected?
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact scope
+      description: Runtime, steps, pipelines, docs, or CI?
+      placeholder: runtime, helm, cli

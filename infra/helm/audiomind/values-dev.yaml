@@ -2,9 +2,9 @@
 # values-dev.yaml — kind cluster overlay
 #
 # Usage:
-#   helm install audiomind infra/helm/audiomind \
+#   helm install inferflow infra/helm/audiomind \
 #     -f infra/helm/audiomind/values-dev.yaml \
-#     --namespace audiomind --create-namespace
+#     --namespace inferflow --create-namespace
 # ---------------------------------------------------------------------------
 
 apiGateway:
@@ -38,7 +38,7 @@ qdrant:
 
 # vLLM — disabled in kind dev cluster by default (no GPU available).
 # To test the chart rendering with vLLM:
-#   helm template audiomind infra/helm/audiomind -f values-dev.yaml --set vllm.enabled=true
+#   helm template inferflow infra/helm/audiomind -f values-dev.yaml --set vllm.enabled=true
 vllm:
   enabled: false
   image:

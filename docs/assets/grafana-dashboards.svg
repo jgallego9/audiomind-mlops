@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-label="Grafana dashboards placeholder">
+  <rect width="1200" height="520" fill="#111827"/>
+  <text x="40" y="60" font-family="Verdana, sans-serif" font-size="30" fill="#f8fafc">Grafana dashboards (sample snapshot)</text>
+  <rect x="40" y="90" width="350" height="380" fill="#1f2937" stroke="#374151"/>
+  <rect x="425" y="90" width="350" height="380" fill="#1f2937" stroke="#374151"/>
+  <rect x="810" y="90" width="350" height="380" fill="#1f2937" stroke="#374151"/>
+  <text x="80" y="130" font-family="Verdana, sans-serif" font-size="20" fill="#e5e7eb">GPU Utilization</text>
+  <text x="465" y="130" font-family="Verdana, sans-serif" font-size="20" fill="#e5e7eb">LLM Inference</text>
+  <text x="850" y="130" font-family="Verdana, sans-serif" font-size="20" fill="#e5e7eb">System Overview</text>
+  <text x="40" y="500" font-family="Verdana, sans-serif" font-size="16" fill="#9ca3af">Replace this file with real dashboard screenshots when running the monitoring stack.</text>
+</svg>

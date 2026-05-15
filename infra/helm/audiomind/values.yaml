@@ -14,7 +14,7 @@ imageRegistry: ghcr.io/jgallego9
 # ---------------------------------------------------------------------------
 apiGateway:
   image:
-    repository: ghcr.io/jgallego9/audiomind-api-gateway
+    repository: ghcr.io/jgallego9/inferflow-api-gateway
     tag: sha-b5772f3
     pullPolicy: IfNotPresent
   replicaCount: 2
@@ -56,9 +56,9 @@ apiGateway:
       value: http://jaeger-collector:4318
   # Reference to a pre-existing K8s Secret that contains JWT_SECRET_KEY.
   # Create it once with:
-  #   kubectl create secret generic audiomind-secrets \
+  #   kubectl create secret generic inferflow-secrets \
   #     --from-literal=JWT_SECRET_KEY=<your-32-char-secret>
-  existingSecret: audiomind-secrets
+  existingSecret: inferflow-secrets
   secretKey: JWT_SECRET_KEY
   livenessProbe:
     httpGet:
@@ -80,16 +80,16 @@ apiGateway:
   # Ingress (requires ingress-nginx + cert-manager, F2-8)
   ingress:
     enabled: false
-    host: audiomind.local
+    host: inferflow.local
     tls: false
-    clusterIssuer: audiomind-ca-issuer
+    clusterIssuer: inferflow-ca-issuer
     annotations: {}
 # ---------------------------------------------------------------------------
 # worker
 # ---------------------------------------------------------------------------
 worker:
   image:
-    repository: ghcr.io/jgallego9/audiomind-worker
+    repository: ghcr.io/jgallego9/inferflow-worker
     tag: sha-b5772f3
     pullPolicy: IfNotPresent
   replicaCount: 1
@@ -152,7 +152,7 @@ vllm:
   # HuggingFace token for gated models — read from the same pre-existing Secret
   # used by api-gateway (kubectl create secret generic audiomind-secrets ...).
   hfTokenSecret:
-    name: audiomind-secrets
+    name: inferflow-secrets
     key: HF_TOKEN
   resources:
     requests:

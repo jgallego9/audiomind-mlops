@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700" role="img" aria-label="Inferflow CLI demo snapshot">
+  <rect width="1200" height="700" fill="#0b1220"/>
+  <rect x="24" y="24" width="1152" height="652" rx="12" fill="#111827" stroke="#334155"/>
+  <text x="56" y="72" font-family="monospace" font-size="24" fill="#22d3ee">$ inferflow init</text>
+  <text x="56" y="112" font-family="monospace" font-size="20" fill="#e2e8f0">╭──────────────────────────╮</text>
+  <text x="56" y="140" font-family="monospace" font-size="20" fill="#e2e8f0">│      Inferflow Init      │</text>
+  <text x="56" y="168" font-family="monospace" font-size="20" fill="#e2e8f0">╰──────────────────────────╯</text>
+  <text x="56" y="214" font-family="monospace" font-size="20" fill="#22c55e">Created inferflow.yaml and .env</text>
+  <text x="56" y="264" font-family="monospace" font-size="20" fill="#94a3b8">$ inferflow task list</text>
+  <text x="56" y="304" font-family="monospace" font-size="18" fill="#e2e8f0">audio-transcribe   Transcribes audio content into text</text>
+  <text x="56" y="334" font-family="monospace" font-size="18" fill="#e2e8f0">text-embed         Encodes text into a dense vector embedding</text>
+  <text x="56" y="364" font-family="monospace" font-size="18" fill="#e2e8f0">vision-embedding   Encodes an image into dense vector tensor</text>
+  <text x="56" y="414" font-family="monospace" font-size="20" fill="#94a3b8">$ inferflow pipeline validate image-search</text>
+  <text x="56" y="454" font-family="monospace" font-size="20" fill="#22c55e">Pipeline 'image-search' is valid</text>
+  <text x="56" y="524" font-family="monospace" font-size="18" fill="#facc15">Snapshot generated for README docs.</text>
+</svg>

@@ -489,13 +489,13 @@ Instalar: `make pre-commit-install`. Ejecutar en todos los ficheros: `make pre-c
 
 **Topics (GitHub)**: `mlops` · `inference` · `pipeline-as-code` · `kubernetes` · `helm` · `argocd` · `fastapi` · `redis-streams` · `vllm` · `python` · `docker` · `gitops` · `rag` · `llm`
 
-- [ ] **F8-1** Rename del repositorio y actualización de referencias
+- [x] **F8-1** Rename del repositorio y actualización de referencias
   - Renombrar repo a `inferflow-mlops` y actualizar descripción + topics en GitHub Settings
   - Actualizar todas las referencias a `audiomind` en `values.yaml`, `applicationset.yaml`, namespaces, Helm charts, Makefile, CI workflows y README
   - Actualizar imágenes GHCR: `ghcr.io/jgallego9/inferflow-*`
   - La redirección automática de GitHub mantiene URLs antiguas funcionando; documentar el cambio en `CHANGELOG.md`
 
-- [ ] **F8-2** README — identidad visual y demo rápida
+- [x] **F8-2** README — identidad visual y demo rápida
   - Logo / banner de cabecera (1200×400, dark-mode friendly) generado con Figma o Canva; almacenado en `docs/assets/`
   - GIF animado de demo end-to-end: `scripts/demo.sh` en acción grabado con [`vhs`](https://github.com/charmbracelet/vhs) o `asciinema` → gif
   - Screenshots de los tres Grafana dashboards (GPU utilization, LLM inference, system overview) con datos reales
@@ -503,7 +503,7 @@ Instalar: `make pre-commit-install`. Ejecutar en todos los ficheros: `make pre-c
   - Diagrama de arquitectura de tres capas (Step / Pipeline / Runtime, Fase 7) como imagen SVG en `docs/assets/architecture.svg`
   - Diagrama de canary deploy (10% → 50% → 100%) en `docs/assets/canary-deploy.svg`
 
-- [ ] **F8-3** README — contenido y estructura
+- [x] **F8-3** README — contenido y estructura
   - Sección "Why this project" — elevator pitch de 3 bullets (problema → solución → diferencial competitivo)
   - Sección "Add a pipeline in 3 steps" con fragmento real de `pipeline.yaml` y los comandos de despliegue
   - Tabla "Available Steps": nombre, descripción, input/output schema, versión, badge CI individual
@@ -512,26 +512,26 @@ Instalar: `make pre-commit-install`. Ejecutar en todos los ficheros: `make pre-c
   - Sección "Roadmap" enlazando al GitHub Project board
   - Carpeta `docs/` con guías detalladas: `architecture.md`, `adding-a-pipeline.md`, `adding-a-step.md`, `local-setup.md`
 
-- [ ] **F8-4** Infraestructura de issues y PRs
+- [x] **F8-4** Infraestructura de issues y PRs
   - `.github/ISSUE_TEMPLATE/bug_report.yml` — pasos de reproducción, logs, entorno (OS, k8s version, Python)
   - `.github/ISSUE_TEMPLATE/feature_request.yml` — problema, solución propuesta, alternativas consideradas
   - `.github/ISSUE_TEMPLATE/new_step.yml` — template específico: nombre del step, modelo base, schema input/output, caso de uso
   - `.github/ISSUE_TEMPLATE/config.yml` — deshabilita issues en blanco; redirige preguntas a Discussions
   - `.github/PULL_REQUEST_TEMPLATE.md` — checklist: tipo de cambio, issue relacionado, tests añadidos, docs actualizados, `make ci` pasado
 
-- [ ] **F8-5** Guías de comunidad
+- [x] **F8-5** Guías de comunidad
   - `CONTRIBUTING.md` — fork → branch naming (`feat/`, `fix/`, `step/`) → commit convention → pre-commit setup → PR flow
   - `CODE_OF_CONDUCT.md` — Contributor Covenant v2.1
   - `.github/SECURITY.md` — política de disclosure: reporte privado via GitHub Security Advisories, SLA de respuesta 72h
   - `CHANGELOG.md` — bootstrapeado manualmente con el historial por fases; a partir de F8-7 lo mantiene `release-please` de forma automática
 
-- [ ] **F8-6** GitHub project hygiene
+- [x] **F8-6** GitHub project hygiene
   - Labels: `bug` · `enhancement` · `new-step` · `new-pipeline` · `documentation` · `good first issue` · `help wanted` · `breaking-change` · `performance`; creados con `scripts/setup-labels.sh` usando `gh label create`
   - GitHub Project board (kanban) enlazado al repo: columnas Backlog / In Progress / In Review / Done
   - GitHub Discussions activado: categorías Q&A, Ideas, Show and Tell
   - Añadir sección "Contributing" al README con enlace al label `good first issue` para onboarding de nuevos colaboradores
 
-- [ ] **F8-7** Semantic versioning automático con `release-please`
+- [x] **F8-7** Semantic versioning automático con `release-please`
   - Añadir `.github/workflows/release.yml` con el job `release-please-action` (Google `release-please-action@v4`)
   - Estrategia `simple` con `release-type: python`; `version-file: version.txt` en raíz del repo como fuente de verdad
   - Flujo resultante:
@@ -543,4 +543,6 @@ Instalar: `make pre-commit-install`. Ejecutar en todos los ficheros: `make pre-c
   - El `CHANGELOG.md` de raíz agregará entradas de todos los componentes (runtime + steps); cada step tendrá su propio `CHANGELOG.md` en `steps/<name>/`
   - Añadir entrada en tabla "Decisiones técnicas": `release-please` vs `semantic-release` (motivo: soporte nativo de monorepo con componentes independientes y sin necesidad de npm)
 
-- [ ] **F8-README** Revisión final del README — lectura completa desde perspectiva de recruiter nuevo: todos los assets en su lugar, todos los enlaces verificados, tiempo de lectura ≤ 5 min hasta el primer `docker compose up`
+- [x] **F8-README** Revisión final del README — lectura completa desde perspectiva de recruiter nuevo: todos los assets en su lugar, todos los enlaces verificados, tiempo de lectura ≤ 5 min hasta el primer `docker compose up`
+
+> Nota operativa F8: los cambios de configuración remota de GitHub (rename final del repo, topics, discussions y project board) quedan automatizados en `scripts/setup-repo-hygiene.sh` + `scripts/setup-labels.sh`. En este entorno no está disponible `gh`, por lo que la ejecución remota debe lanzarse desde una máquina con GitHub CLI autenticado.

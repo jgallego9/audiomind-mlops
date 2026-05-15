@@ -1,6 +1,6 @@
 apiVersion: v2
-name: audiomind
-description: AudioMind MLOps Platform — async transcription + RAG search
+name: inferflow
+description: Inferflow MLOps Platform — pipeline-as-code ML inference runtime
 type: application
 version: 0.1.0
 appVersion: "0.1.0"

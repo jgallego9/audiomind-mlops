@@ -4,9 +4,9 @@
 #
 # Usage:
 #   ./scripts/promote-model.sh \
-#       --model-name audiomind-vllm \
+#       --model-name inferflow-vllm \
 #       --model-version 3 \
-#       --image ghcr.io/jgallego9/audiomind-mlops/vllm:sha-abc1234
+#       --image ghcr.io/jgallego9/inferflow/vllm:sha-abc1234
 #
 # Required tools:
 #   - curl (for MLflow REST API)
@@ -23,8 +23,8 @@ set -euo pipefail
 
 # ── Defaults ────────────────────────────────────────────────────────────────
 MLFLOW_TRACKING_URI="${MLFLOW_TRACKING_URI:-http://localhost:5000}"
-ROLLOUT_NAMESPACE="${ROLLOUT_NAMESPACE:-audiomind}"
-ROLLOUT_NAME="${ROLLOUT_NAME:-audiomind-vllm}"
+ROLLOUT_NAMESPACE="${ROLLOUT_NAMESPACE:-inferflow}"
+ROLLOUT_NAME="${ROLLOUT_NAME:-inferflow-vllm}"
 CONTAINER_NAME="${CONTAINER_NAME:-vllm}"
 
 # ── Argument parsing ─────────────────────────────────────────────────────────
