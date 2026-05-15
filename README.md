@@ -85,17 +85,20 @@ Task schemas live in `tasks/<task>/schema.json`.
 
 ## Inferflow CLI
 
-Current command set:
+Current command groups:
 
 ```text
 inferflow init [--non-interactive]
 
-inferflow task list
-inferflow step list
+inferflow task list|show|new
+inferflow step list|new|test|build|push|show
 
-inferflow pipeline list
-inferflow pipeline validate <pipeline>
+inferflow pipeline list|new|validate|dev|run|deploy|status|logs|scale|rollback|metrics
+inferflow models prefetch|status|clear
+inferflow job status|result
 ```
+
+Tip: run `inferflow <group> --help` for command-specific flags and examples.
 
 Install globally:
 
@@ -171,4 +174,9 @@ See [CHANGELOG.md](CHANGELOG.md).
 - [docs/adding-a-pipeline.md](docs/adding-a-pipeline.md)
 - [docs/adding-a-step.md](docs/adding-a-step.md)
 - [docs/local-setup.md](docs/local-setup.md)
+- [docs/quickstart.md](docs/quickstart.md)
+- [docs/engineering-audit.md](docs/engineering-audit.md)
+- [docs/architecture-benchmark.md](docs/architecture-benchmark.md)
+- [docs/repo-structure.md](docs/repo-structure.md)
+- [docs/final-quality-gate.md](docs/final-quality-gate.md)
 - [docs/github-manual-operations.md](docs/github-manual-operations.md)

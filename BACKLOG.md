@@ -559,6 +559,17 @@ Instalar: `make pre-commit-install`. Ejecutar en todos los ficheros: `make pre-c
 - Criterio de aceptación binario: o pasa la evidencia, o la tarea no está cerrada.
 - Optimización para onboarding: el usuario nuevo debe ejecutar una demo funcional en minutos y entender la estructura sin leer todo el código.
 
+#### Avance inicial (2026-05-15)
+
+- Entregados documentos base de la fase:
+  - `docs/engineering-audit.md`
+  - `docs/architecture-benchmark.md`
+  - `docs/repo-structure.md`
+  - `docs/quickstart.md`
+  - `docs/final-quality-gate.md`
+- README actualizado para reflejar la superficie real de la CLI y enlazar la documentación F9.
+- Estado de cierre F9: en progreso (pendiente ejecución en entorno limpio y resolución/diferimiento formal de hallazgos).
+
 - [ ] **F9-1** Auditoría de implementación end-to-end (código + infra + DX)
   - Revisar de forma sistemática runtime (`services/`), step SDK (`services/step-sdk/`), steps (`steps/`), pipelines (`pipelines/`) e infra (`infra/`)
   - Detectar deuda técnica real: duplicación, complejidad accidental, acoplamientos innecesarios, defaults peligrosos y rutas de error no cubiertas

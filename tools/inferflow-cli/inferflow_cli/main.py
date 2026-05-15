@@ -817,9 +817,6 @@ def pipeline_run(
             response = None
             continue
 
-    if response is None and name == "audio-rag":
-        response = _request_json("POST", f"{api_url}/transcribe", payload)
-
     if response is None:
         _exit_with_error("Unable to start pipeline run on available endpoints")
 
