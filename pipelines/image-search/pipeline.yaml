@@ -6,7 +6,7 @@ trigger:
   stream: "pipelines:image-search:jobs"
 steps:
   - id: embed
-    task: image-embed
+    task: vision-embedding
     url: "http://vision-clip:8000"
   - id: search
     task: vector-search

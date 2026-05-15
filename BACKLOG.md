@@ -317,7 +317,7 @@ Instalar: `make pre-commit-install`. Ejecutar en todos los ficheros: `make pre-c
 
 - [x] **F7-6** CI por step — `steps/<name>/VERSION` como fuente de verdad del tag; GitHub Actions `step-ci.yml` con path filter: build + test + trivy scan + push a GHCR únicamente para los steps cuyos ficheros cambiaron en el PR; matriz dinámica generada con `git diff --name-only` para no buildear steps no modificados
 
-- [ ] **F7-7** `inferflow` CLI — herramienta de developer experience dedicada, moderna y visualmente cuidada:
+- [x] **F7-7** `inferflow` CLI — herramienta de developer experience dedicada, moderna y visualmente cuidada:
   > **Por qué no `make`**: Make no tiene discoverabilidad real, no hace tab-completion, no valida argumentos, es difícil en Windows y no permite prompts interactivos. Las herramientas del ecosistema ML más exitosas (BentoML, Modal, Replicate/Cog, ZenML) usan CLI dedicadas por la misma razón. `make` se conserva únicamente para targets de CI.
 
   **Stack técnico** — validado contra referentes directos del ecosistema ML:
@@ -427,7 +427,7 @@ Instalar: `make pre-commit-install`. Ejecutar en todos los ficheros: `make pre-c
   - `GET /v1/pipelines/{id}/schema` — schema de input del pipeline
   - `GET /v1/pipelines/{id}/status` — estado de cada step en tiempo real
 
-- [ ] **F7-README** Actualizar README: flujo de setup en **2 pasos** (`git clone` + `inferflow init`, sin edición manual de ficheros); flujo completo de 5 etapas (setup → demo → custom pipeline → nuevo step → deploy) usando únicamente comandos `inferflow`; tabla de tareas built-in con schemas I/O; diagrama de arquitectura de tres capas (step / pipeline / runtime); tabla de steps disponibles con tarea, impl, versión y env vars clave; sección de instalación de la CLI (`uv tool install`); captura o GIF del output visual de la CLI
+- [x] **F7-README** Actualizar README: flujo de setup en **2 pasos** (`git clone` + `inferflow init`, sin edición manual de ficheros); flujo completo de 5 etapas (setup → demo → custom pipeline → nuevo step → deploy) usando únicamente comandos `inferflow`; tabla de tareas built-in con schemas I/O; diagrama de arquitectura de tres capas (step / pipeline / runtime); tabla de steps disponibles con tarea, impl, versión y env vars clave; sección de instalación de la CLI (`uv tool install`); captura o GIF del output visual de la CLI
 
 ---
 

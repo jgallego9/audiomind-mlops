@@ -11,7 +11,7 @@ dependencies = []
 package = false
 
 [tool.uv.workspace]
-members = ["services/*", "steps/*"]
+members = ["services/*", "steps/*", "tools/*"]
 
 [tool.uv.sources]
 audiomind-shared = { workspace = true }

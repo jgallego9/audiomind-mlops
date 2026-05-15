@@ -65,7 +65,7 @@ class VisionClipStep(BaseStep):
     @property
     def task(self) -> str:
         """Return the inferflow task name."""
-        return "image-embed"
+        return "vision-embedding"
 
     @property
     def implementation(self) -> str:
@@ -79,8 +79,8 @@ class VisionClipStep(BaseStep):
 
     @property
     def outputs(self) -> list[MetadataTensor]:
-        """Return output tensor descriptors from the image-embed task schema."""
-        return [MetadataTensor(name="embedding", datatype="FP32", shape=[-1])]
+        """Return output tensor descriptors from the vision-embedding schema."""
+        return [MetadataTensor(name="vector", datatype="FP32", shape=[-1])]
 
     async def predict(self, request: InferRequest) -> InferResponse:
         """Generate an image embedding from the incoming request.
@@ -96,7 +96,7 @@ class VisionClipStep(BaseStep):
             model_name=self.name,
             outputs=[
                 Tensor(
-                    name="embedding",
+                    name="vector",
                     datatype="FP32",
                     shape=[len(embedding)],
                     data=embedding,

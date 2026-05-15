@@ -1,0 +1,22 @@
+{
+  "task": "vision-embedding",
+  "version": "1.0",
+  "description": "Encodes an image into a dense vector tensor for vector search/indexing",
+  "inputs": [
+    {
+      "name": "image_url",
+      "datatype": "BYTES",
+      "shape": [1],
+      "description": "URL of the image to embed",
+      "required": true
+    }
+  ],
+  "outputs": [
+    {
+      "name": "vector",
+      "datatype": "FP32",
+      "shape": [-1],
+      "description": "Dense vector representation of the image"
+    }
+  ]
+}

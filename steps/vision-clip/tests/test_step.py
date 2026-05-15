@@ -20,7 +20,7 @@ def test_step_name(step) -> None:
 
 
 def test_step_task(step) -> None:
-    assert step.task == "image-embed"
+    assert step.task == "vision-embedding"
 
 
 def test_step_implementation(step) -> None:
@@ -53,7 +53,7 @@ async def test_predict_returns_embedding(
 
     assert len(response.outputs) == 1
     tensor = response.outputs[0]
-    assert tensor.name == "embedding"
+    assert tensor.name == "vector"
     assert tensor.datatype == "FP32"
     assert tensor.shape == [3]
     assert abs(tensor.data[0] - 0.9) < 1e-5
@@ -84,7 +84,7 @@ def test_v2_infer_endpoint(client: TestClient) -> None:
     resp = client.post("/v2/models/vision-clip/infer", json=payload)
     assert resp.status_code == 200
     outputs = resp.json()["outputs"]
-    assert outputs[0]["name"] == "embedding"
+    assert outputs[0]["name"] == "vector"
     assert outputs[0]["datatype"] == "FP32"
 
 
@@ -99,9 +99,9 @@ def test_model_metadata(client: TestClient) -> None:
     assert resp.status_code == 200
     data = resp.json()
     assert data["name"] == "vision-clip"
-    assert data["task"] == "image-embed"
+    assert data["task"] == "vision-embedding"
     assert any(t["name"] == "image_url" for t in data["inputs"])
-    assert any(t["name"] == "embedding" for t in data["outputs"])
+    assert any(t["name"] == "vector" for t in data["outputs"])
 
 
 def test_create_app_returns_fastapi() -> None:

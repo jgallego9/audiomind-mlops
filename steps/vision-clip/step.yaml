@@ -1,6 +1,6 @@
 name: vision-clip
 version: "1"
-task: image-embed
+task: vision-embedding
 description: Encodes an image URL into a dense embedding vector using a CLIP-like model
 port: 8080
 
@@ -12,7 +12,7 @@ inputs:
     required: true
 
 outputs:
-  - name: embedding
+  - name: vector
     datatype: FP32
     shape: [-1]
     description: "Dense embedding vector (dimension depends on the model)"
