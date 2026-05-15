@@ -67,33 +67,32 @@ for cmd in curl jq kubectl; do
     }
 done
 
-# ── Step 1: Transition model version to Production in MLflow ─────────────────
-echo "==> [1/3] Transitioning MLflow model '${MODEL_NAME}' v${MODEL_VERSION} to Production …"
+# ── Step 1: Set MLflow alias 'champion' on the requested model version ────────
+# MLflow 3.x deprecates lifecycle stages in favour of registered-model aliases.
+# API: POST /api/2.0/mlflow/registered-models/alias
+# Ref: https://mlflow.org/docs/latest/api_reference/rest-api.html#set-registered-model-alias
+echo "==> [1/3] Setting MLflow alias 'champion' on '${MODEL_NAME}' v${MODEL_VERSION} …"
 
 MLFLOW_API="${MLFLOW_TRACKING_URI}/api/2.0/mlflow"
 
-# First, confirm the version exists and log its current stage.
-VERSION_INFO=$(
-    curl --fail --silent \
-        "${MLFLOW_API}/model-versions/get?name=${MODEL_NAME}&version=${MODEL_VERSION}"
-)
-CURRENT_STAGE=$(echo "$VERSION_INFO" | jq -r '.model_version.current_stage')
-echo "    Current stage: ${CURRENT_STAGE}"
+# Confirm the version exists and is accessible.
+curl --fail --silent --output /dev/null \
+    "${MLFLOW_API}/model-versions/get?name=${MODEL_NAME}&version=${MODEL_VERSION}"
 
-# Transition to Production.
-TRANSITION_PAYLOAD=$(jq -n \
+# Set (or update) the 'champion' alias to point at the requested version.
+ALIAS_PAYLOAD=$(jq -n \
     --arg name    "$MODEL_NAME" \
+    --arg alias   "champion" \
     --arg version "$MODEL_VERSION" \
-    --arg stage   "Production" \
-    '{name: $name, version: $version, stage: $stage, archive_existing_versions: true}')
+    '{name: $name, alias: $alias, version: $version}')
 
 curl --fail --silent --output /dev/null \
     --request POST \
     --header "Content-Type: application/json" \
-    --data "$TRANSITION_PAYLOAD" \
-    "${MLFLOW_API}/model-versions/transition-stage"
+    --data "$ALIAS_PAYLOAD" \
+    "${MLFLOW_API}/registered-models/alias"
 
-echo "    Model promoted to Production."
+echo "    Alias 'champion' set to version ${MODEL_VERSION}."
 
 # ── Step 2: Trigger Argo Rollouts canary ────────────────────────────────────
 echo "==> [2/3] Updating Argo Rollout '${ROLLOUT_NAME}' image to '${NEW_IMAGE}' …"
@@ -117,7 +116,7 @@ cat <<EOF
 
 Promotion initiated.
 
-  Model    : ${MODEL_NAME} v${MODEL_VERSION} → Production
+  Model    : ${MODEL_NAME} v${MODEL_VERSION} → alias 'champion'
   Image    : ${NEW_IMAGE}
   Rollout  : ${ROLLOUT_NAMESPACE}/${ROLLOUT_NAME}
 

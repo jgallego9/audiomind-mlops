@@ -12,10 +12,6 @@ dependencies = [
     # Data handling
     "pandas>=2.0",
     "numpy>=1.26",
-    # MLflow REST API access
-    "mlflow>=3.0",
-    # Redis access for reference data sampling
-    "redis[hiredis]>=5.0",
     # Qdrant access for embedding snapshots
     "qdrant-client>=1.12",
     # Settings

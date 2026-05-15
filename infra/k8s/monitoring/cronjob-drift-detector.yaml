@@ -59,8 +59,6 @@ spec:
                   value: "500"
                 - name: DRIFT_QDRANT_REFERENCE_SIZE
                   value: "500"
-                - name: DRIFT_MLFLOW_TRACKING_URI
-                  value: "http://mlflow.mlflow.svc.cluster.local:80"
               resources:
                 requests:
                   cpu: 100m

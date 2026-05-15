@@ -16,7 +16,6 @@ import logging
 import sys
 from typing import Any
 
-import numpy as np
 import pandas as pd
 from evidently import Report
 from evidently.presets import DataDriftPreset
@@ -32,18 +31,23 @@ def _sample_vectors(
     client: QdrantClient,
     collection: str,
     limit: int,
-    offset: int = 0,
-) -> pd.DataFrame:
+    offset: int | None = None,
+) -> tuple[pd.DataFrame, int | None]:
     """Scroll Qdrant and return a DataFrame of embedding dimensions.
+
+    ``offset`` is a Qdrant ``PointId`` cursor returned by a previous scroll
+    call ("skip points with IDs less than this value"), **not** a page-level
+    integer offset.  Pass ``None`` to start from the first point.
 
     :param client: Qdrant client instance.
     :param collection: Collection name.
     :param limit: Maximum number of vectors to fetch.
-    :param offset: Scroll offset (0 = latest).
-    :returns: DataFrame with one column per embedding dimension.
+    :param offset: PointId cursor from a previous scroll, or ``None``.
+    :returns: Tuple of (DataFrame with one column per embedding dimension,
+        next-page cursor for chaining a subsequent scroll).
     :raises RuntimeError: If no vectors are found.
     """
-    records, _ = client.scroll(
+    records, next_offset = client.scroll(
         collection_name=collection,
         limit=limit,
         offset=offset,
@@ -51,12 +55,13 @@ def _sample_vectors(
     )
     if not records:
         raise RuntimeError(
-            f"No vectors found in Qdrant collection '{collection}' at offset={offset}"
+            f"No vectors found in Qdrant collection '{collection}' "
+            f"at offset={offset}"
         )
     vectors = [r.vector for r in records]
     dim = len(vectors[0])
     columns = [f"dim_{i}" for i in range(dim)]
-    return pd.DataFrame(vectors, columns=columns)
+    return pd.DataFrame(vectors, columns=columns), next_offset
 
 
 def _run_drift_report(
@@ -149,20 +154,21 @@ def main() -> None:
 
     client = QdrantClient(url=settings.qdrant_url)
 
-    # Current window: most recent N vectors
-    current_df = _sample_vectors(
+    # Current window: most recent N vectors (start from the beginning of
+    # the collection; Qdrant returns points sorted by ID ascending).
+    current_df, next_offset = _sample_vectors(
         client,
         settings.qdrant_collection,
         limit=settings.qdrant_sample_size,
-        offset=0,
     )
 
-    # Reference window: older N vectors (offset by sample_size)
-    reference_df = _sample_vectors(
+    # Reference window: the next N vectors using the cursor returned above.
+    # Using cursor-based pagination avoids assuming sequential integer IDs.
+    reference_df, _ = _sample_vectors(
         client,
         settings.qdrant_collection,
         limit=settings.qdrant_reference_size,
-        offset=settings.qdrant_sample_size,
+        offset=next_offset,
     )
 
     logger.info(
