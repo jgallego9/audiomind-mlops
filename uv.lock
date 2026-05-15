@@ -22,6 +22,7 @@ members = [
     "step-text-embed-fastembed",
     "step-vector-index-qdrant",
     "step-vector-search-qdrant",
+    "step-vision-clip",
     "worker",
 ]
 
@@ -3595,6 +3596,25 @@ requires-dist = [
     { name = "inferflow-step-sdk", editable = "services/step-sdk" },
     { name = "pydantic-settings", specifier = ">=2.0" },
     { name = "qdrant-client", specifier = ">=1.12" },
+    { name = "uvicorn", extras = ["standard"], specifier = ">=0.30" },
+]
+
+[[package]]
+name = "step-vision-clip"
+version = "0.1.0"
+source = { virtual = "steps/vision-clip" }
+dependencies = [
+    { name = "fastembed" },
+    { name = "inferflow-step-sdk" },
+    { name = "pydantic-settings" },
+    { name = "uvicorn", extra = ["standard"] },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "fastembed", specifier = ">=0.4" },
+    { name = "inferflow-step-sdk", editable = "services/step-sdk" },
+    { name = "pydantic-settings", specifier = ">=2.0" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.30" },
 ]
 

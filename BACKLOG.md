@@ -313,7 +313,7 @@ Instalar: `make pre-commit-install`. Ejecutar en todos los ficheros: `make pre-c
   - Steps con `modelVolume` montan un PVC compartido (`models-cache`) para evitar descargar el mismo modelo en cada pod y en cada restart
   - Añadir un pipeline nuevo = añadir una entrada en `values.yaml` + el `pipeline.yaml`; cero cambios en templates
 
-- [ ] **F7-5** Demo de segundo pipeline — `pipelines/image-search/`: Image→CLIP→Qdrant, sin modificar runtime ni templates Helm. Valida que la plataforma es realmente genérica: el único código nuevo son `steps/vision-clip/` (nueva tarea: vision-embedding) y `pipelines/image-search/pipeline.yaml`; `step-vector-index-qdrant` y `step-vector-search-qdrant` se reutilizan sin cambios
+- [x] **F7-5** Demo de segundo pipeline — `pipelines/image-search/`: Image→CLIP→Qdrant, sin modificar runtime ni templates Helm. Valida que la plataforma es realmente genérica: el único código nuevo son `steps/vision-clip/` (nueva tarea: vision-embedding) y `pipelines/image-search/pipeline.yaml`; `step-vector-index-qdrant` y `step-vector-search-qdrant` se reutilizan sin cambios
 
 - [ ] **F7-6** CI por step — `steps/<name>/VERSION` como fuente de verdad del tag; GitHub Actions `step-ci.yml` con path filter: build + test + trivy scan + push a GHCR únicamente para los steps cuyos ficheros cambiaron en el PR; matriz dinámica generada con `git diff --name-only` para no buildear steps no modificados
 

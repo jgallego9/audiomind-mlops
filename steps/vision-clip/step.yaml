@@ -1,0 +1,22 @@
+name: vision-clip
+version: "1"
+task: image-embed
+description: Encodes an image URL into a dense embedding vector using a CLIP-like model
+port: 8080
+
+inputs:
+  - name: image_url
+    datatype: BYTES
+    shape: [1]
+    description: "Image URL to encode"
+    required: true
+
+outputs:
+  - name: embedding
+    datatype: FP32
+    shape: [-1]
+    description: "Dense embedding vector (dimension depends on the model)"
+
+env:
+  VISION_STEP_VISION_MODEL: "Qdrant/resnet50-onnx"
+  VISION_STEP_MODEL_CACHE_DIR: "/models"

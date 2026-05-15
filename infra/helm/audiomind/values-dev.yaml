@@ -84,3 +84,13 @@ pipelines:
       search:
         image: "ghcr.io/jgallego9/step-vector-search-qdrant:latest"
         imagePullPolicy: Never
+  image-search:
+    enabled: true
+    steps:
+      embed:
+        image: "ghcr.io/jgallego9/step-vision-clip:latest"
+        replicas: 1
+        imagePullPolicy: Never
+      search:
+        image: "ghcr.io/jgallego9/step-vector-search-qdrant:latest"
+        imagePullPolicy: Never

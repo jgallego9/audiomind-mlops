@@ -1,0 +1,13 @@
+name: image-search
+version: "1.0"
+description: "Image search pipeline: image URL -> CLIP embedding -> Qdrant vector search"
+trigger:
+  type: redis-stream
+  stream: "pipelines:image-search:jobs"
+steps:
+  - id: embed
+    task: image-embed
+    url: "http://vision-clip:8000"
+  - id: search
+    task: vector-search
+    url: "http://vector-search-qdrant:8000"
