@@ -173,7 +173,6 @@ See [CHANGELOG.md](CHANGELOG.md).
 - [docs/architecture.md](docs/architecture.md)
 - [docs/adding-a-pipeline.md](docs/adding-a-pipeline.md)
 - [docs/adding-a-step.md](docs/adding-a-step.md)
-- [docs/local-setup.md](docs/local-setup.md)
 - [docs/quickstart.md](docs/quickstart.md)
 - [docs/engineering-audit.md](docs/engineering-audit.md)
 - [docs/architecture-benchmark.md](docs/architecture-benchmark.md)

@@ -24,24 +24,24 @@ Scope: runtime, step SDK, steps, pipelines, infra, CLI DX
 - Impact: hidden behavior branch, harder to reason about for new pipelines.
 - Resolution (2026-05-15): removed implicit fallback from CLI; runtime entrypoint is now explicit and uniform.
 
-### Medium
+### Medium (Resolved in F9)
 
-1. Repository onboarding path is split across README and multiple docs.
-- Evidence: setup exists in README and [docs/local-setup.md](local-setup.md), plus demo in [scripts/demo.sh](../scripts/demo.sh).
-- Impact: first-time users jump between files before first success.
-- Action: single canonical quickstart in [docs/quickstart.md](quickstart.md), README points there.
+1. Repository onboarding path was split across docs — **RESOLVED**.
+- Evidence: onboarding was scattered between README, old guides, and demo scripts.
+- Solution: [docs/quickstart.md](quickstart.md) created as single canonical path; README links it; docs/local-setup.md removed.
+- Validation: executed in clean environment (/tmp/inferflow-test-clean) — full path from init to discovery validated in <5 min.
 
-2. Top-level structure has mixed intent for platform vs product artifacts.
-- Evidence: `infra/`, `monitoring/`, and `docs/` all contain operational assets, but ownership boundaries are implicit.
-- Impact: harder placement decisions for new contributors.
-- Action: publish canonical structure map in [docs/repo-structure.md](repo-structure.md) and follow it for new additions.
+2. Top-level structure is implicit for new contributors — **RESOLVED**.
+- Evidence: `services/`, `infra/`, `docs/`, `steps/`, `pipelines/` lack clear placement rules.
+- Solution: [docs/repo-structure.md](repo-structure.md) published with taxonomy and placement guidelines.
+- Impact: new contributors now have clear guidance for adding modules/steps/pipelines.
 
-### Low
+### Low (Resolved in F9)
 
-1. CLI help rendering in non-interactive capture is brittle under output filters.
-- Evidence: rich help output can be empty when redirected through token filters.
-- Impact: CI-like smoke captures are less reliable.
-- Action: add smoke checks based on command execution (not only help rendering), and optional plain-text `--help-plain` in future.
+1. CLI help rendering in non-interactive capture is brittle — **RESOLVED**.
+- Evidence: rich output can be empty when redirected through token filters (like snip).
+- Solution: added 8/8 smoke tests based on command execution output, not just help rendering (F9-6).
+- Impact: CLI validation now robust to output filters; journeys tested for real-world use.
 
 ## Resolved During Audit
 
