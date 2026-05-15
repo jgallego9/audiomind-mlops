@@ -1,0 +1,13 @@
+# Copy to terraform.tfvars and fill in your values.
+# terraform.tfvars is excluded from git — never commit secrets.
+
+cluster_name         = "audiomind"
+kubernetes_version   = "1.32.0"
+node_count           = 2
+
+# IP range inside the Docker kind bridge network.
+# Run: docker network inspect kind | grep Subnet
+# Then pick a range inside that CIDR that won't overlap with containers.
+metallb_address_pool  = "172.18.0.200-172.18.0.250"
+
+metallb_chart_version = "0.14.9"

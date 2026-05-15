@@ -571,6 +571,55 @@ No changes to the ApplicationSet controller or the CI pipeline are required.
 
 ---
 
+## Infrastructure as Code (Terraform)
+
+The `infra/terraform/` directory contains a cloud-agnostic Terraform layout with a shared interface module and three concrete environments.
+
+### Environments
+
+| Environment | Provider | Cluster | Extras |
+|-------------|----------|---------|--------|
+| `envs/local` | [tehcyx/kind ~> 0.11](https://registry.terraform.io/providers/tehcyx/kind/latest) | kind (1.32.0) | MetalLB LoadBalancer |
+| `envs/aws` | [terraform-aws-modules/eks ~> 21.0](https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/latest) | EKS 1.33 + VPC | ECR with lifecycle policies, IRSA |
+| `envs/gcp` | [terraform-google-modules/kubernetes-engine ~> 44.1](https://registry.terraform.io/modules/terraform-google-modules/kubernetes-engine/google/latest) | GKE (REGULAR channel) | Workload Identity, Artifact Registry |
+
+### Directory layout
+
+```
+infra/terraform/
+├── modules/
+│   └── k8s-cluster/           # Cloud-agnostic interface (variables + validation + outputs)
+└── envs/
+    ├── local/                 # kind + MetalLB
+    ├── aws/                   # EKS + VPC + ECR
+    └── gcp/                   # GKE + Artifact Registry
+```
+
+### Multi-cloud quickstart
+
+```bash
+# 1. Choose your environment (local | aws | gcp)
+ENV=local   # or aws / gcp
+
+# 2. Copy and edit the example vars file
+cp infra/terraform/envs/$ENV/terraform.tfvars.example \
+   infra/terraform/envs/$ENV/terraform.tfvars
+# Edit the file with your values
+
+# 3. Init, plan, apply via Makefile
+make terraform-init-$ENV
+make terraform-plan-$ENV   # skip for local env
+make terraform-apply-$ENV
+```
+
+> **GPU nodes** — both `envs/aws` and `envs/gcp` support GPU node groups.  
+> Set `gpu_node_count >= 1` in your `terraform.tfvars` to enable them. GPU nodes are tainted `nvidia.com/gpu=true:NoSchedule`.
+>
+> **GCP deletion** — `deletion_protection` defaults to `true`.  
+> Set `deletion_protection = false` in your tfvars before running `terraform destroy`.
+
+---
+
 ## Project Structure
 
 ```

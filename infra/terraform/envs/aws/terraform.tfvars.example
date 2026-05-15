@@ -1,0 +1,19 @@
+# Copy to terraform.tfvars and fill in your values.
+# terraform.tfvars is excluded from git — never commit AWS credentials or account IDs.
+
+aws_region         = "us-east-1"
+cluster_name       = "audiomind"
+kubernetes_version = "1.33"
+
+# CPU node group
+node_count = 2
+
+# GPU node group — set to 0 to disable
+gpu_node_count    = 0
+gpu_instance_type = "g4dn.xlarge"
+
+vpc_cidr = "10.0.0.0/16"
+
+tags = {
+  Owner = "mlops-team"
+}

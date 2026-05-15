@@ -31,6 +31,11 @@ HELM_ARGOCD_VALUES      ?= $(HELM_ARGOCD_CHART)/values-dev.yaml
 HELM_ARGOCD_NS          ?= argocd
 ARGOCD_K8S_DIR          ?= infra/k8s/argocd
 
+# Terraform environment directories
+TF_LOCAL_DIR ?= infra/terraform/envs/local
+TF_AWS_DIR   ?= infra/terraform/envs/aws
+TF_GCP_DIR   ?= infra/terraform/envs/gcp
+
 .PHONY: help install lock lint lint-fix format typecheck test test-fast ci \
         pre-commit-install pre-commit-run \
         up up-mlops up-all down logs ps build \
@@ -42,7 +47,10 @@ ARGOCD_K8S_DIR          ?= infra/k8s/argocd
         helm-ingress-deps helm-ingress-install \
         helm-eso-deps helm-eso-install \
         helm-argocd-deps helm-argocd-install argocd-bootstrap argocd-port-forward \
-        infra-up infra-namespaces
+        infra-up infra-namespaces \
+        terraform-init-local terraform-plan-local terraform-apply-local terraform-destroy-local \
+        terraform-init-aws terraform-plan-aws terraform-apply-aws \
+        terraform-init-gcp terraform-plan-gcp terraform-apply-gcp
 
 # ---------------------------------------------------------------------------
 # Dev setup
@@ -294,6 +302,49 @@ argocd-bootstrap:  ## Apply App-of-apps + AppProject + ApplicationSet (idempoten
 
 argocd-port-forward:  ## Forward ArgoCD UI to http://localhost:8080 (Ctrl-C to stop)
 	kubectl port-forward svc/argocd-server -n $(HELM_ARGOCD_NS) 8080:80
+
+# ---------------------------------------------------------------------------
+# Terraform — Infrastructure as Code
+# ---------------------------------------------------------------------------
+
+# local (kind) ----------------------------------------------------------------
+
+terraform-init-local:  ## terraform init for envs/local
+	@command -v terraform >/dev/null 2>&1 || { echo "ERROR: terraform is required. Install from https://developer.hashicorp.com/terraform/downloads"; exit 127; }
+	terraform -chdir=$(TF_LOCAL_DIR) init
+
+terraform-plan-local:  ## terraform plan for envs/local (requires terraform.tfvars)
+	terraform -chdir=$(TF_LOCAL_DIR) plan -var-file=terraform.tfvars
+
+terraform-apply-local:  ## terraform apply for envs/local (auto-approve)
+	terraform -chdir=$(TF_LOCAL_DIR) apply -var-file=terraform.tfvars -auto-approve
+
+terraform-destroy-local:  ## terraform destroy for envs/local (auto-approve)
+	terraform -chdir=$(TF_LOCAL_DIR) destroy -var-file=terraform.tfvars -auto-approve
+
+# AWS (EKS) -------------------------------------------------------------------
+
+terraform-init-aws:  ## terraform init for envs/aws
+	@command -v terraform >/dev/null 2>&1 || { echo "ERROR: terraform is required."; exit 127; }
+	terraform -chdir=$(TF_AWS_DIR) init
+
+terraform-plan-aws:  ## terraform plan for envs/aws (requires terraform.tfvars)
+	terraform -chdir=$(TF_AWS_DIR) plan -var-file=terraform.tfvars
+
+terraform-apply-aws:  ## terraform apply for envs/aws (auto-approve)
+	terraform -chdir=$(TF_AWS_DIR) apply -var-file=terraform.tfvars -auto-approve
+
+# GCP (GKE) -------------------------------------------------------------------
+
+terraform-init-gcp:  ## terraform init for envs/gcp
+	@command -v terraform >/dev/null 2>&1 || { echo "ERROR: terraform is required."; exit 127; }
+	terraform -chdir=$(TF_GCP_DIR) init
+
+terraform-plan-gcp:  ## terraform plan for envs/gcp (requires terraform.tfvars)
+	terraform -chdir=$(TF_GCP_DIR) plan -var-file=terraform.tfvars
+
+terraform-apply-gcp:  ## terraform apply for envs/gcp (auto-approve)
+	terraform -chdir=$(TF_GCP_DIR) apply -var-file=terraform.tfvars -auto-approve
 
 # ---------------------------------------------------------------------------
 # Help
