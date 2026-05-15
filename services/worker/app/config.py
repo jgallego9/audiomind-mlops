@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     mlflow_model_version: str = "1"
     mlflow_experiment_name: str = "audiomind-inference"
 
+    # Pipeline-as-code — directory containing per-pipeline subdirectories
+    pipelines_dir: str = "pipelines"
+
 
 @lru_cache
 def get_settings() -> Settings:

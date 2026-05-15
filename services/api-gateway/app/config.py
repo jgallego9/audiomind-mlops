@@ -40,6 +40,9 @@ class Settings(BaseSettings):
     otel_otlp_endpoint: AnyHttpUrl = AnyHttpUrl("http://jaeger:4318")  # OTLP/HTTP
     otel_sample_rate: float = 1.0  # 1.0 = 100%; reduce in high-volume prod
 
+    # Pipeline-as-code — directory containing per-pipeline subdirectories
+    pipelines_dir: str = "pipelines"
+
 
 @lru_cache
 def get_settings() -> Settings:

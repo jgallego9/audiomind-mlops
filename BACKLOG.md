@@ -221,14 +221,14 @@ Instalar: `make pre-commit-install`. Ejecutar en todos los ficheros: `make pre-c
 | Tags `latest` en docker-compose para Whisper y Ollama | `docker-compose.yml` | Builds no reproducibles; cambio de comportamiento silencioso tras `docker pull` |
 | Sin `.env.example`; variables requeridas solo visibles leyendo código | `docker-compose.yml`, `config.py` ×3 | First-time setup por ensayo y error |
 
-- [ ] **F7-0** Limpieza de deuda técnica previa a la refactorización — prerequisito bloqueante para F7-1+:
+- [x] **F7-0** Limpieza de deuda técnica previa a la refactorización — prerequisito bloqueante para F7-1+:
   - Extraer `STREAM_KEY`, `CONSUMER_GROUP` y `JOB_KEY_PREFIX` a un módulo compartido `services/shared/streams.py` importado por api-gateway y worker; eliminar duplicados
   - Alinear `qdrant_collection` en los tres servicios al mismo valor por defecto (`"transcriptions"`); añadir test de integración que valide que los tres apuntan al mismo nombre
   - Fijar tags de Whisper ASR (`ahmetoner/whisper-asr-webservice:v1.5.0` o último tag estable) y Ollama (`ollama/ollama:0.6.x`) en `docker-compose.yml`; nunca `latest` en servicios que afectan al pipeline
   - Crear `.env.example` en la raíz con todas las variables requeridas agrupadas por servicio, con comentarios que expliquen el impacto de cada una y un valor seguro de ejemplo
   - Definir `JobPayload` como modelo Pydantic en `services/shared/schemas.py`; api-gateway lo serializa a Redis Streams, consumer lo deserializa y valida; errores de schema visibles en lugar de silenciosos
 
-- [ ] **F7-1** Step SDK y protocolo — biblioteca interna `services/step-sdk/` (Python package):
+- [x] **F7-1** Step SDK y protocolo — biblioteca interna `services/step-sdk/` (Python package):
   - Convención de nombrado: `step-{tarea}-{implementación}` — la tarea define el contrato (schema.json compartido), la implementación es intercambiable; ejemplos: `step-stt-whisper`, `step-stt-faster-whisper`, `step-embed-fastembed`, `step-embed-openai`. Cambiar de Whisper a faster-whisper es cambiar una línea en `pipeline.yaml`, el grafo no cambia
   - **Task registry**: `tasks/<nombre>/schema.json` como fuente de verdad de los contratos I/O; 7 tareas built-in incluidas en el repo:
     - `stt`: `{audio_url, language}` → `{text, language, duration_s}`
@@ -254,7 +254,7 @@ Instalar: `make pre-commit-install`. Ejecutar en todos los ficheros: `make pre-c
   - `steps/vector-search-qdrant/` — tarea: buscar vectores; impl: Qdrant; mismas variables + `SEARCH_LIMIT`, `SCORE_THRESHOLD`
   - Cada step: `Dockerfile`, `predict.py` (hereda `BaseStep`), `schema.json` (idéntico para todos los steps de la misma tarea), `VERSION`, `README.md` con tabla de env vars y ejemplo de pipeline.yaml, tests unitarios con mock del modelo
 
-- [ ] **F7-3** Pipeline-as-code — `pipelines/<name>/pipeline.yaml` define el grafo:
+- [x] **F7-3** Pipeline-as-code — `pipelines/<name>/pipeline.yaml` define el grafo:
   ```yaml
   name: audio-rag
   version: "1.0"

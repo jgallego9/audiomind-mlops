@@ -1,0 +1,10 @@
+name: audio-rag
+version: "1.0"
+description: "Audio transcription pipeline: audio URL → Whisper ASR → transcript tensors"
+trigger:
+  type: redis-stream
+  stream: "pipelines:audio-rag:jobs"
+steps:
+  - id: transcribe
+    task: audio-transcribe
+    url: "http://audio-transcribe-whisper:8000"

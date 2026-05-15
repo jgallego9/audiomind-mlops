@@ -185,6 +185,22 @@ services:
     networks:
       - audiomind-net
 
+  # ── AudioTranscribeWhisper step — KServe V2 inference step (models profile) ─
+  # Exposes GET /v2/models/audio-transcribe-whisper + POST /v2/models/.../infer
+  audio-transcribe-whisper:
+    build:
+      context: steps/audio-transcribe-whisper
+    profiles: [models]
+    ports:
+      - "${AUDIO_TRANSCRIBE_PORT:-8001}:8000"
+    environment:
+      WHISPER_STEP_WHISPER_URL: "http://whisper-asr:9000"
+    depends_on:
+      - whisper-asr
+    restart: unless-stopped
+    networks:
+      - audiomind-net
+
   # ── Ollama — local LLM (models profile) ─────────────────────────────────────
   # Pull model: docker compose exec ollama ollama pull llama3.2:1b
   # OpenAI-compatible API: http://localhost:11434

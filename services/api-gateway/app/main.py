@@ -11,7 +11,7 @@ from slowapi.errors import RateLimitExceeded
 from app.config import get_settings
 from app.middleware.rate_limit import limiter
 from app.middleware.telemetry import setup_tracing, shutdown_tracing
-from app.routes import auth, health, jobs, search
+from app.routes import auth, health, jobs, pipelines, search
 
 _settings = get_settings()
 
@@ -48,6 +48,7 @@ app.include_router(health.router)
 app.include_router(auth.router, prefix="/auth")
 app.include_router(jobs.router)
 app.include_router(search.router)
+app.include_router(pipelines.router)
 
 # Expose Prometheus metrics at /metrics (scraped by Prometheus ServiceMonitor)
 Instrumentator().instrument(app).expose(app)

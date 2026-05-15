@@ -12,12 +12,14 @@ import logging
 import signal
 import uuid
 
+from audiomind_shared.pipeline import load_pipelines
 from prometheus_client import start_http_server
 from qdrant_client import AsyncQdrantClient
 from redis.asyncio import Redis
 
 from app.config import get_settings
 from app.consumer import run_consumer
+from app.pipeline_consumer import run_pipeline_consumer
 
 _METRICS_PORT = 9090
 
@@ -60,11 +62,36 @@ async def _main() -> None:
         run_consumer(redis, consumer_id, qdrant, settings)
     )
 
+    # Start one pipeline consumer task per pipeline definition found in pipelines_dir.
+    pipeline_tasks: list[asyncio.Task[None]] = []
+    try:
+        pipelines = load_pipelines(settings.pipelines_dir)
+        for pipeline in pipelines:
+            task = asyncio.create_task(
+                run_pipeline_consumer(
+                    redis,
+                    consumer_id,
+                    pipeline,
+                    shutdown_event,
+                    job_ttl_seconds=settings.job_ttl_seconds
+                    if hasattr(settings, "job_ttl_seconds")
+                    else 3600,
+                )
+            )
+            pipeline_tasks.append(task)
+            logger.info("pipeline_consumer_registered pipeline=%s", pipeline.name)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning(
+            "pipeline_load_error dir=%s error=%s", settings.pipelines_dir, exc
+        )
+
     # Block until a SIGINT/SIGTERM arrives.
     await shutdown_event.wait()
 
     consumer_task.cancel()
-    await asyncio.gather(consumer_task, return_exceptions=True)
+    for t in pipeline_tasks:
+        t.cancel()
+    await asyncio.gather(consumer_task, *pipeline_tasks, return_exceptions=True)
     await redis.aclose()
     await qdrant.close()
 

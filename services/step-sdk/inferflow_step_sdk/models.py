@@ -78,3 +78,40 @@ class ModelReadyResponse(BaseModel):
 
     name: str
     ready: bool
+
+
+class MetadataTensor(BaseModel):
+    """Tensor descriptor for ``$metadata_model_response``.
+
+    :param name: Tensor name.
+    :param datatype: Element type — ``BYTES``, ``FP32``, ``INT64``, etc.
+    :param shape: Tensor shape; use ``-1`` for variable-size dimensions.
+    """
+
+    name: str
+    datatype: str
+    shape: list[int]
+
+
+class ModelMetadataResponse(BaseModel):
+    """``$metadata_model_response`` — body for ``GET /v2/models/{name}``.
+
+    Extends the KServe V2 spec with inferflow-specific fields
+    (``task``, ``implementation``) to enable router introspection.
+
+    :param name: Model (step) name.
+    :param versions: Supported versions list; single-element for inferflow steps.
+    :param platform: Backend identifier; always ``"inferflow"`` for our steps.
+    :param inputs: Input tensor descriptors from the task schema.
+    :param outputs: Output tensor descriptors from the task schema.
+    :param task: Inferflow task name, e.g. ``"audio-transcribe"``.
+    :param implementation: Implementation identifier, e.g. ``"whisper"``.
+    """
+
+    name: str
+    versions: list[str] | None = None
+    platform: str = "inferflow"
+    inputs: list[MetadataTensor] = []
+    outputs: list[MetadataTensor] = []
+    task: str = ""
+    implementation: str = ""

@@ -301,6 +301,7 @@ dev = [
     { name = "pytest-cov" },
     { name = "pytest-mock" },
     { name = "ruff" },
+    { name = "types-pyyaml" },
     { name = "yamllint" },
 ]
 
@@ -320,6 +321,7 @@ dev = [
     { name = "pytest-cov", specifier = ">=6.0" },
     { name = "pytest-mock", specifier = ">=3.14" },
     { name = "ruff", specifier = ">=0.15" },
+    { name = "types-pyyaml", specifier = ">=6.0" },
     { name = "yamllint", specifier = ">=1.38.0" },
 ]
 
@@ -329,10 +331,14 @@ version = "0.1.0"
 source = { editable = "services/shared" }
 dependencies = [
     { name = "pydantic" },
+    { name = "pyyaml" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "pydantic", specifier = ">=2.0" }]
+requires-dist = [
+    { name = "pydantic", specifier = ">=2.0" },
+    { name = "pyyaml", specifier = ">=6.0" },
+]
 
 [[package]]
 name = "bcrypt"
@@ -3605,6 +3611,15 @@ wheels = [
 ]
 
 [[package]]
+name = "types-pyyaml"
+version = "6.0.12.20260510"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/36/85/0d9fafce21be112e977a89677f1ce9d1aef921d745b17c758c93e861c11f/types_pyyaml-6.0.12.20260510.tar.gz", hash = "sha256:09c1f1cb65a6eebea1e2e51ccf4918b8288e152909609a35cdb0d805efd125ad", size = 17831, upload-time = "2026-05-10T05:26:28.136Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d3/ad/fd618a218925daada7b8a5e7326e662599fa5fdff4a4c44ab2795bd2d9ca/types_pyyaml-6.0.12.20260510-py3-none-any.whl", hash = "sha256:3492eb9ba4d9d833473214c4d5736cccf5f37d93f5854059721e1c84f785309d", size = 20304, upload-time = "2026-05-10T05:26:26.981Z" },
+]
+
+[[package]]
 name = "typing-extensions"
 version = "4.15.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3930,6 +3945,7 @@ version = "0.1.0"
 source = { virtual = "services/worker" }
 dependencies = [
     { name = "audiomind-shared" },
+    { name = "httpx" },
     { name = "mlflow" },
     { name = "prometheus-client" },
     { name = "pydantic-settings" },
@@ -3940,6 +3956,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "audiomind-shared", editable = "services/shared" },
+    { name = "httpx", specifier = ">=0.28" },
     { name = "mlflow", specifier = ">=3.0" },
     { name = "prometheus-client", specifier = ">=0.21" },
     { name = "pydantic-settings", specifier = ">=2.6" },

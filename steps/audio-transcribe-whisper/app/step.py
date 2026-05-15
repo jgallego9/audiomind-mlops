@@ -1,6 +1,11 @@
 import httpx
 from inferflow_step_sdk.base import BaseStep
-from inferflow_step_sdk.models import InferRequest, InferResponse, Tensor
+from inferflow_step_sdk.models import (
+    InferRequest,
+    InferResponse,
+    MetadataTensor,
+    Tensor,
+)
 
 from app.config import Settings
 
@@ -23,6 +28,33 @@ class AudioTranscribeWhisperStep(BaseStep):
     def version(self) -> str:
         """Return the step version."""
         return "1"
+
+    @property
+    def task(self) -> str:
+        """Return the inferflow task name."""
+        return "audio-transcribe"
+
+    @property
+    def implementation(self) -> str:
+        """Return the implementation identifier."""
+        return "whisper"
+
+    @property
+    def inputs(self) -> list[MetadataTensor]:
+        """Return input tensor descriptors from the audio-transcribe task schema."""
+        return [
+            MetadataTensor(name="audio_url", datatype="BYTES", shape=[1]),
+            MetadataTensor(name="language", datatype="BYTES", shape=[1]),
+        ]
+
+    @property
+    def outputs(self) -> list[MetadataTensor]:
+        """Return output tensor descriptors from the audio-transcribe task schema."""
+        return [
+            MetadataTensor(name="transcript", datatype="BYTES", shape=[1]),
+            MetadataTensor(name="language", datatype="BYTES", shape=[1]),
+            MetadataTensor(name="duration", datatype="FP32", shape=[1]),
+        ]
 
     async def predict(self, request: InferRequest) -> InferResponse:
         """Download audio from URL and transcribe it via Whisper ASR.

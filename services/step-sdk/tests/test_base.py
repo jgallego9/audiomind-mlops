@@ -127,3 +127,26 @@ def test_not_ready_step_returns_false() -> None:
         "name": "not-ready",
         "ready": False,
     }
+
+
+# ---------------------------------------------------------------------------
+# Model metadata endpoint (KServe V2 GET /v2/models/{name})
+# ---------------------------------------------------------------------------
+
+
+def test_model_metadata_returns_correct_response(client: TestClient) -> None:
+    resp = client.get("/v2/models/echo")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["name"] == "echo"
+    assert body["platform"] == "inferflow"
+    assert body["versions"] == ["1"]
+    assert body["task"] == ""
+    assert body["implementation"] == ""
+    assert body["inputs"] == []
+    assert body["outputs"] == []
+
+
+def test_model_metadata_unknown_model_returns_404(client: TestClient) -> None:
+    resp = client.get("/v2/models/unknown")
+    assert resp.status_code == 404

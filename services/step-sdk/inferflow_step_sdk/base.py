@@ -28,6 +28,8 @@ from fastapi import FastAPI, HTTPException
 from inferflow_step_sdk.models import (
     InferRequest,
     InferResponse,
+    MetadataTensor,
+    ModelMetadataResponse,
     ModelReadyResponse,
     ServerLiveResponse,
 )
@@ -67,6 +69,38 @@ class BaseStep(ABC):
         """
         return True
 
+    @property
+    def task(self) -> str:
+        """Inferflow task name, e.g. ``"audio-transcribe"``.
+
+        Override in subclasses to expose task identity via ``GET /v2/models/{name}``.
+        """
+        return ""
+
+    @property
+    def implementation(self) -> str:
+        """Implementation identifier, e.g. ``"whisper"``.
+
+        Override in subclasses to expose implementation identity via model metadata.
+        """
+        return ""
+
+    @property
+    def inputs(self) -> list[MetadataTensor]:
+        """Input tensor descriptors for the model metadata endpoint.
+
+        Override to return the step's actual input schema.
+        """
+        return []
+
+    @property
+    def outputs(self) -> list[MetadataTensor]:
+        """Output tensor descriptors for the model metadata endpoint.
+
+        Override to return the step's actual output schema.
+        """
+        return []
+
     def build_app(self) -> FastAPI:
         """Construct and return the FastAPI application for this step.
 
@@ -93,6 +127,26 @@ class BaseStep(ABC):
         @app.get("/v2/health/ready", response_model=ServerLiveResponse)
         async def server_ready() -> ServerLiveResponse:
             return ServerLiveResponse(live=await step.is_ready())
+
+        @app.get(
+            "/v2/models/{model_name}",
+            response_model=ModelMetadataResponse,
+        )
+        async def model_metadata(model_name: str) -> ModelMetadataResponse:
+            if model_name != step.name:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Unknown model: {model_name!r}",
+                )
+            return ModelMetadataResponse(
+                name=step.name,
+                versions=[step.version],
+                platform="inferflow",
+                inputs=step.inputs,
+                outputs=step.outputs,
+                task=step.task,
+                implementation=step.implementation,
+            )
 
         @app.get(
             "/v2/models/{model_name}/ready",

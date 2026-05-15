@@ -41,6 +41,20 @@ from app.dependencies.redis import get_redis  # noqa: E402
 from app.main import app  # noqa: E402
 from app.models.auth import TokenData  # noqa: E402
 
+# Snapshot of ALL app.* modules loaded at conftest import time (gateway's).
+# Used by _restore_gateway_app to re-populate sys.modules before each test so
+# that patch("app.routes.pipelines.xxx") resolves to the gateway, not the worker
+# or step (which also clear and reload app.* during collection).
+_GATEWAY_APP_MODULES: dict[str, object] = {
+    k: v for k, v in sys.modules.items() if k == "app" or k.startswith("app.")
+}
+
+
+@pytest.fixture(autouse=True)
+def _restore_gateway_app() -> None:
+    """Re-populate sys.modules with the gateway's app.* before each test."""
+    sys.modules.update(_GATEWAY_APP_MODULES)
+
 
 @pytest.fixture(autouse=True)
 def _clear_settings_cache() -> Generator[None]:
