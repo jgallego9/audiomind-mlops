@@ -6,7 +6,10 @@ import json
 import secrets
 import shutil
 from dataclasses import dataclass
-from pathlib import Path  # noqa: TC003
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 import yaml
 from dotenv import dotenv_values

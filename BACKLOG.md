@@ -546,3 +546,85 @@ Instalar: `make pre-commit-install`. Ejecutar en todos los ficheros: `make pre-c
 - [x] **F8-README** Revisión final del README — lectura completa desde perspectiva de recruiter nuevo: todos los assets en su lugar, todos los enlaces verificados, tiempo de lectura ≤ 5 min hasta el primer `docker compose up`
 
 > Nota operativa F8: los cambios de configuración remota de GitHub (rename final del repo, topics, discussions, labels y project board) están documentados en `docs/github-manual-operations.md` para ejecución manual directa en GitHub UI.
+
+---
+
+### FASE 9 — Engineering Audit, IA-Quality Gate & Usability First
+
+> **Objetivo**: cerrar el proyecto con una validación técnica seria (sin maquillaje), garantizar que la implementación está alineada con buenas prácticas reales del ecosistema y dejar un repositorio extremadamente fácil de usar para cualquier persona nueva.
+
+#### Principios de esta fase
+
+- Nada de “AI slop”: cada cambio debe tener justificación técnica verificable.
+- Criterio de aceptación binario: o pasa la evidencia, o la tarea no está cerrada.
+- Optimización para onboarding: el usuario nuevo debe ejecutar una demo funcional en minutos y entender la estructura sin leer todo el código.
+
+- [ ] **F9-1** Auditoría de implementación end-to-end (código + infra + DX)
+  - Revisar de forma sistemática runtime (`services/`), step SDK (`services/step-sdk/`), steps (`steps/`), pipelines (`pipelines/`) e infra (`infra/`)
+  - Detectar deuda técnica real: duplicación, complejidad accidental, acoplamientos innecesarios, defaults peligrosos y rutas de error no cubiertas
+  - Generar `docs/engineering-audit.md` con:
+    - hallazgos priorizados por severidad (alta/media/baja)
+    - impacto funcional y riesgo operacional
+    - propuesta de corrección concreta por hallazgo
+
+- [ ] **F9-2** Contraste técnico contra referencias públicas y documentación oficial
+  - Comparar decisiones clave con fuentes oficiales y proyectos de referencia del dominio (mínimo):
+    - KServe V2 Inference Protocol
+    - Seldon Core 2
+    - Ray Serve
+    - FastAPI deployment/runtime best practices
+    - ArgoCD + Argo Rollouts docs
+    - Helm chart best practices
+  - Crear `docs/architecture-benchmark.md` con matriz “decisión actual vs referencia vs gap vs acción”
+  - Toda recomendación debe enlazar fuente pública y evidenciar si se adopta, se adapta o se descarta
+
+- [ ] **F9-3** Revisión de limpieza de implementación (clean code + maintainability)
+  - Aplicar un pase de simplificación real:
+    - eliminar utilidades redundantes y wrappers sin valor
+    - reducir ramas condicionales complejas y funciones largas
+    - consolidar configuración dispersa
+  - Añadir checklist de mantenibilidad en PR final:
+    - nombres consistentes
+    - errores explícitos
+    - observabilidad mínima por componente
+    - tests alineados con comportamiento esperado
+
+- [ ] **F9-4** Rediseño de estructura de carpetas para legibilidad
+  - Definir una taxonomía clara y estable para top-level folders (producto, plataforma, documentación, herramientas)
+  - Reducir ambigüedad de rutas y evitar “dónde va esto” para nuevos contribuidores
+  - Publicar `docs/repo-structure.md` con:
+    - árbol de carpetas objetivo
+    - propósito de cada directorio
+    - reglas de ubicación de nuevos módulos/servicios/steps
+  - Incluir plan de migración con riesgo bajo (renombres por lotes + validación por etapa)
+
+- [ ] **F9-5** Simplificación extrema de uso del repositorio (quickstart real)
+  - Diseñar un único camino principal para usuario nuevo:
+    1. setup entorno
+    2. levantar stack
+    3. ejecutar pipeline demo
+    4. validar resultado
+  - Reducir pasos opcionales/confusos en README y mover detalle avanzado a `docs/`
+  - Añadir `docs/quickstart.md` con comandos copy/paste verificados
+
+- [ ] **F9-6** UX de CLI orientada a “time-to-first-success”
+  - Revisar comandos de `inferflow` desde perspectiva de descubribilidad y ergonomía
+  - Garantizar:
+    - ayuda clara por comando
+    - mensajes de error accionables
+    - defaults seguros para entorno local
+    - flujo guiado para primer pipeline (`init` → `pipeline validate` → `pipeline run`)
+  - Añadir pruebas smoke de CLI para los journeys críticos de usuario nuevo
+
+- [ ] **F9-7** Definition of Done de calidad final (gate de cierre)
+  - No cerrar F9 sin cumplir simultáneamente:
+    - `make ci` en verde
+    - documentación nueva de F9 completa y enlazada desde README
+    - quickstart ejecutado en entorno limpio siguiendo solo documentación
+    - lista de hallazgos resueltos o diferidos con justificación explícita
+  - Crear `docs/final-quality-gate.md` con evidencia verificable de cierre
+
+- [ ] **F9-README** Curación final de README para usuario real
+  - Reescribir README en modo “producto”: valor, quickstart, arquitectura, operaciones comunes, troubleshooting
+  - Eliminar duplicaciones y secciones que no ayuden a adoptar el repo
+  - Validar lectura de punta a punta con objetivo: primer éxito en menos de 10 minutos
