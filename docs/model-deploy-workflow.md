@@ -1,7 +1,7 @@
 # Model Deploy Workflow
 
 Step-by-step guide for deploying a new model version to production using the
-AudioMind MLOps platform.
+Inferflow MLOps platform.
 
 ---
 
@@ -66,7 +66,7 @@ After training, log and register the model:
 import mlflow
 
 mlflow.set_tracking_uri("http://mlflow.mlflow.svc.cluster.local:80")
-mlflow.set_experiment("audiomind-inference")
+mlflow.set_experiment("inferflow-inference")
 
 with mlflow.start_run():
     # log params, metrics ...
@@ -77,7 +77,7 @@ with mlflow.start_run():
     mlflow.pytorch.log_model(
         model,
         artifact_path="model",
-        registered_model_name="audiomind-whisper",
+        registered_model_name="inferflow-whisper",
     )
 ```
 
@@ -91,18 +91,18 @@ The CI pipeline (`.github/workflows/ci.yml`, job `build-push`) triggers on every
 commit to `main` and:
 
 1. Builds the image with `docker buildx bake`.
-2. Pushes to `ghcr.io/jgallego9/audiomind-mlops/worker:<sha>`.
+2. Pushes to `ghcr.io/jgallego9/inferflow-mlops/worker:<sha>`.
 3. Scans with Trivy (fails on CRITICAL CVEs).
-4. Bumps the image tag in `infra/helm/audiomind/values.yaml` via `yq`.
+4. Bumps the image tag in `infra/helm/inferflow/values.yaml` via `yq`.
 
 For a manual build:
 
 ```bash
 docker build \
-  -t ghcr.io/jgallego9/audiomind-mlops/worker:v2.0.0 \
+  -t ghcr.io/jgallego9/inferflow-mlops/worker:v2.0.0 \
   services/worker/
 
-docker push ghcr.io/jgallego9/audiomind-mlops/worker:v2.0.0
+docker push ghcr.io/jgallego9/inferflow-mlops/worker:v2.0.0
 ```
 
 ---
@@ -111,14 +111,14 @@ docker push ghcr.io/jgallego9/audiomind-mlops/worker:v2.0.0
 
 ```bash
 export MLFLOW_TRACKING_URI=http://mlflow.mlflow.svc.cluster.local:80
-export ROLLOUT_NAMESPACE=audiomind
-export ROLLOUT_NAME=audiomind-vllm
+export ROLLOUT_NAMESPACE=inferflow
+export ROLLOUT_NAME=inferflow-vllm
 export CONTAINER_NAME=vllm
 
 ./scripts/promote-model.sh \
-  --model-name audiomind-whisper \
+  --model-name inferflow-whisper \
   --model-version 7 \
-  --image ghcr.io/jgallego9/audiomind-mlops/worker:v2.0.0
+  --image ghcr.io/jgallego9/inferflow-mlops/worker:v2.0.0
 ```
 
 The script:
@@ -133,14 +133,14 @@ The script:
 
 ```bash
 # Watch rollout progress in real time
-kubectl argo rollouts get rollout audiomind-vllm \
-  -n audiomind --watch
+kubectl argo rollouts get rollout inferflow-vllm \
+  -n inferflow --watch
 
 # Check analysis run results
-kubectl get analysisrun -n audiomind
+kubectl get analysisrun -n inferflow
 
 # Inspect a specific run
-kubectl describe analysisrun <name> -n audiomind
+kubectl describe analysisrun <name> -n inferflow
 ```
 
 Grafana dashboards:
@@ -155,14 +155,14 @@ If the rollout is paused at an `indefinite` step (no `duration`):
 
 ```bash
 # Promote to next step
-kubectl argo rollouts promote audiomind-vllm -n audiomind
+kubectl argo rollouts promote inferflow-vllm -n inferflow
 
 # Full promotion (skip remaining steps)
-kubectl argo rollouts promote audiomind-vllm -n audiomind --full
+kubectl argo rollouts promote inferflow-vllm -n inferflow --full
 
 # Abort and roll back to previous stable version
-kubectl argo rollouts abort audiomind-vllm -n audiomind
-kubectl argo rollouts undo audiomind-vllm -n audiomind
+kubectl argo rollouts abort inferflow-vllm -n inferflow
+kubectl argo rollouts undo inferflow-vllm -n inferflow
 ```
 
 ---
@@ -175,18 +175,18 @@ manually for verification:
 ```bash
 kubectl create job --from=cronjob/drift-detector \
   drift-detector-manual-$(date +%s) \
-  -n audiomind
+  -n inferflow
 ```
 
 Check the result:
 
 ```bash
 # Latest job logs
-kubectl logs job/<name> -n audiomind
+kubectl logs job/<name> -n inferflow
 
 # Prometheus metric
 curl -s http://localhost:9090/api/v1/query \
-  --data-urlencode 'query=audiomind_embedding_drift_share' \
+  --data-urlencode 'query=inferflow_embedding_drift_share' \
   | jq '.data.result'
 ```
 
@@ -200,9 +200,9 @@ more than 15 minutes.
 | Scenario | Action |
 |----------|--------|
 | Analysis fails during canary | Argo Rollouts auto-aborts and rolls back to stable |
-| Drift detected after full rollout | Run `kubectl argo rollouts undo audiomind-vllm -n audiomind` |
+| Drift detected after full rollout | Run `kubectl argo rollouts undo inferflow-vllm -n inferflow` |
 | MLflow promotion error | Re-run `promote-model.sh` — idempotent |
-| Image pull error | Check GHCR credentials: `kubectl get secret ghcr-secret -n audiomind` |
+| Image pull error | Check GHCR credentials: `kubectl get secret ghcr-secret -n inferflow` |
 
 ---
 
@@ -211,8 +211,8 @@ more than 15 minutes.
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `MLFLOW_TRACKING_URI` | — | MLflow server URL (required) |
-| `ROLLOUT_NAMESPACE` | `audiomind` | K8s namespace of the Rollout |
-| `ROLLOUT_NAME` | `audiomind-vllm` | Name of the Argo Rollout resource |
+| `ROLLOUT_NAMESPACE` | `inferflow` | K8s namespace of the Rollout |
+| `ROLLOUT_NAME` | `inferflow-vllm` | Name of the Argo Rollout resource |
 | `CONTAINER_NAME` | `vllm` | Container name inside the Rollout pod spec |
 | `DRIFT_PUSHGATEWAY_URL` | `http://prometheus-pushgateway…` | Push Gateway for drift metrics |
 | `DRIFT_MLFLOW_TRACKING_URI` | `http://mlflow.mlflow…` | MLflow for drift detector |

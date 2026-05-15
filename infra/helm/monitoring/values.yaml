@@ -1,4 +1,4 @@
-# AudioMind Monitoring — base values.
+# Inferflow Monitoring — base values.
 # Override with values-dev.yaml for kind clusters.
 
 # ---------------------------------------------------------------------------
@@ -27,11 +27,11 @@ kube-prometheus-stack:
         enabled: true
 
     # Loki datasource — added alongside Prometheus so logs are searchable in Grafana.
-    # URL uses the known service FQDN (release name: audiomind-monitoring).
+    # URL uses the known service FQDN (release name: inferflow-monitoring).
     additionalDataSources:
       - name: Loki
         type: loki
-        url: http://audiomind-monitoring-loki.monitoring.svc.cluster.local:3100
+        url: http://inferflow-monitoring-loki.monitoring.svc.cluster.local:3100
         access: proxy
 
     resources:
@@ -138,19 +138,19 @@ loki:
 # Promtail
 # NOTE: values.yaml is NOT a Go template — {{ }} syntax is not processed here.
 # The Loki URL uses the known service FQDN derived from the release name
-# "audiomind-monitoring" (set in Makefile helm-monitoring-install target).
+# "inferflow-monitoring" (set in Makefile helm-monitoring-install target).
 # ---------------------------------------------------------------------------
 promtail:
   enabled: true
 
   config:
     clients:
-      # Service name: <release>-loki — assumes release name is audiomind-monitoring.
-      - url: http://audiomind-monitoring-loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
+      # Service name: <release>-loki — assumes release name is inferflow-monitoring.
+      - url: http://inferflow-monitoring-loki.monitoring.svc.cluster.local:3100/loki/api/v1/push
     snippets:
       pipelineStages:
         - cri: {}
-        # Parse structured JSON logs emitted by audiomind services.
+        # Parse structured JSON logs emitted by inferflow services.
         - json:
             expressions:
               level: level

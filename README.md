@@ -4,8 +4,8 @@
 
 [![Python 3.13](https://img.shields.io/badge/python-3.13-blue.svg)](https://www.python.org/downloads/)
 [![License MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![CI](https://github.com/jgallego9/audiomind-mlops/actions/workflows/ci.yml/badge.svg)](https://github.com/jgallego9/audiomind-mlops/actions/workflows/ci.yml)
-[![Step CI](https://github.com/jgallego9/audiomind-mlops/actions/workflows/step-ci.yml/badge.svg)](https://github.com/jgallego9/audiomind-mlops/actions/workflows/step-ci.yml)
+[![CI](https://github.com/jgallego9/inferflow-mlops/actions/workflows/ci.yml/badge.svg)](https://github.com/jgallego9/inferflow-mlops/actions/workflows/ci.yml)
+[![Step CI](https://github.com/jgallego9/inferflow-mlops/actions/workflows/step-ci.yml/badge.svg)](https://github.com/jgallego9/inferflow-mlops/actions/workflows/step-ci.yml)
 
 A production-ready, pipeline-as-code ML inference platform.
 Define your AI pipeline in YAML, deploy with one command, and scale each step independently.
@@ -20,7 +20,7 @@ Define your AI pipeline in YAML, deploy with one command, and scale each step in
 
 ```bash
 git clone <repo-url>
-cd audiomind-mlops
+cd inferflow-mlops
 uv tool install ./tools/inferflow-cli
 inferflow init
 ```
@@ -59,7 +59,7 @@ inferflow pipeline validate <name>
 
 3. Enable it in Helm values under `.Values.pipelines.<name>`.
 
-Generic templates in `infra/helm/audiomind/templates/steps/` already create Deployments, Services, optional HPA, PDB, and model cache PVC mounts.
+Generic templates in `infra/helm/inferflow/templates/steps/` already create Deployments, Services, optional HPA, PDB, and model cache PVC mounts.
 
 ## Available Steps
 
@@ -155,7 +155,7 @@ Project board (kanban): https://github.com/users/jgallego9/projects
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md).
 
-Good first issues: https://github.com/jgallego9/audiomind-mlops/labels/good%20first%20issue
+Good first issues: https://github.com/jgallego9/inferflow-mlops/labels/good%20first%20issue
 
 ## Security
 
@@ -171,3 +171,4 @@ See [CHANGELOG.md](CHANGELOG.md).
 - [docs/adding-a-pipeline.md](docs/adding-a-pipeline.md)
 - [docs/adding-a-step.md](docs/adding-a-step.md)
 - [docs/local-setup.md](docs/local-setup.md)
+- [docs/github-manual-operations.md](docs/github-manual-operations.md)

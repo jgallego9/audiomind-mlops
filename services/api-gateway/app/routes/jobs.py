@@ -3,9 +3,9 @@ from datetime import UTC, datetime
 from typing import Annotated
 from uuid import uuid4
 
-from audiomind_shared.schemas import TranscribeStreamMessage
-from audiomind_shared.streams import JOB_KEY_PREFIX, STREAM_KEY
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from inferflow_shared.schemas import TranscribeStreamMessage
+from inferflow_shared.streams import JOB_KEY_PREFIX, STREAM_KEY
 
 from app.config import Settings, get_settings
 from app.dependencies.auth import CurrentUser

@@ -1,7 +1,7 @@
 [project]
-name = "audiomind-drift-detector"
+name = "inferflow-drift-detector"
 version = "0.1.0"
-description = "Evidently-based data and embedding drift detector for AudioMind"
+description = "Evidently-based data and embedding drift detector for Inferflow"
 requires-python = ">=3.11"
 dependencies = [
     # Evidently v2 API: Report, DataDriftPreset, Dataset, DataDefinition

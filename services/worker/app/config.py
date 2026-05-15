@@ -22,9 +22,9 @@ class Settings(BaseSettings):
 
     # MLflow — inference metrics tracking
     mlflow_tracking_uri: str = "http://mlflow.mlflow.svc.cluster.local:80"
-    mlflow_model_name: str = "audiomind-whisper"
+    mlflow_model_name: str = "inferflow-whisper"
     mlflow_model_version: str = "1"
-    mlflow_experiment_name: str = "audiomind-inference"
+    mlflow_experiment_name: str = "inferflow-inference"
 
     # Pipeline-as-code — directory containing per-pipeline subdirectories
     pipelines_dir: str = "pipelines"

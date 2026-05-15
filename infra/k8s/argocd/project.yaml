@@ -1,26 +1,26 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: audiomind
+  name: inferflow
   namespace: argocd
   finalizers:
     # Prevent deletion while Applications exist.
     - resources-finalizer.argocd.argoproj.io
 spec:
-  description: "AudioMind MLOps workloads — dev / staging / prod"
+  description: "Inferflow MLOps workloads — dev / staging / prod"
 
   # Allowed source repos.
   sourceRepos:
-    - https://github.com/jgallego9/audiomind-mlops.git
+    - https://github.com/jgallego9/inferflow-mlops.git
 
   # Allowed destination clusters and namespaces.
   destinations:
     - server: https://kubernetes.default.svc
-      namespace: audiomind-dev
+      namespace: inferflow-dev
     - server: https://kubernetes.default.svc
-      namespace: audiomind-staging
+      namespace: inferflow-staging
     - server: https://kubernetes.default.svc
-      namespace: audiomind-prod
+      namespace: inferflow-prod
 
   # Allowed cluster-scoped resource kinds (none needed beyond namespaced resources).
   clusterResourceWhitelist: []

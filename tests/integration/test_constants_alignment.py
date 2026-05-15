@@ -5,7 +5,7 @@ refactoring that changes stream names will break these tests immediately
 rather than causing silent job loss in production.
 
 The "no hardcoded constants" invariant is enforced structurally — both
-api-gateway and worker import from audiomind_shared.streams at module level,
+api-gateway and worker import from inferflow_shared.streams at module level,
 so any attempt to redeclare the constants would shadow the import and be
 caught by mypy's --strict checks.
 """
@@ -17,30 +17,30 @@ class TestStreamConstants:
     """Verify canonical constant values in the shared package."""
 
     def test_stream_key(self) -> None:
-        from audiomind_shared.streams import STREAM_KEY
+        from inferflow_shared.streams import STREAM_KEY
 
-        assert STREAM_KEY == "audiomind:jobs"
+        assert STREAM_KEY == "inferflow:jobs"
 
     def test_consumer_group(self) -> None:
-        from audiomind_shared.streams import CONSUMER_GROUP
+        from inferflow_shared.streams import CONSUMER_GROUP
 
-        assert CONSUMER_GROUP == "audiomind:workers"
+        assert CONSUMER_GROUP == "inferflow:workers"
 
     def test_job_key_prefix(self) -> None:
-        from audiomind_shared.streams import JOB_KEY_PREFIX
+        from inferflow_shared.streams import JOB_KEY_PREFIX
 
-        assert JOB_KEY_PREFIX == "audiomind:job"
+        assert JOB_KEY_PREFIX == "inferflow:job"
 
     def test_job_key_format(self) -> None:
-        from audiomind_shared.streams import JOB_KEY_PREFIX
+        from inferflow_shared.streams import JOB_KEY_PREFIX
 
         job_id = "abc-123"
-        assert f"{JOB_KEY_PREFIX}:{job_id}" == "audiomind:job:abc-123"
+        assert f"{JOB_KEY_PREFIX}:{job_id}" == "inferflow:job:abc-123"
 
 
 class TestTranscribeStreamMessage:
     def test_serializes_to_flat_dict(self) -> None:
-        from audiomind_shared.schemas import TranscribeStreamMessage
+        from inferflow_shared.schemas import TranscribeStreamMessage
 
         msg = TranscribeStreamMessage(
             job_id="abc-123",
@@ -55,7 +55,7 @@ class TestTranscribeStreamMessage:
 
     def test_roundtrip_from_redis_fields(self) -> None:
         """Simulate what Redis xreadgroup returns and validate deserialization."""
-        from audiomind_shared.schemas import TranscribeStreamMessage
+        from inferflow_shared.schemas import TranscribeStreamMessage
 
         redis_fields: dict[str, str] = {
             "job_id": "xyz-789",
@@ -71,7 +71,7 @@ class TestTranscribeStreamMessage:
 
     def test_invalid_type_raises(self) -> None:
         """A message with an unknown type must fail validation."""
-        from audiomind_shared.schemas import TranscribeStreamMessage
+        from inferflow_shared.schemas import TranscribeStreamMessage
         from pydantic import ValidationError
 
         with pytest.raises(ValidationError):

@@ -1,7 +1,7 @@
 apiVersion: v2
 name: argocd
 description: >
-  AudioMind MLOps — ArgoCD wrapper chart.
+  Inferflow MLOps — ArgoCD wrapper chart.
   Pins argo-cd 9.5.14 (app v3.4.2) and enables ApplicationSet controller
   and Ingress. Installed once into namespace 'argocd'.
 type: application

@@ -3,7 +3,7 @@ name: external-secrets
 description: >
   Wrapper chart for External Secrets Operator (ESO).
   Syncs secrets from external providers (AWS SSM/Secrets Manager, Vault, GCP SM)
-  into Kubernetes Secrets consumed by audiomind services.
+  into Kubernetes Secrets consumed by inferflow services.
 type: application
 version: 0.1.0
 appVersion: "0.14.4"

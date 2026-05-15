@@ -4,7 +4,7 @@ from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
-from audiomind_shared.pipeline import PipelineDefinition
+from inferflow_shared.pipeline import PipelineDefinition
 
 from app.pipeline_runner import PipelineRunner
 

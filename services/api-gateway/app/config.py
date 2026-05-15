@@ -13,7 +13,7 @@ class Settings(BaseSettings):
         extra="ignore",  # tolerate unrecognised env vars (common in Docker)
     )
 
-    app_name: str = "AudioMind API Gateway"
+    app_name: str = "Inferflow API Gateway"
     app_version: str = "0.1.0"
 
     # JWT

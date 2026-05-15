@@ -14,7 +14,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: audiomind-dcgm-exporter
+  name: inferflow-dcgm-exporter
   namespace: monitoring
   labels:
     app.kubernetes.io/name: dcgm-exporter

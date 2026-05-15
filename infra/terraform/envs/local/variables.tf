@@ -1,7 +1,7 @@
 variable "cluster_name" {
   description = "Name of the kind cluster."
   type        = string
-  default     = "audiomind"
+  default     = "inferflow"
 }
 
 variable "kubernetes_version" {

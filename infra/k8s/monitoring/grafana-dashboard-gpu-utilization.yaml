@@ -152,12 +152,12 @@ data:
       ],
       "refresh": "30s",
       "schemaVersion": 38,
-      "tags": ["audiomind", "gpu", "dcgm", "nvidia"],
+      "tags": ["inferflow", "gpu", "dcgm", "nvidia"],
       "templating": {"list": []},
       "time": {"from": "now-1h", "to": "now"},
       "timepicker": {},
       "timezone": "UTC",
-      "title": "AudioMind — GPU Utilisation (DCGM)",
-      "uid": "audiomind-gpu-utilization",
+      "title": "Inferflow — GPU Utilisation (DCGM)",
+      "uid": "inferflow-gpu-utilization",
       "version": 1
     }

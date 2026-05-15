@@ -111,12 +111,12 @@ def _push_metrics(
     registry = CollectorRegistry()
 
     drift_share_gauge = Gauge(
-        "audiomind_embedding_drift_share",
+        "inferflow_embedding_drift_share",
         "Fraction of embedding dimensions with detected drift (Evidently PSI)",
         registry=registry,
     )
     drift_detected_gauge = Gauge(
-        "audiomind_embedding_drift_detected",
+        "inferflow_embedding_drift_detected",
         "1 if dataset-level drift detected, 0 otherwise",
         registry=registry,
     )

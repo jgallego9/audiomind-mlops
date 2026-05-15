@@ -13,7 +13,7 @@ data:
         {"type": "grafana", "id": "grafana", "name": "Grafana", "version": "10.0.0"},
         {"type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "1.0.0"}
       ],
-      "description": "AudioMind vLLM inference metrics: request latency, queue depth, KV-cache, token throughput",
+      "description": "Inferflow vLLM inference metrics: request latency, queue depth, KV-cache, token throughput",
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 1,
@@ -156,12 +156,12 @@ data:
       ],
       "refresh": "30s",
       "schemaVersion": 38,
-      "tags": ["audiomind", "vllm", "inference", "llm"],
+      "tags": ["inferflow", "vllm", "inference", "llm"],
       "templating": {"list": []},
       "time": {"from": "now-1h", "to": "now"},
       "timepicker": {},
       "timezone": "UTC",
-      "title": "AudioMind — LLM Inference (vLLM)",
-      "uid": "audiomind-llm-inference",
+      "title": "Inferflow — LLM Inference (vLLM)",
+      "uid": "inferflow-llm-inference",
       "version": 1
     }

@@ -1,7 +1,7 @@
 # Copy to terraform.tfvars and fill in your values.
 # terraform.tfvars is excluded from git — never commit secrets.
 
-cluster_name         = "audiomind"
+cluster_name         = "inferflow"
 kubernetes_version   = "1.32.0"
 node_count           = 2
 

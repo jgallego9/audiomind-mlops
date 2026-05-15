@@ -10,10 +10,10 @@ class Settings(BaseSettings):
     pushgateway_url: str = (
         "http://prometheus-pushgateway.monitoring.svc.cluster.local:9091"
     )
-    job_name: str = "audiomind_drift_detector"
+    job_name: str = "inferflow_drift_detector"
 
     # Qdrant (embedding snapshots)
-    qdrant_url: str = "http://qdrant.audiomind.svc.cluster.local:6333"
+    qdrant_url: str = "http://qdrant.inferflow.svc.cluster.local:6333"
     qdrant_collection: str = "transcriptions"
     # Number of recent vectors to sample for current window
     qdrant_sample_size: int = 500

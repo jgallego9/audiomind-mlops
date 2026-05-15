@@ -17,9 +17,9 @@ from app.consumer import (
     run_consumer,
 )
 
-_STREAM = "audiomind:jobs"
-_GROUP = "audiomind:workers"
-_JOB_PREFIX = "audiomind:job"
+_STREAM = "inferflow:jobs"
+_GROUP = "inferflow:workers"
+_JOB_PREFIX = "inferflow:job"
 
 _FAST_TRANSCRIPTION = {
     "transcript": "hello world",

@@ -14,8 +14,8 @@ resolution-markers = [
 [manifest]
 members = [
     "api-gateway",
-    "audiomind-drift-detector",
-    "audiomind-shared",
+    "inferflow-drift-detector",
+    "inferflow-shared",
     "inferflow-cli",
     "inferflow-mlops",
     "inferflow-step-sdk",
@@ -165,7 +165,7 @@ name = "api-gateway"
 version = "0.1.0"
 source = { virtual = "services/api-gateway" }
 dependencies = [
-    { name = "audiomind-shared" },
+    { name = "inferflow-shared" },
     { name = "bcrypt" },
     { name = "fastapi" },
     { name = "opentelemetry-api" },
@@ -183,7 +183,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "audiomind-shared", editable = "services/shared" },
+    { name = "inferflow-shared", editable = "services/shared" },
     { name = "bcrypt", specifier = ">=4.0" },
     { name = "fastapi", specifier = ">=0.115" },
     { name = "opentelemetry-api", specifier = ">=1.28" },
@@ -265,7 +265,7 @@ wheels = [
 ]
 
 [[package]]
-name = "audiomind-drift-detector"
+name = "inferflow-drift-detector"
 version = "0.1.0"
 source = { virtual = "services/drift-detector" }
 dependencies = [
@@ -288,7 +288,7 @@ requires-dist = [
 ]
 
 [[package]]
-name = "audiomind-shared"
+name = "inferflow-shared"
 version = "0.1.0"
 source = { editable = "services/shared" }
 dependencies = [
@@ -1499,7 +1499,7 @@ source = { virtual = "." }
 
 [package.dev-dependencies]
 dev = [
-    { name = "audiomind-shared" },
+    { name = "inferflow-shared" },
     { name = "fakeredis" },
     { name = "httpx" },
     { name = "inferflow-step-sdk" },
@@ -1519,7 +1519,7 @@ dev = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "audiomind-shared", editable = "services/shared" },
+    { name = "inferflow-shared", editable = "services/shared" },
     { name = "fakeredis", specifier = ">=2.26" },
     { name = "httpx", specifier = ">=0.28" },
     { name = "inferflow-step-sdk", editable = "services/step-sdk" },
@@ -4138,7 +4138,7 @@ name = "worker"
 version = "0.1.0"
 source = { virtual = "services/worker" }
 dependencies = [
-    { name = "audiomind-shared" },
+    { name = "inferflow-shared" },
     { name = "httpx" },
     { name = "mlflow" },
     { name = "prometheus-client" },
@@ -4149,7 +4149,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "audiomind-shared", editable = "services/shared" },
+    { name = "inferflow-shared", editable = "services/shared" },
     { name = "httpx", specifier = ">=0.28" },
     { name = "mlflow", specifier = ">=3.0" },
     { name = "prometheus-client", specifier = ">=0.21" },

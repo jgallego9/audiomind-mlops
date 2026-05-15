@@ -29,7 +29,7 @@ async def test_transcribe_stores_job_in_redis(
     job_id = response.json()["job_id"]
 
     # Then
-    data = await fake_redis.hgetall(f"audiomind:job:{job_id}")
+    data = await fake_redis.hgetall(f"inferflow:job:{job_id}")
     assert data["status"] == "pending"
     assert data["language"] == "es"
     assert data["user"] == "testuser"
@@ -44,7 +44,7 @@ async def test_transcribe_publishes_to_stream(
     )
 
     # Then
-    messages = await fake_redis.xrange("audiomind:jobs")
+    messages = await fake_redis.xrange("inferflow:jobs")
     assert len(messages) == 1
     _msg_id, fields = messages[0]
     assert fields["type"] == "transcribe"
@@ -89,7 +89,7 @@ async def test_get_job_completed_includes_result(
     job_id = "completed-job-1"
     result_data = {"transcript": "hello world", "language": "en"}
     await fake_redis.hset(
-        f"audiomind:job:{job_id}",
+        f"inferflow:job:{job_id}",
         mapping={
             "status": "completed",
             "audio_url": "https://example.com/audio.mp3",
@@ -122,7 +122,7 @@ async def test_get_job_other_users_job_returns_403(
     # Given: a job owned by a different user
     job_id = "other-users-job"
     await fake_redis.hset(
-        f"audiomind:job:{job_id}",
+        f"inferflow:job:{job_id}",
         mapping={
             "status": "pending",
             "audio_url": "https://example.com/audio.mp3",

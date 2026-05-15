@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# AudioMind MLOps — end-to-end demo
+# Inferflow MLOps — end-to-end demo
 #
 # Prerequisites:
 #   • Docker Compose stack running:  docker compose up -d

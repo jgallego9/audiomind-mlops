@@ -1,7 +1,7 @@
 # rollout-vllm.yaml — Argo Rollouts canary deployment for the vLLM inference service.
 #
 # Drop-in replacement for the apps/v1 Deployment produced by
-# infra/helm/audiomind/templates/vllm/deployment.yaml.  Apply AFTER the
+# infra/helm/inferflow/templates/vllm/deployment.yaml.  Apply AFTER the
 # Helm-managed Deployment has been deleted (or set vllm.enabled=false in the
 # Helm chart and let ArgoCD sync before applying this manifest).
 #
@@ -15,10 +15,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
-  name: audiomind-vllm
-  namespace: audiomind
+  name: inferflow-vllm
+  namespace: inferflow
   labels:
-    app.kubernetes.io/name: audiomind
+    app.kubernetes.io/name: inferflow
     app.kubernetes.io/component: vllm
     app.kubernetes.io/managed-by: argo-rollouts
 spec:
@@ -26,15 +26,15 @@ spec:
   # Must match the Service selector used by the vLLM ClusterIP service.
   selector:
     matchLabels:
-      app.kubernetes.io/name: audiomind
+      app.kubernetes.io/name: inferflow
       app.kubernetes.io/component: vllm
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: audiomind
+        app.kubernetes.io/name: inferflow
         app.kubernetes.io/component: vllm
     spec:
-      serviceAccountName: audiomind
+      serviceAccountName: inferflow
       containers:
         - name: vllm
           # Image tag is overridden by scripts/promote-model.sh via
@@ -59,7 +59,7 @@ spec:
             - name: HF_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: audiomind-hf-token
+                  name: inferflow-hf-token
                   key: token
                   optional: true
           resources:
@@ -89,7 +89,7 @@ spec:
       volumes:
         - name: model-cache
           persistentVolumeClaim:
-            claimName: audiomind-vllm-model-cache
+            claimName: inferflow-vllm-model-cache
   minReadySeconds: 30
   revisionHistoryLimit: 3
 

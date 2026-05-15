@@ -1,4 +1,4 @@
-# AudioMind MLOps Platform — Backlog
+# Inferflow MLOps Platform — Backlog
 
 > **Objetivo**: Portfolio project que posiciona como Senior MLOps Engineer.
 > **Caso de uso**: Audio → Whisper (STT) → LLM analysis → Embeddings → RAG search
@@ -105,7 +105,7 @@ Instalar: `make pre-commit-install`. Ejecutar en todos los ficheros: `make pre-c
 ### FASE 2 — Kubernetes + Helm
 
 - [x] **F2-1** kind cluster local con `cluster.yaml` (multi-node: 1 control-plane + 2 workers)
-- [x] **F2-2** Helm chart `infra/helm/audiomind/`: subchart por componente, `values.yaml` base + overlays por entorno
+- [x] **F2-2** Helm chart `infra/helm/inferflow/`: subchart por componente, `values.yaml` base + overlays por entorno
 - [x] **F2-3** NVIDIA GPU Operator desplegado via Helm (`infra/helm/gpu-operator/`)
   - Gestiona drivers, container toolkit, device plugin, DCGM automáticamente
   - Configuración time-slicing para entornos sin GPU dedicada
@@ -123,10 +123,10 @@ Instalar: `make pre-commit-install`. Ejecutar en todos los ficheros: `make pre-c
 
 - [x] **F3-1** ArgoCD instalado en namespace `argocd`, UI expuesta via port-forward o Ingress
   - Helm wrapper chart `infra/helm/argocd/` con dependencia `argo/argo-cd 9.5.14` (ArgoCD v3.4.2)
-  - `values.yaml` base (Ingress nginx, `argocd.audiomind.local`) + `values-dev.yaml` (NodePort 30880)
+  - `values.yaml` base (Ingress nginx, `argocd.inferflow.local`) + `values-dev.yaml` (NodePort 30880)
 - [x] **F3-2** `infra/k8s/argocd/applicationset.yaml`: dos ApplicationSets con List generator
-  - `audiomind-auto-sync` → dev (automated prune + selfHeal)
-  - `audiomind-manual-sync` → staging, prod (manual approval)
+  - `inferflow-auto-sync` → dev (automated prune + selfHeal)
+  - `inferflow-manual-sync` → staging, prod (manual approval)
   - `goTemplate: true`, `goTemplateOptions: ["missingkey=error"]`
 - [x] **F3-3** GitHub Actions workflow `.github/workflows/ci.yml`:
   - Job 1 `lint-test`: ruff · mypy · pytest --cov 80% · helm lint · yamllint
@@ -134,8 +134,8 @@ Instalar: `make pre-commit-install`. Ejecutar en todos los ficheros: `make pre-c
   - Job 3 `bump-tag`: yq bump image tags in `values.yaml` → `[skip ci]` commit
   - All action versions pinned to SHA-equivalent semver tags
 - [x] **F3-4** ArgoCD auto-sync en rama `main` (dev), manual approval en staging/prod
-- [x] **F3-5** `infra/k8s/argocd/app-of-apps.yaml`: root Application `audiomind-root` gestiona AppProject + ApplicationSets
-  - `infra/k8s/argocd/project.yaml`: AppProject `audiomind` con source repo + destination namespaces
+- [x] **F3-5** `infra/k8s/argocd/app-of-apps.yaml`: root Application `inferflow-root` gestiona AppProject + ApplicationSets
+  - `infra/k8s/argocd/project.yaml`: AppProject `inferflow` con source repo + destination namespaces
 - [x] **F3-6** Gestión de secretos en CI: `GITHUB_TOKEN` para GHCR (mismo repo); OIDC pattern documentado para cloud providers
   - Makefile targets: `helm-argocd-deps`, `helm-argocd-install`, `argocd-bootstrap`, `argocd-port-forward`
 - [x] **F3-README** README actualizado: sección CI/CD + GitOps, badges workflow + GHCR, diagrama del pipeline ASCII, instrucciones ArgoCD bootstrap
@@ -155,7 +155,7 @@ Instalar: `make pre-commit-install`. Ejecutar en todos los ficheros: `make pre-c
   - `grafana-dashboard-gpu-utilization.yaml`: utilización GPU, VRAM, temperatura, potencia (DCGM)
   - `grafana-dashboard-system-overview.yaml`: resumen end-to-end, pod health, error rates, logs Loki
 - [x] **F4-4** PrometheusRules SLO en `infra/k8s/monitoring/`:
-  - `prometheusrule-audiomind.yaml`: P95 latency > 2s, 5xx error rate > 5%, worker no jobs processed
+  - `prometheusrule-inferflow.yaml`: P95 latency > 2s, 5xx error rate > 5%, worker no jobs processed
   - `prometheusrule-vllm.yaml`: vLLM latency, queue depth, KV-cache high, preemption rate
   - `prometheusrule-gpu.yaml`: GPU util, VRAM > 90%, temperature, power draw
 - [x] **F4-5** Instrumentación de servicios Python:
@@ -172,7 +172,7 @@ Instalar: `make pre-commit-install`. Ejecutar en todos los ficheros: `make pre-c
 
 - [x] **F5-1** MLflow configurado en Kubernetes: tracking server con PostgreSQL backend + S3/Minio artifact store
 - [x] **F5-2** Logging automático de métricas de inferencia por versión de modelo (latencia, tokens/s, error rate) a MLflow
-- [x] **F5-3** `scripts/promote-model.sh`: registra modelo en MLflow → actualiza `infra/helm/audiomind/values.yaml` con nuevo tag → ArgoCD sync
+- [x] **F5-3** `scripts/promote-model.sh`: registra modelo en MLflow → actualiza `infra/helm/inferflow/values.yaml` con nuevo tag → ArgoCD sync
 - [x] **F5-4** Argo Rollouts canary en `infra/k8s/argo-rollouts/`:
   - Rollout de nueva versión de modelo: 10% → 50% → 100%
   - `AnalysisTemplate` que valida `vllm:request_success_ratio > 0.99` y `p95_latency < 2s`
@@ -214,7 +214,7 @@ Instalar: `make pre-commit-install`. Ejecutar en todos los ficheros: `make pre-c
 | Fricción | Fichero(s) afectados | Impacto |
 |---|---|---|
 | `_STREAM_KEY` y `_JOB_KEY_PREFIX` duplicados sin fuente de verdad | `consumer.py` + `routes/jobs.py` | Jobs silenciosamente perdidos si las constantes divergen |
-| `qdrant_collection` es `"transcriptions"` en api-gateway/worker pero `"audiomind"` en drift-detector | `config.py` ×2, `settings.py` | Drift-detector monitoriza una colección vacía; error silencioso |
+| `qdrant_collection` es `"transcriptions"` en api-gateway/worker pero `"inferflow"` en drift-detector | `config.py` ×2, `settings.py` | Drift-detector monitoriza una colección vacía; error silencioso |
 | Modelo de embeddings descargado y bakeado en imagen Docker (`BAAI/bge-small-en-v1.5`) | `Dockerfile` ×2 | Cambiar modelo = rebuild de la imagen (~2 min); no es configuración, es código |
 | `mock_transcribe` llamado directamente desde `consumer.py` sin abstracción | `consumer.py`, `processors/transcribe.py` | Sustituir por Whisper real requiere refactor del consumer, no solo cambiar un env var |
 | Tipo de job `"transcribe"` hardcodeado en la ruta; sin schema del payload | `routes/jobs.py` | Añadir un campo al job (prioridad, dominio) exige editar enqueue y consumer coordinadamente |
@@ -354,14 +354,14 @@ Instalar: `make pre-commit-install`. Ejecutar en todos los ficheros: `make pre-c
     dev:
       context: kubernetes
       kubeconfig: ~/.kube/config
-      namespace: audiomind-dev
-      helm_values: infra/helm/audiomind/values-dev.yaml
+      namespace: inferflow-dev
+      helm_values: infra/helm/inferflow/values-dev.yaml
       deploy: helm            # helm upgrade directo (iteración rápida)
     prod:
-      namespace: audiomind-prod
-      helm_values: infra/helm/audiomind/values.yaml
+      namespace: inferflow-prod
+      helm_values: infra/helm/inferflow/values.yaml
       deploy: argocd          # commit values.yaml → push → ArgoCD sync
-      argocd_app: audiomind-prod
+      argocd_app: inferflow-prod
   pipelines_dir: pipelines/
   steps_dir:     steps/
   tasks_dir:     tasks/
@@ -481,7 +481,7 @@ Instalar: `make pre-commit-install`. Ejecutar en todos los ficheros: `make pre-c
 
 #### Rename del repositorio
 
-> `audiomind-mlops` describe el caso de uso original (audio → Whisper → RAG) pero ya no representa el proyecto tras la Fase 7, que lo convierte en una plataforma genérica de inferencia ML.
+> `inferflow-mlops` describe el caso de uso original (audio → Whisper → RAG) pero ya no representa el proyecto tras la Fase 7, que lo convierte en una plataforma genérica de inferencia ML.
 
 **Nombre propuesto**: `inferflow-mlops` — *"inference" + "workflow"*, captura la esencia de pipelines componibles de ML.
 
@@ -491,7 +491,7 @@ Instalar: `make pre-commit-install`. Ejecutar en todos los ficheros: `make pre-c
 
 - [x] **F8-1** Rename del repositorio y actualización de referencias
   - Renombrar repo a `inferflow-mlops` y actualizar descripción + topics en GitHub Settings
-  - Actualizar todas las referencias a `audiomind` en `values.yaml`, `applicationset.yaml`, namespaces, Helm charts, Makefile, CI workflows y README
+  - Actualizar todas las referencias a `inferflow` en `values.yaml`, `applicationset.yaml`, namespaces, Helm charts, Makefile, CI workflows y README
   - Actualizar imágenes GHCR: `ghcr.io/jgallego9/inferflow-*`
   - La redirección automática de GitHub mantiene URLs antiguas funcionando; documentar el cambio en `CHANGELOG.md`
 
@@ -545,4 +545,4 @@ Instalar: `make pre-commit-install`. Ejecutar en todos los ficheros: `make pre-c
 
 - [x] **F8-README** Revisión final del README — lectura completa desde perspectiva de recruiter nuevo: todos los assets en su lugar, todos los enlaces verificados, tiempo de lectura ≤ 5 min hasta el primer `docker compose up`
 
-> Nota operativa F8: los cambios de configuración remota de GitHub (rename final del repo, topics, discussions y project board) quedan automatizados en `scripts/setup-repo-hygiene.sh` + `scripts/setup-labels.sh`. En este entorno no está disponible `gh`, por lo que la ejecución remota debe lanzarse desde una máquina con GitHub CLI autenticado.
+> Nota operativa F8: los cambios de configuración remota de GitHub (rename final del repo, topics, discussions, labels y project board) están documentados en `docs/github-manual-operations.md` para ejecución manual directa en GitHub UI.

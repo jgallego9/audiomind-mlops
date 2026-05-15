@@ -1,10 +1,10 @@
-# ApplicationSet: audiomind-auto-sync
+# ApplicationSet: inferflow-auto-sync
 # Manages environments that use automated sync (dev).
-# Separate from audiomind-manual-sync to allow independent pause/resume.
+# Separate from inferflow-manual-sync to allow independent pause/resume.
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: audiomind-auto-sync
+  name: inferflow-auto-sync
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "1"
@@ -15,21 +15,21 @@ spec:
     - list:
         elements:
           - env: dev
-            namespace: audiomind-dev
+            namespace: inferflow-dev
             targetRevision: main
   template:
     metadata:
-      name: "audiomind-{{ .env }}"
+      name: "inferflow-{{ .env }}"
       namespace: argocd
       labels:
-        app.kubernetes.io/name: audiomind
+        app.kubernetes.io/name: inferflow
         env: "{{ .env }}"
     spec:
-      project: audiomind
+      project: inferflow
       source:
-        repoURL: https://github.com/jgallego9/audiomind-mlops.git
+        repoURL: https://github.com/jgallego9/inferflow-mlops.git
         targetRevision: "{{ .targetRevision }}"
-        path: infra/helm/audiomind
+        path: infra/helm/inferflow
         helm:
           valueFiles:
             - values.yaml
@@ -45,12 +45,12 @@ spec:
           - CreateNamespace=true
           - ServerSideApply=true
 ---
-# ApplicationSet: audiomind-manual-sync
+# ApplicationSet: inferflow-manual-sync
 # Manages environments that require human approval before sync (staging, prod).
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: audiomind-manual-sync
+  name: inferflow-manual-sync
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "1"
@@ -61,24 +61,24 @@ spec:
     - list:
         elements:
           - env: staging
-            namespace: audiomind-staging
+            namespace: inferflow-staging
             targetRevision: main
           - env: prod
-            namespace: audiomind-prod
+            namespace: inferflow-prod
             targetRevision: release/stable
   template:
     metadata:
-      name: "audiomind-{{ .env }}"
+      name: "inferflow-{{ .env }}"
       namespace: argocd
       labels:
-        app.kubernetes.io/name: audiomind
+        app.kubernetes.io/name: inferflow
         env: "{{ .env }}"
     spec:
-      project: audiomind
+      project: inferflow
       source:
-        repoURL: https://github.com/jgallego9/audiomind-mlops.git
+        repoURL: https://github.com/jgallego9/inferflow-mlops.git
         targetRevision: "{{ .targetRevision }}"
-        path: infra/helm/audiomind
+        path: infra/helm/inferflow
         helm:
           valueFiles:
             - values.yaml

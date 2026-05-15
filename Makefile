@@ -4,7 +4,7 @@ KIND_CLUSTER_NAME   ?= inferflow
 KIND_CONFIG         ?= infra/kind/cluster.yaml
 HELM_RELEASE        ?= inferflow
 HELM_NAMESPACE      ?= inferflow
-HELM_CHART          ?= infra/helm/audiomind
+HELM_CHART          ?= infra/helm/inferflow
 HELM_VALUES         ?= $(HELM_CHART)/values-dev.yaml
 
 # Infrastructure charts
@@ -148,7 +148,7 @@ helm-lint:  ## Lint the Helm chart
 	@command -v helm >/dev/null 2>&1 || { echo "ERROR: helm is required."; exit 127; }
 	helm lint $(HELM_CHART) -f $(HELM_VALUES)
 
-helm-install:  ## Install the AudioMind Helm release
+helm-install:  ## Install the Inferflow Helm release
 	@test -f $(HELM_CHART)/Chart.yaml || { echo "ERROR: Helm chart not found at $(HELM_CHART). Complete F2-2 before running this target."; exit 2; }
 	@command -v helm >/dev/null 2>&1 || { echo "ERROR: helm is required. Install it from https://helm.sh/docs/intro/install/"; exit 127; }
 	helm dependency build $(HELM_CHART)
@@ -157,7 +157,7 @@ helm-install:  ## Install the AudioMind Helm release
 		--namespace $(HELM_NAMESPACE) --create-namespace \
 		-f $(HELM_VALUES)
 
-helm-upgrade:  ## Upgrade (or install if absent) the AudioMind Helm release
+helm-upgrade:  ## Upgrade (or install if absent) the Inferflow Helm release
 	@test -f $(HELM_CHART)/Chart.yaml || { echo "ERROR: Helm chart not found at $(HELM_CHART). Complete F2-2 before running this target."; exit 2; }
 	@command -v helm >/dev/null 2>&1 || { echo "ERROR: helm is required. Install it from https://helm.sh/docs/intro/install/"; exit 127; }
 	helm dependency build $(HELM_CHART)
@@ -256,10 +256,10 @@ helm-eso-install:  ## Install External Secrets Operator
 # ---------------------------------------------------------------------------
 # Namespace setup (F2-6)
 # ---------------------------------------------------------------------------
-infra-namespaces:  ## Apply ResourceQuota and LimitRange to the audiomind namespace
+infra-namespaces:  ## Apply ResourceQuota and LimitRange to the inferflow namespace
 	@command -v kubectl >/dev/null 2>&1 || { echo "ERROR: kubectl is required."; exit 127; }
 	kubectl create namespace $(HELM_NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
-	kubectl apply -f infra/k8s/namespaces/audiomind/
+	kubectl apply -f infra/k8s/namespaces/inferflow/
 
 # ---------------------------------------------------------------------------
 # Full local infra bootstrap (F2-3 through F2-8 in order)
@@ -272,7 +272,7 @@ infra-up:  ## Bootstrap the full local infra stack on a running kind cluster
 	$(MAKE) helm-eso-install
 	$(MAKE) helm-install
 	@echo ""
-	@echo "✓ Full AudioMind infra deployed. Run 'make kind-status' to verify."
+	@echo "✓ Full Inferflow infra deployed. Run 'make kind-status' to verify."
 
 # ---------------------------------------------------------------------------
 # CI gate (runs locally exactly what CI runs)

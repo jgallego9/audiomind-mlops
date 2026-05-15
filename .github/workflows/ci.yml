@@ -1,6 +1,6 @@
 # .github/workflows/ci.yml
 #
-# CI/CD pipeline for AudioMind MLOps.
+# CI/CD pipeline for Inferflow MLOps.
 #
 # Jobs:
 #   1. lint-test   — ruff + mypy + pytest (all branches & PRs)
@@ -75,10 +75,10 @@ jobs:
       - name: Pytest
         run: uv run pytest
 
-      - name: Helm lint — audiomind chart
+      - name: Helm lint — inferflow chart
         run: |
           curl -sSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-          helm lint infra/helm/audiomind
+          helm lint infra/helm/inferflow
 
       - name: YAML lint — infra/k8s
         run: uv run yamllint -d relaxed infra/k8s/
@@ -209,18 +209,18 @@ jobs:
       - name: Bump api-gateway image tag
         run: |
           yq -i '.apiGateway.image.tag = "${{ steps.release.outputs.tag }}"' \
-            infra/helm/audiomind/values.yaml
+            infra/helm/inferflow/values.yaml
 
       - name: Bump worker image tag
         run: |
           yq -i '.worker.image.tag = "${{ steps.release.outputs.tag }}"' \
-            infra/helm/audiomind/values.yaml
+            infra/helm/inferflow/values.yaml
 
       - name: Commit & push
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add infra/helm/audiomind/values.yaml
+          git add infra/helm/inferflow/values.yaml
           # Exit cleanly if nothing changed (idempotent).
           git diff --cached --quiet && exit 0
           git commit --no-verify \

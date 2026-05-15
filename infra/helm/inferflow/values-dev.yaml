@@ -1,0 +1,96 @@
+# ---------------------------------------------------------------------------
+# values-dev.yaml — kind cluster overlay
+#
+# Usage:
+#   helm install inferflow infra/helm/inferflow \
+#     -f infra/helm/inferflow/values-dev.yaml \
+#     --namespace inferflow --create-namespace
+# ---------------------------------------------------------------------------
+
+apiGateway:
+  image:
+    pullPolicy: Never   # images loaded via: kind load docker-image <image>
+  replicaCount: 1
+  service:
+    type: NodePort      # reachable from host via kind port mapping
+  hpa:
+    enabled: false
+  # PDB with minAvailable: 1 blocks ALL voluntary disruptions when replicaCount: 1.
+  # Disable in dev to allow node drain and rolling upgrades.
+  pdb:
+    enabled: false
+
+worker:
+  image:
+    pullPolicy: Never
+  replicaCount: 1
+  pdb:
+    enabled: false
+
+redis:
+  master:
+    persistence:
+      enabled: false
+
+qdrant:
+  persistence:
+    enabled: false
+
+# vLLM — disabled in kind dev cluster by default (no GPU available).
+# To test the chart rendering with vLLM:
+#   helm template inferflow infra/helm/inferflow -f values-dev.yaml --set vllm.enabled=true
+vllm:
+  enabled: false
+  image:
+    pullPolicy: Never   # image loaded via: kind load docker-image vllm/vllm-openai:v0.6.6
+  # Override GPU resources — kind nodes have no GPU device plugin.
+  resources:
+    requests:
+      cpu: "500m"
+      memory: 2Gi
+    limits:
+      cpu: "2000m"
+      memory: 4Gi
+  nodeSelector: {}   # remove GPU node requirement for kind
+  tolerations: []
+  persistence:
+    enabled: false   # avoid PVC dependency in dev
+
+# ---------------------------------------------------------------------------
+# Pipeline steps — dev overrides
+# ---------------------------------------------------------------------------
+modelsCache:
+  size: 2Gi
+
+pipelines:
+  audio-rag:
+    enabled: true
+    steps:
+      transcribe:
+        image: "ghcr.io/jgallego9/step-stt-whisper:latest"
+        replicas: 1
+        # modelVolume intentionally kept — even in dev we want the path mounted.
+        # Set imagePullPolicy to Never if using a locally loaded image.
+        imagePullPolicy: Never
+      embed:
+        image: "ghcr.io/jgallego9/step-embed-fastembed:latest"
+        replicas: 1
+        imagePullPolicy: Never
+        hpa:
+          enabled: false
+      index:
+        image: "ghcr.io/jgallego9/step-vector-index-qdrant:latest"
+        imagePullPolicy: Never
+      search:
+        image: "ghcr.io/jgallego9/step-vector-search-qdrant:latest"
+        imagePullPolicy: Never
+  image-search:
+    enabled: true
+    steps:
+      embed:
+        image: "ghcr.io/jgallego9/step-vision-clip:latest"
+        replicas: 1
+        imagePullPolicy: Never
+      search:
+        image: "ghcr.io/jgallego9/step-vector-search-qdrant:latest"
+        imagePullPolicy: Never

@@ -17,7 +17,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: AnalysisTemplate
 metadata:
   name: vllm-success-rate
-  namespace: audiomind
+  namespace: inferflow
 spec:
   args:
     # Passed by the Rollout's analysis.args block so the Prometheus address can
@@ -42,9 +42,9 @@ spec:
         prometheus:
           address: "{{args.prometheus-url}}"
           query: |
-            sum(rate(vllm:request_success_total{namespace="audiomind"}[5m]))
+            sum(rate(vllm:request_success_total{namespace="inferflow"}[5m]))
             /
-            sum(rate(vllm:e2e_request_latency_seconds_count{namespace="audiomind"}[5m]))
+            sum(rate(vllm:e2e_request_latency_seconds_count{namespace="inferflow"}[5m]))
 
     # ── Metric 2: P95 end-to-end latency ─────────────────────────────────────
     # Measures the P95 latency of vLLM requests.  Abort if > 2 s.
@@ -61,6 +61,6 @@ spec:
             histogram_quantile(
               0.95,
               sum(
-                rate(vllm:e2e_request_latency_seconds_bucket{namespace="audiomind"}[5m])
+                rate(vllm:e2e_request_latency_seconds_bucket{namespace="inferflow"}[5m])
               ) by (le)
             )

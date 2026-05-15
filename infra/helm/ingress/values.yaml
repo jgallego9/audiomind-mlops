@@ -1,4 +1,4 @@
-# AudioMind Ingress — base values.
+# Inferflow Ingress — base values.
 
 ingressNginx:
   enabled: true

@@ -1,0 +1,41 @@
+# LimitRange for the inferflow namespace.
+#
+# Enforces default resource requests/limits for containers that don't set them,
+# and prevents a single container from exhausting the node.
+#
+# Ref: https://kubernetes.io/docs/concepts/policy/limit-range/
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: inferflow-limitrange
+  namespace: inferflow
+spec:
+  limits:
+    # ── Container defaults ───────────────────────────────────────────────────
+    - type: Container
+      default:
+        cpu: "500m"
+        memory: 512Mi
+      defaultRequest:
+        cpu: "100m"
+        memory: 128Mi
+      # Hard caps per container to prevent resource monopolisation
+      max:
+        cpu: "8"
+        memory: 24Gi
+      min:
+        cpu: "50m"
+        memory: 64Mi
+
+    # ── Pod limits (sum of all containers) ───────────────────────────────────
+    - type: Pod
+      max:
+        cpu: "16"
+        memory: 32Gi
+
+    # ── PersistentVolumeClaim limits ─────────────────────────────────────────
+    - type: PersistentVolumeClaim
+      max:
+        storage: 50Gi
+      min:
+        storage: 1Gi

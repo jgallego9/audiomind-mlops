@@ -136,9 +136,9 @@ module "gke" {
 
 # ─── Artifact Registry ────────────────────────────────────────────────────────
 
-resource "google_artifact_registry_repository" "audiomind" {
+resource "google_artifact_registry_repository" "inferflow" {
   location      = var.region
-  repository_id = "audiomind"
+  repository_id = "inferflow"
   format        = "DOCKER"
-  description   = "AudioMind MLOps container images"
+  description   = "Inferflow MLOps container images"
 }

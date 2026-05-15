@@ -2,7 +2,7 @@
 # terraform.tfvars is excluded from git — never commit AWS credentials or account IDs.
 
 aws_region         = "us-east-1"
-cluster_name       = "audiomind"
+cluster_name       = "inferflow"
 kubernetes_version = "1.33"
 
 # CPU node group

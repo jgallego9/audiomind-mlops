@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "inferflow.worker.fullname" . }}
+  labels:
+    {{- include "inferflow.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+spec:
+  replicas: {{ .Values.worker.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "inferflow.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      labels:
+        {{- include "inferflow.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: worker
+    spec:
+      serviceAccountName: {{ include "inferflow.serviceAccountName" . }}
+      containers:
+        - name: worker
+          image: "{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}"
+          imagePullPolicy: {{ .Values.worker.image.pullPolicy }}
+          env:
+            # --- sourced from values (list, stable order) ---
+            {{- toYaml .Values.worker.env | nindent 12 }}
+            # --- internal service URLs derived from release name ---
+            - name: REDIS_URL
+              value: {{ include "inferflow.redisUrl" . | quote }}
+            - name: QDRANT_URL
+              value: {{ include "inferflow.qdrantUrl" . | quote }}
+          ports:
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.worker.resources | nindent 12 }}

@@ -16,6 +16,6 @@ This checks required input/output compatibility between adjacent steps.
 
 ## 3. Enable in Helm values
 
-Add `.Values.pipelines.<name>` in `infra/helm/audiomind/values.yaml`.
+Add `.Values.pipelines.<name>` in `infra/helm/inferflow/values.yaml`.
 
-No template changes are required in `infra/helm/audiomind/templates/steps/`.
+No template changes are required in `infra/helm/inferflow/templates/steps/`.

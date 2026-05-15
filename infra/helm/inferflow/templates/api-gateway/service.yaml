@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "inferflow.apiGateway.fullname" . }}
+  labels:
+    {{- include "inferflow.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api-gateway
+spec:
+  type: {{ .Values.apiGateway.service.type }}
+  ports:
+    - port: {{ .Values.apiGateway.service.port }}
+      targetPort: {{ .Values.apiGateway.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "inferflow.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: api-gateway

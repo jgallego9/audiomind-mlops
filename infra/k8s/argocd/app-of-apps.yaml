@@ -1,14 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: audiomind-root
+  name: inferflow-root
   namespace: argocd
   # This is the "bootstrap" application installed manually once.
   # After installation, ArgoCD self-manages everything via GitOps.
   annotations:
     argocd.argoproj.io/sync-wave: "0"
   labels:
-    app.kubernetes.io/name: audiomind-root
+    app.kubernetes.io/name: inferflow-root
     app.kubernetes.io/component: gitops-bootstrap
   # Remove the application AND its children when this object is deleted.
   finalizers:
@@ -17,7 +17,7 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/jgallego9/audiomind-mlops.git
+    repoURL: https://github.com/jgallego9/inferflow-mlops.git
     targetRevision: HEAD
     # Points at the directory containing all ArgoCD manifests:
     # applicationset.yaml, project.yaml, and this file itself.

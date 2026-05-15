@@ -14,12 +14,12 @@ package = false
 members = ["services/*", "steps/*", "tools/*"]
 
 [tool.uv.sources]
-audiomind-shared = { workspace = true }
+inferflow-shared = { workspace = true }
 inferflow-step-sdk = { workspace = true }
 
 [dependency-groups]
 dev = [
-    "audiomind-shared",
+    "inferflow-shared",
     "inferflow-step-sdk",
     "fakeredis>=2.26",
     "httpx>=0.28",
@@ -71,7 +71,7 @@ python_version = "3.13"
 strict = true
 plugins = ["pydantic.mypy"]
 explicit_package_bases = true
-# Make audiomind-shared (editable install via .pth hook) visible to mypy.
+# Make inferflow-shared (editable install via .pth hook) visible to mypy.
 mypy_path = ["services/shared"]
 
 [tool.pydantic-mypy]

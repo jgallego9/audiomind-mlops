@@ -4,8 +4,8 @@ import logging
 import time
 from datetime import UTC, datetime
 
-from audiomind_shared.schemas import TranscribeStreamMessage
-from audiomind_shared.streams import CONSUMER_GROUP, JOB_KEY_PREFIX, STREAM_KEY
+from inferflow_shared.schemas import TranscribeStreamMessage
+from inferflow_shared.streams import CONSUMER_GROUP, JOB_KEY_PREFIX, STREAM_KEY
 from prometheus_client import Counter, Histogram
 from pydantic import ValidationError
 from qdrant_client import AsyncQdrantClient
@@ -21,15 +21,15 @@ logger = logging.getLogger(__name__)
 
 # Prometheus metrics
 JOBS_PROCESSED_TOTAL = Counter(
-    "audiomind_worker_jobs_processed_total",
+    "inferflow_worker_jobs_processed_total",
     "Total number of jobs successfully processed",
 )
 JOBS_FAILED_TOTAL = Counter(
-    "audiomind_worker_jobs_failed_total",
+    "inferflow_worker_jobs_failed_total",
     "Total number of jobs that failed processing",
 )
 JOB_DURATION_SECONDS = Histogram(
-    "audiomind_worker_job_duration_seconds",
+    "inferflow_worker_job_duration_seconds",
     "Duration of job processing in seconds",
     buckets=[0.1, 0.5, 1.0, 2.0, 5.0, 10.0, 30.0, 60.0, 120.0],
 )

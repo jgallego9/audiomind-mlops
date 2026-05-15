@@ -4,21 +4,21 @@
 # The job:
 #   1. Samples recent and reference embedding vectors from Qdrant.
 #   2. Runs Evidently DataDriftPreset (PSI method).
-#   3. Pushes audiomind_embedding_drift_share and
-#      audiomind_embedding_drift_detected to the Prometheus Push Gateway.
+#   3. Pushes inferflow_embedding_drift_share and
+#      inferflow_embedding_drift_detected to the Prometheus Push Gateway.
 #   4. Exits non-zero (and the Job fails) when dataset drift is detected,
 #      which triggers a Prometheus alert via the PrometheusRule in
-#      prometheusrule-audiomind.yaml.
+#      prometheusrule-inferflow.yaml.
 #
 # Push Gateway is part of kube-prometheus-stack.  Metrics are scraped from
 # it by the existing prometheus-pushgateway ServiceMonitor.
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: audiomind-drift-detector
-  namespace: audiomind
+  name: inferflow-drift-detector
+  namespace: inferflow
   labels:
-    app.kubernetes.io/name: audiomind
+    app.kubernetes.io/name: inferflow
     app.kubernetes.io/component: drift-detector
 spec:
   # Run every 6 hours
@@ -37,24 +37,24 @@ spec:
       template:
         metadata:
           labels:
-            app.kubernetes.io/name: audiomind
+            app.kubernetes.io/name: inferflow
             app.kubernetes.io/component: drift-detector
         spec:
           restartPolicy: OnFailure
-          serviceAccountName: audiomind
+          serviceAccountName: inferflow
           containers:
             - name: drift-detector
-              image: ghcr.io/jgallego9/audiomind-mlops/drift-detector:latest
+              image: ghcr.io/jgallego9/inferflow-mlops/drift-detector:latest
               imagePullPolicy: Always
               env:
                 - name: DRIFT_PUSHGATEWAY_URL
                   value: "http://prometheus-pushgateway.monitoring.svc.cluster.local:9091"
                 - name: DRIFT_JOB_NAME
-                  value: "audiomind_drift_detector"
+                  value: "inferflow_drift_detector"
                 - name: DRIFT_QDRANT_URL
-                  value: "http://qdrant.audiomind.svc.cluster.local:6333"
+                  value: "http://qdrant.inferflow.svc.cluster.local:6333"
                 - name: DRIFT_QDRANT_COLLECTION
-                  value: "audiomind"
+                  value: "inferflow"
                 - name: DRIFT_QDRANT_SAMPLE_SIZE
                   value: "500"
                 - name: DRIFT_QDRANT_REFERENCE_SIZE

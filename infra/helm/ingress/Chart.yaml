@@ -1,7 +1,7 @@
 apiVersion: v2
-name: audiomind-ingress
+name: inferflow-ingress
 description: >
-  Umbrella chart for AudioMind ingress infrastructure:
+  Umbrella chart for Inferflow ingress infrastructure:
   ingress-nginx (ingress controller) and cert-manager (TLS certificate management).
 type: application
 version: 0.1.0

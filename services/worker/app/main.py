@@ -1,6 +1,6 @@
-"""AudioMind async inference worker.
+"""Inferflow async inference worker.
 
-Consumes transcription jobs from the ``audiomind:jobs`` Redis Stream,
+Consumes transcription jobs from the ``inferflow:jobs`` Redis Stream,
 processes them (mock ASR for now), and stores results in Redis Hashes.
 
 Usage:
@@ -12,7 +12,7 @@ import logging
 import signal
 import uuid
 
-from audiomind_shared.pipeline import load_pipelines
+from inferflow_shared.pipeline import load_pipelines
 from prometheus_client import start_http_server
 from qdrant_client import AsyncQdrantClient
 from redis.asyncio import Redis
