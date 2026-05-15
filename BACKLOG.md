@@ -287,7 +287,7 @@ Instalar: `make pre-commit-install`. Ejecutar en todos los ficheros: `make pre-c
   - Api-gateway expone `POST /v1/pipelines/{pipeline_id}/jobs` y `GET /v1/pipelines` (lista pipelines activos con su schema de input); elimina la ruta `/jobs` hardcodeada a `"transcribe"`
   - El router valida el payload de entrada contra el `schema.json` del primer step antes de encolar; errores de validación devuelven 422 con campo exacto
 
-- [ ] **F7-4** Helm chart genérico por pipeline — el chart principal instala runtime compartido; por cada pipeline en `pipelines/` el chart genera Deployments para sus steps vía `range`:
+- [x] **F7-4** Helm chart genérico por pipeline — el chart principal instala runtime compartido; por cada pipeline en `pipelines/` el chart genera Deployments para sus steps vía `range`:
   ```yaml
   # values.yaml
   pipelines:

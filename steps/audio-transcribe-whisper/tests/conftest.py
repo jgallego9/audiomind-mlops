@@ -35,4 +35,3 @@ def _restore_step_app() -> None:
     import app.config  # noqa: F401
     import app.main  # noqa: F401
     import app.step  # noqa: F401
-

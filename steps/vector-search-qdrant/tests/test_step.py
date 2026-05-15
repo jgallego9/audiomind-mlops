@@ -35,7 +35,9 @@ async def test_predict_returns_results(
     request = InferRequest(
         model_name="vector-search-qdrant",
         inputs=[
-            Tensor(name="vector", datatype="FP32", shape=[4], data=[0.1, 0.2, 0.3, 0.4]),
+            Tensor(
+                name="vector", datatype="FP32", shape=[4], data=[0.1, 0.2, 0.3, 0.4]
+            ),
             Tensor(name="top_k", datatype="INT64", shape=[1], data=[3]),
         ],
     )
@@ -60,7 +62,9 @@ async def test_predict_uses_default_top_k(
     request = InferRequest(
         model_name="vector-search-qdrant",
         inputs=[
-            Tensor(name="vector", datatype="FP32", shape=[4], data=[0.1, 0.2, 0.3, 0.4]),
+            Tensor(
+                name="vector", datatype="FP32", shape=[4], data=[0.1, 0.2, 0.3, 0.4]
+            ),
         ],
     )
     await step.predict(request)
@@ -90,7 +94,9 @@ async def test_predict_passes_filter(
     request = InferRequest(
         model_name="vector-search-qdrant",
         inputs=[
-            Tensor(name="vector", datatype="FP32", shape=[4], data=[0.1, 0.2, 0.3, 0.4]),
+            Tensor(
+                name="vector", datatype="FP32", shape=[4], data=[0.1, 0.2, 0.3, 0.4]
+            ),
             Tensor(name="filters", datatype="BYTES", shape=[1], data=[filters]),
         ],
     )

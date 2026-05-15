@@ -143,12 +143,12 @@ class VectorIndexQdrantStep(BaseStep):
             points=[PointStruct(id=doc_id, vector=vector, payload=payload)],
         )
         logger.info(
-            "vector_indexed id=%s collection=%s", doc_id, self._settings.qdrant_collection
+            "vector_indexed id=%s collection=%s",
+            doc_id,
+            self._settings.qdrant_collection,
         )
 
         return InferResponse(
             model_name=self.name,
-            outputs=[
-                Tensor(name="indexed", datatype="BOOL", shape=[1], data=[True])
-            ],
+            outputs=[Tensor(name="indexed", datatype="BOOL", shape=[1], data=[True])],
         )

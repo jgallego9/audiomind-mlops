@@ -37,7 +37,9 @@ async def test_predict_indexes_vector(
         model_name="vector-index-qdrant",
         inputs=[
             Tensor(name="id", datatype="BYTES", shape=[1], data=["doc-1"]),
-            Tensor(name="vector", datatype="FP32", shape=[4], data=[0.1, 0.2, 0.3, 0.4]),
+            Tensor(
+                name="vector", datatype="FP32", shape=[4], data=[0.1, 0.2, 0.3, 0.4]
+            ),
             Tensor(
                 name="metadata",
                 datatype="BYTES",
@@ -62,7 +64,9 @@ async def test_predict_creates_collection_when_missing(
         model_name="vector-index-qdrant",
         inputs=[
             Tensor(name="id", datatype="BYTES", shape=[1], data=["doc-2"]),
-            Tensor(name="vector", datatype="FP32", shape=[4], data=[0.1, 0.2, 0.3, 0.4]),
+            Tensor(
+                name="vector", datatype="FP32", shape=[4], data=[0.1, 0.2, 0.3, 0.4]
+            ),
         ],
     )
     await step.predict(request)
@@ -88,7 +92,9 @@ async def test_predict_skips_create_when_collection_exists(
         model_name="vector-index-qdrant",
         inputs=[
             Tensor(name="id", datatype="BYTES", shape=[1], data=["doc-3"]),
-            Tensor(name="vector", datatype="FP32", shape=[4], data=[0.1, 0.2, 0.3, 0.4]),
+            Tensor(
+                name="vector", datatype="FP32", shape=[4], data=[0.1, 0.2, 0.3, 0.4]
+            ),
         ],
     )
     await step.predict(request)
@@ -103,7 +109,9 @@ async def test_predict_missing_id_raises(
     request = InferRequest(
         model_name="vector-index-qdrant",
         inputs=[
-            Tensor(name="vector", datatype="FP32", shape=[4], data=[0.1, 0.2, 0.3, 0.4]),
+            Tensor(
+                name="vector", datatype="FP32", shape=[4], data=[0.1, 0.2, 0.3, 0.4]
+            ),
         ],
     )
     with pytest.raises(ValueError, match="id"):

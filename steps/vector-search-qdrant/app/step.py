@@ -126,7 +126,9 @@ class VectorSearchQdrantStep(BaseStep):
         query_vector = _get_floats(request.inputs, "vector")
         top_k = _get_int(request.inputs, "top_k", self._settings.default_top_k)
         filters_raw = _get_bytes(request.inputs, "filters", "{}")
-        qdrant_filter = json.loads(filters_raw) if filters_raw.strip() not in ("{}", "") else None
+        qdrant_filter = (
+            json.loads(filters_raw) if filters_raw.strip() not in ("{}", "") else None
+        )
 
         hits = await self._client.search(
             collection_name=self._settings.qdrant_collection,

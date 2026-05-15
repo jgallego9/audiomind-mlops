@@ -55,3 +55,32 @@ vllm:
   tolerations: []
   persistence:
     enabled: false   # avoid PVC dependency in dev
+
+# ---------------------------------------------------------------------------
+# Pipeline steps — dev overrides
+# ---------------------------------------------------------------------------
+modelsCache:
+  size: 2Gi
+
+pipelines:
+  audio-rag:
+    enabled: true
+    steps:
+      transcribe:
+        image: "ghcr.io/jgallego9/step-stt-whisper:latest"
+        replicas: 1
+        # modelVolume intentionally kept — even in dev we want the path mounted.
+        # Set imagePullPolicy to Never if using a locally loaded image.
+        imagePullPolicy: Never
+      embed:
+        image: "ghcr.io/jgallego9/step-embed-fastembed:latest"
+        replicas: 1
+        imagePullPolicy: Never
+        hpa:
+          enabled: false
+      index:
+        image: "ghcr.io/jgallego9/step-vector-index-qdrant:latest"
+        imagePullPolicy: Never
+      search:
+        image: "ghcr.io/jgallego9/step-vector-search-qdrant:latest"
+        imagePullPolicy: Never
