@@ -1,0 +1,35 @@
+{
+  "task": "text-rerank",
+  "version": "1.0",
+  "description": "Re-ranks a list of candidate documents given a query using a cross-encoder",
+  "inputs": [
+    {
+      "name": "query",
+      "datatype": "BYTES",
+      "shape": [1],
+      "description": "Search query text",
+      "required": true
+    },
+    {
+      "name": "documents",
+      "datatype": "BYTES",
+      "shape": [-1],
+      "description": "JSON-encoded list of candidate document strings to re-rank",
+      "required": true
+    }
+  ],
+  "outputs": [
+    {
+      "name": "ranked_indices",
+      "datatype": "INT64",
+      "shape": [-1],
+      "description": "Original indices of documents sorted by relevance score (descending)"
+    },
+    {
+      "name": "scores",
+      "datatype": "FP32",
+      "shape": [-1],
+      "description": "Relevance scores (same order as ranked_indices)"
+    }
+  ]
+}

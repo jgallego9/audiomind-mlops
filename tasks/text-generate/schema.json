@@ -1,0 +1,43 @@
+{
+  "task": "text-generate",
+  "version": "1.0",
+  "description": "Generates text from a prompt using a language model",
+  "inputs": [
+    {
+      "name": "prompt",
+      "datatype": "BYTES",
+      "shape": [1],
+      "description": "Input prompt text",
+      "required": true
+    },
+    {
+      "name": "system_prompt",
+      "datatype": "BYTES",
+      "shape": [1],
+      "description": "Optional system/instruction prompt",
+      "required": false
+    },
+    {
+      "name": "max_tokens",
+      "datatype": "INT64",
+      "shape": [1],
+      "description": "Maximum tokens to generate",
+      "required": false,
+      "default": 512
+    }
+  ],
+  "outputs": [
+    {
+      "name": "text",
+      "datatype": "BYTES",
+      "shape": [1],
+      "description": "Generated text response"
+    },
+    {
+      "name": "tokens_used",
+      "datatype": "INT64",
+      "shape": [1],
+      "description": "Total tokens consumed (prompt + completion)"
+    }
+  ]
+}

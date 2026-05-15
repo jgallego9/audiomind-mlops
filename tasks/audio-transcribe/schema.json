@@ -1,0 +1,42 @@
+{
+  "task": "audio-transcribe",
+  "version": "1.0",
+  "description": "Transcribes audio content into text",
+  "inputs": [
+    {
+      "name": "audio_url",
+      "datatype": "BYTES",
+      "shape": [1],
+      "description": "URL of the audio file to transcribe",
+      "required": true
+    },
+    {
+      "name": "language",
+      "datatype": "BYTES",
+      "shape": [1],
+      "description": "Language hint ('en', 'es', …) or 'auto' for detection",
+      "required": false,
+      "default": "auto"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "transcript",
+      "datatype": "BYTES",
+      "shape": [1],
+      "description": "Full transcription text"
+    },
+    {
+      "name": "language",
+      "datatype": "BYTES",
+      "shape": [1],
+      "description": "Detected or requested language code"
+    },
+    {
+      "name": "duration",
+      "datatype": "FP32",
+      "shape": [1],
+      "description": "Audio duration in seconds"
+    }
+  ]
+}

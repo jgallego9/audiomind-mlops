@@ -1,0 +1,13 @@
+[project]
+name = "inferflow-step-sdk"
+version = "0.1.0"
+description = "KServe V2 protocol base classes for inferflow pipeline steps"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.115",
+    "pydantic>=2.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

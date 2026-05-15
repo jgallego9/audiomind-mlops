@@ -77,10 +77,13 @@ format:  ## Run ruff formatter
 	uv run ruff format .
 
 SHARED_PATH := $(shell pwd)/services/shared
+STEP_SDK_PATH := $(shell pwd)/services/step-sdk
 
 typecheck:  ## Run mypy type checker per service (avoids dual-app namespace conflict)
 	cd services/api-gateway && MYPYPATH=$(SHARED_PATH) uv run mypy app/
 	cd services/worker && MYPYPATH=$(SHARED_PATH) uv run mypy app/
+	cd services/step-sdk && uv run mypy inferflow_step_sdk/
+	cd steps/audio-transcribe-whisper && MYPYPATH=$(STEP_SDK_PATH) uv run mypy app/
 
 pre-commit-run:  ## Run pre-commit on all files
 	uv run pre-commit run --all-files

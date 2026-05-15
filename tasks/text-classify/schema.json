@@ -1,0 +1,34 @@
+{
+  "task": "text-classify",
+  "version": "1.0",
+  "description": "Classifies text into one or more predefined categories",
+  "inputs": [
+    {
+      "name": "text",
+      "datatype": "BYTES",
+      "shape": [1],
+      "description": "Input text to classify",
+      "required": true
+    }
+  ],
+  "outputs": [
+    {
+      "name": "label",
+      "datatype": "BYTES",
+      "shape": [1],
+      "description": "Predicted class label"
+    },
+    {
+      "name": "score",
+      "datatype": "FP32",
+      "shape": [1],
+      "description": "Confidence score for the top label (0.0–1.0)"
+    },
+    {
+      "name": "scores",
+      "datatype": "FP32",
+      "shape": [-1],
+      "description": "Confidence scores for all candidate labels (same order as labels)"
+    }
+  ]
+}

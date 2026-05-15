@@ -1,0 +1,44 @@
+{
+  "task": "text-chunk",
+  "version": "1.0",
+  "description": "Splits a long text into overlapping chunks suitable for embedding",
+  "inputs": [
+    {
+      "name": "text",
+      "datatype": "BYTES",
+      "shape": [1],
+      "description": "Input text to chunk",
+      "required": true
+    },
+    {
+      "name": "chunk_size",
+      "datatype": "INT64",
+      "shape": [1],
+      "description": "Maximum tokens per chunk",
+      "required": false,
+      "default": 512
+    },
+    {
+      "name": "overlap",
+      "datatype": "INT64",
+      "shape": [1],
+      "description": "Overlap in tokens between consecutive chunks",
+      "required": false,
+      "default": 64
+    }
+  ],
+  "outputs": [
+    {
+      "name": "chunks",
+      "datatype": "BYTES",
+      "shape": [-1],
+      "description": "JSON-encoded list of text chunk strings"
+    },
+    {
+      "name": "chunk_count",
+      "datatype": "INT64",
+      "shape": [1],
+      "description": "Number of chunks produced"
+    }
+  ]
+}

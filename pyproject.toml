@@ -11,14 +11,16 @@ dependencies = []
 package = false
 
 [tool.uv.workspace]
-members = ["services/*"]
+members = ["services/*", "steps/*"]
 
 [tool.uv.sources]
 audiomind-shared = { workspace = true }
+inferflow-step-sdk = { workspace = true }
 
 [dependency-groups]
 dev = [
     "audiomind-shared",
+    "inferflow-step-sdk",
     "fakeredis>=2.26",
     "httpx>=0.28",
     "mypy>=2.0",
@@ -84,15 +86,15 @@ ignore_missing_imports = true
 # Pytest + coverage
 # ---------------------------------------------------------------------------
 [tool.pytest.ini_options]
-testpaths = ["services", "tests"]
+testpaths = ["services", "steps", "tests"]
 asyncio_mode = "auto"
 # importlib avoids module-name collisions between same-named test packages
 # across multiple service directories.
-addopts = "--cov=services --cov-report=term-missing --cov-report=xml --import-mode=importlib"
+addopts = "--cov=services --cov=steps --cov-report=term-missing --cov-report=xml --import-mode=importlib"
 
 
 [tool.coverage.run]
-source = ["services"]
+source = ["services", "steps"]
 omit = ["*/tests/*", "*/__init__.py"]
 
 [tool.coverage.report]
