@@ -315,7 +315,7 @@ Instalar: `make pre-commit-install`. Ejecutar en todos los ficheros: `make pre-c
 
 - [x] **F7-5** Demo de segundo pipeline — `pipelines/image-search/`: Image→CLIP→Qdrant, sin modificar runtime ni templates Helm. Valida que la plataforma es realmente genérica: el único código nuevo son `steps/vision-clip/` (nueva tarea: vision-embedding) y `pipelines/image-search/pipeline.yaml`; `step-vector-index-qdrant` y `step-vector-search-qdrant` se reutilizan sin cambios
 
-- [ ] **F7-6** CI por step — `steps/<name>/VERSION` como fuente de verdad del tag; GitHub Actions `step-ci.yml` con path filter: build + test + trivy scan + push a GHCR únicamente para los steps cuyos ficheros cambiaron en el PR; matriz dinámica generada con `git diff --name-only` para no buildear steps no modificados
+- [x] **F7-6** CI por step — `steps/<name>/VERSION` como fuente de verdad del tag; GitHub Actions `step-ci.yml` con path filter: build + test + trivy scan + push a GHCR únicamente para los steps cuyos ficheros cambiaron en el PR; matriz dinámica generada con `git diff --name-only` para no buildear steps no modificados
 
 - [ ] **F7-7** `inferflow` CLI — herramienta de developer experience dedicada, moderna y visualmente cuidada:
   > **Por qué no `make`**: Make no tiene discoverabilidad real, no hace tab-completion, no valida argumentos, es difícil en Windows y no permite prompts interactivos. Las herramientas del ecosistema ML más exitosas (BentoML, Modal, Replicate/Cog, ZenML) usan CLI dedicadas por la misma razón. `make` se conserva únicamente para targets de CI.
