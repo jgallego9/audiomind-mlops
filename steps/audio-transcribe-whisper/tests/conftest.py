@@ -25,6 +25,9 @@ def _restore_step_app() -> None:
     root (which is first in sys.path after collection) so that intra-test
     imports like ``from app.main import create_app`` find the correct module.
     """
+    # Ensure this step's root is first in sys.path
+    if not sys.path or sys.path[0] != _STEP_ROOT:
+        sys.path.insert(0, _STEP_ROOT)
     for _k in list(sys.modules):
         if _k == "app" or _k.startswith("app."):
             del sys.modules[_k]

@@ -1,0 +1,33 @@
+name: vector-index-qdrant
+version: "1"
+task: vector-index
+description: Upserts a vector and its metadata payload into Qdrant. Creates the collection automatically if it does not exist.
+port: 8080
+
+inputs:
+  - name: id
+    datatype: BYTES
+    shape: [1]
+    description: "Unique document identifier"
+    required: true
+  - name: vector
+    datatype: FP32
+    shape: [-1]
+    description: "Dense embedding vector to index"
+    required: true
+  - name: metadata
+    datatype: BYTES
+    shape: [1]
+    description: "JSON-encoded dict of metadata fields to store alongside the vector"
+    required: false
+
+outputs:
+  - name: indexed
+    datatype: BOOL
+    shape: [1]
+    description: "True when the vector was successfully written to Qdrant"
+
+env:
+  INDEX_STEP_QDRANT_URL: "http://qdrant:6333"
+  INDEX_STEP_QDRANT_COLLECTION: "transcriptions"
+  INDEX_STEP_VECTOR_SIZE: "384"

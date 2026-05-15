@@ -1,0 +1,17 @@
+[project]
+name = "step-vector-search-qdrant"
+version = "0.1.0"
+description = "Inferflow step: nearest-neighbour vector search via Qdrant"
+requires-python = ">=3.13"
+dependencies = [
+    "inferflow-step-sdk",
+    "qdrant-client>=1.12",
+    "pydantic-settings>=2.0",
+    "uvicorn[standard]>=0.30",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+inferflow-step-sdk = { workspace = true }

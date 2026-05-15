@@ -1,0 +1,36 @@
+{
+  "task": "vector-search",
+  "version": "1.0",
+  "description": "Retrieves the top-k nearest neighbours from a vector store",
+  "inputs": [
+    {
+      "name": "vector",
+      "datatype": "FP32",
+      "shape": [-1],
+      "description": "Query embedding vector",
+      "required": true
+    },
+    {
+      "name": "top_k",
+      "datatype": "INT64",
+      "shape": [1],
+      "description": "Number of results to return",
+      "required": false
+    },
+    {
+      "name": "filters",
+      "datatype": "BYTES",
+      "shape": [1],
+      "description": "JSON-encoded Qdrant filter dict (optional)",
+      "required": false
+    }
+  ],
+  "outputs": [
+    {
+      "name": "results",
+      "datatype": "BYTES",
+      "shape": [1],
+      "description": "JSON-encoded list of {id, score, metadata} dicts"
+    }
+  ]
+}

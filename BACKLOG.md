@@ -244,7 +244,7 @@ Instalar: `make pre-commit-install`. Ejecutar en todos los ficheros: `make pre-c
   - Clase base `BaseStep` con validación de schema JSON automática, `@step` decorator, logging estructurado y métricas Prometheus estándar: `step_request_duration_seconds`, `step_requests_total{status}`
   - `GET /info` obligatorio: devuelve `{name, task, implementation, version, schema_input, schema_output, model_id}`; permite al router introspeccionar el step sin leer el filesystem
 
-- [ ] **F7-2** Step registry — `steps/` como catálogo organizado por tarea e implementación:
+- [x] **F7-2** Step registry — `steps/` como catálogo organizado por tarea e implementación:
   - `steps/stt-whisper/` — tarea: speech-to-text; impl: OpenAI Whisper; `STT_MODEL` configurable (`base`/`small`/`medium`/`large-v3`); pesos descargados en primer arranque a volumen `/models`, no bakeados en imagen
   - `steps/stt-faster-whisper/` — misma tarea, misma `schema.json`; impl: faster-whisper (CPU-friendly, 4× más rápido que Whisper en CPU); drop-in replacement de `step-stt-whisper` cambiando solo la `image:` en `pipeline.yaml`
   - `steps/embed-fastembed/` — tarea: embeddings; impl: FastEmbed; `EMBED_MODEL` como env var en runtime; modelo descargado a `/models`, sin rebuild
