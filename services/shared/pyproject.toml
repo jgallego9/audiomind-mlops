@@ -1,0 +1,8 @@
+[project]
+name = "audiomind-shared"
+version = "0.1.0"
+description = "Shared constants and schemas for AudioMind services"
+requires-python = ">=3.13"
+dependencies = [
+    "pydantic>=2.0",
+]

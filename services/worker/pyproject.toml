@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "AudioMind async inference worker (Redis Streams consumer)"
 requires-python = ">=3.13"
 dependencies = [
+    "audiomind-shared",
     "redis[hiredis]>=5.0",
     "pydantic-settings>=2.6",
     # Qdrant vector store (RAG pipeline)
@@ -16,3 +17,6 @@ dependencies = [
 
 [tool.uv]
 package = false
+
+[tool.uv.sources]
+audiomind-shared = { workspace = true }

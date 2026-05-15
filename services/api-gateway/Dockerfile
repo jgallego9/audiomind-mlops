@@ -14,6 +14,7 @@ ENV UV_COMPILE_BYTECODE=1 \
 COPY pyproject.toml uv.lock ./
 COPY services/api-gateway/pyproject.toml ./services/api-gateway/pyproject.toml
 COPY services/worker/pyproject.toml       ./services/worker/pyproject.toml
+COPY services/shared/pyproject.toml      ./services/shared/pyproject.toml
 
 # Install only the api-gateway dependencies (no worker deps, no dev tools).
 RUN --mount=type=cache,target=/root/.cache/uv \
@@ -34,6 +35,7 @@ COPY --from=builder /app/.venv /app/.venv
 ENV PATH="/app/.venv/bin:$PATH"
 
 # Copy application source.
+COPY services/shared ./services/shared
 COPY services/api-gateway/app ./app
 
 # Pre-download the embedding model so the first request has no cold-start.

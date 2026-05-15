@@ -76,9 +76,11 @@ lint-fix:  ## Run ruff linter with auto-fix
 format:  ## Run ruff formatter
 	uv run ruff format .
 
+SHARED_PATH := $(shell pwd)/services/shared
+
 typecheck:  ## Run mypy type checker per service (avoids dual-app namespace conflict)
-	cd services/api-gateway && uv run mypy app/
-	cd services/worker && uv run mypy app/
+	cd services/api-gateway && MYPYPATH=$(SHARED_PATH) uv run mypy app/
+	cd services/worker && MYPYPATH=$(SHARED_PATH) uv run mypy app/
 
 pre-commit-run:  ## Run pre-commit on all files
 	uv run pre-commit run --all-files

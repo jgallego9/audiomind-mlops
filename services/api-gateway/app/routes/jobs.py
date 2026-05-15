@@ -3,6 +3,8 @@ from datetime import UTC, datetime
 from typing import Annotated
 from uuid import uuid4
 
+from audiomind_shared.schemas import TranscribeStreamMessage
+from audiomind_shared.streams import JOB_KEY_PREFIX, STREAM_KEY
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from app.config import Settings, get_settings
@@ -10,9 +12,6 @@ from app.dependencies.auth import CurrentUser
 from app.dependencies.redis import RedisClient
 from app.middleware.rate_limit import limiter
 from app.models.jobs import JobStatus, TranscribeRequest, TranscribeResponse
-
-_STREAM_KEY = "audiomind:jobs"
-_JOB_KEY_PREFIX = "audiomind:job"
 
 router = APIRouter(tags=["jobs"])
 
@@ -37,7 +36,7 @@ async def transcribe(
     """
     job_id = str(uuid4())
     created_at = datetime.now(UTC).isoformat()
-    job_key = f"{_JOB_KEY_PREFIX}:{job_id}"
+    job_key = f"{JOB_KEY_PREFIX}:{job_id}"
 
     # Store initial metadata so the status endpoint is queryable immediately.
     await redis.hset(  # type: ignore[misc]
@@ -53,16 +52,14 @@ async def transcribe(
     await redis.expire(job_key, settings.job_ttl_seconds)
 
     # Publish to the stream for the worker to consume.
-    await redis.xadd(
-        _STREAM_KEY,
-        {
-            "job_id": job_id,
-            "type": "transcribe",
-            "audio_url": str(body.audio_url),
-            "language": body.language,
-            "user": current_user.subject,
-        },
+    msg = TranscribeStreamMessage(
+        job_id=job_id,
+        audio_url=str(body.audio_url),
+        language=body.language,
+        user=current_user.subject,
     )
+    # model_dump(mode="json") returns dict[str, str] — compatible with Redis xadd.
+    await redis.xadd(STREAM_KEY, msg.model_dump(mode="json"))  # type: ignore[arg-type]
 
     return TranscribeResponse(job_id=job_id, status="pending", created_at=created_at)
 
@@ -78,7 +75,7 @@ async def get_job_status(
     current_user: CurrentUser,
 ) -> JobStatus:
     """Return the current status and (when done) result of a transcription job."""
-    job_key = f"{_JOB_KEY_PREFIX}:{job_id}"
+    job_key = f"{JOB_KEY_PREFIX}:{job_id}"
     data: dict[str, str] = await redis.hgetall(job_key)  # type: ignore[misc]
 
     if not data:

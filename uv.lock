@@ -12,6 +12,7 @@ members = [
     "api-gateway",
     "audiomind-drift-detector",
     "audiomind-mlops",
+    "audiomind-shared",
     "worker",
 ]
 
@@ -153,6 +154,7 @@ name = "api-gateway"
 version = "0.1.0"
 source = { virtual = "services/api-gateway" }
 dependencies = [
+    { name = "audiomind-shared" },
     { name = "bcrypt" },
     { name = "fastapi" },
     { name = "opentelemetry-api" },
@@ -170,6 +172,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "audiomind-shared", editable = "services/shared" },
     { name = "bcrypt", specifier = ">=4.0" },
     { name = "fastapi", specifier = ">=0.115" },
     { name = "opentelemetry-api", specifier = ">=1.28" },
@@ -256,25 +259,21 @@ version = "0.1.0"
 source = { virtual = "services/drift-detector" }
 dependencies = [
     { name = "evidently" },
-    { name = "mlflow" },
     { name = "numpy" },
     { name = "pandas" },
     { name = "prometheus-client" },
     { name = "pydantic-settings" },
     { name = "qdrant-client" },
-    { name = "redis", extra = ["hiredis"] },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "evidently", specifier = ">=0.5" },
-    { name = "mlflow", specifier = ">=3.0" },
     { name = "numpy", specifier = ">=1.26" },
     { name = "pandas", specifier = ">=2.0" },
     { name = "prometheus-client", specifier = ">=0.21" },
     { name = "pydantic-settings", specifier = ">=2.6" },
     { name = "qdrant-client", specifier = ">=1.12" },
-    { name = "redis", extras = ["hiredis"], specifier = ">=5.0" },
 ]
 
 [[package]]
@@ -284,6 +283,7 @@ source = { virtual = "." }
 
 [package.dev-dependencies]
 dev = [
+    { name = "audiomind-shared" },
     { name = "fakeredis" },
     { name = "httpx" },
     { name = "mypy" },
@@ -301,6 +301,7 @@ dev = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "audiomind-shared", editable = "services/shared" },
     { name = "fakeredis", specifier = ">=2.26" },
     { name = "httpx", specifier = ">=0.28" },
     { name = "mypy", specifier = ">=2.0" },
@@ -313,6 +314,17 @@ dev = [
     { name = "ruff", specifier = ">=0.15" },
     { name = "yamllint", specifier = ">=1.38.0" },
 ]
+
+[[package]]
+name = "audiomind-shared"
+version = "0.1.0"
+source = { editable = "services/shared" }
+dependencies = [
+    { name = "pydantic" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "pydantic", specifier = ">=2.0" }]
 
 [[package]]
 name = "bcrypt"
@@ -3875,6 +3887,8 @@ name = "worker"
 version = "0.1.0"
 source = { virtual = "services/worker" }
 dependencies = [
+    { name = "audiomind-shared" },
+    { name = "mlflow" },
     { name = "prometheus-client" },
     { name = "pydantic-settings" },
     { name = "qdrant-client", extra = ["fastembed"] },
@@ -3883,6 +3897,8 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "audiomind-shared", editable = "services/shared" },
+    { name = "mlflow", specifier = ">=3.0" },
     { name = "prometheus-client", specifier = ">=0.21" },
     { name = "pydantic-settings", specifier = ">=2.6" },
     { name = "qdrant-client", extras = ["fastembed"], specifier = ">=1.12" },

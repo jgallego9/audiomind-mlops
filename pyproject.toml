@@ -13,8 +13,12 @@ package = false
 [tool.uv.workspace]
 members = ["services/*"]
 
+[tool.uv.sources]
+audiomind-shared = { workspace = true }
+
 [dependency-groups]
 dev = [
+    "audiomind-shared",
     "fakeredis>=2.26",
     "httpx>=0.28",
     "mypy>=2.0",
@@ -64,6 +68,8 @@ python_version = "3.13"
 strict = true
 plugins = ["pydantic.mypy"]
 explicit_package_bases = true
+# Make audiomind-shared (editable install via .pth hook) visible to mypy.
+mypy_path = ["services/shared"]
 
 [tool.pydantic-mypy]
 init_forbid_extra = true
@@ -78,7 +84,7 @@ ignore_missing_imports = true
 # Pytest + coverage
 # ---------------------------------------------------------------------------
 [tool.pytest.ini_options]
-testpaths = ["services"]
+testpaths = ["services", "tests"]
 asyncio_mode = "auto"
 # importlib avoids module-name collisions between same-named test packages
 # across multiple service directories.

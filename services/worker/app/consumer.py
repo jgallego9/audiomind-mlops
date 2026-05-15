@@ -4,7 +4,10 @@ import logging
 import time
 from datetime import UTC, datetime
 
+from audiomind_shared.schemas import TranscribeStreamMessage
+from audiomind_shared.streams import CONSUMER_GROUP, JOB_KEY_PREFIX, STREAM_KEY
 from prometheus_client import Counter, Histogram
+from pydantic import ValidationError
 from qdrant_client import AsyncQdrantClient
 from redis.asyncio import Redis
 from redis.exceptions import ResponseError
@@ -13,10 +16,6 @@ from app.config import Settings
 from app.indexer import index_transcription
 from app.mlflow_logger import log_inference_metrics
 from app.processors.transcribe import mock_transcribe
-
-_STREAM_KEY = "audiomind:jobs"
-_CONSUMER_GROUP = "audiomind:workers"
-_JOB_KEY_PREFIX = "audiomind:job"
 
 logger = logging.getLogger(__name__)
 
@@ -39,9 +38,9 @@ JOB_DURATION_SECONDS = Histogram(
 async def _ensure_consumer_group(redis: Redis) -> None:
     """Create the consumer group (and stream) if they do not yet exist."""
     try:
-        await redis.xgroup_create(_STREAM_KEY, _CONSUMER_GROUP, id="0", mkstream=True)
+        await redis.xgroup_create(STREAM_KEY, CONSUMER_GROUP, id="0", mkstream=True)
         logger.info(
-            "consumer_group_created group=%s stream=%s", _CONSUMER_GROUP, _STREAM_KEY
+            "consumer_group_created group=%s stream=%s", CONSUMER_GROUP, STREAM_KEY
         )
     except ResponseError as exc:
         if "BUSYGROUP" not in str(exc):
@@ -55,11 +54,19 @@ async def _process_message(
     msg_id: str,
     fields: dict[str, str],
 ) -> None:
-    job_id: str = fields.get("job_id", "")
-    audio_url: str = fields.get("audio_url", "")
-    language: str = fields.get("language", "auto")
-    user: str = fields.get("user", "")
-    job_key = f"{_JOB_KEY_PREFIX}:{job_id}"
+    try:
+        msg = TranscribeStreamMessage.model_validate(fields)
+    except ValidationError:
+        logger.exception("stream_message_invalid msg_id=%s fields=%s", msg_id, fields)
+        await redis.xack(STREAM_KEY, CONSUMER_GROUP, msg_id)
+        JOBS_FAILED_TOTAL.inc()
+        return
+
+    job_id = msg.job_id
+    audio_url = msg.audio_url
+    language = msg.language
+    user = msg.user
+    job_key = f"{JOB_KEY_PREFIX}:{job_id}"
 
     logger.info("job_start job_id=%s audio_url=%s", job_id, audio_url)
     await redis.hset(job_key, "status", "processing")  # type: ignore[misc]
@@ -123,7 +130,7 @@ async def _process_message(
         )
     finally:
         JOB_DURATION_SECONDS.observe(_elapsed or (time.monotonic() - start_time))
-        await redis.xack(_STREAM_KEY, _CONSUMER_GROUP, msg_id)
+        await redis.xack(STREAM_KEY, CONSUMER_GROUP, msg_id)
 
 
 async def _recover_pending(
@@ -138,8 +145,8 @@ async def _recover_pending(
     """
     try:
         _next_id, messages, _deleted = await redis.xautoclaim(
-            name=_STREAM_KEY,
-            groupname=_CONSUMER_GROUP,
+            name=STREAM_KEY,
+            groupname=CONSUMER_GROUP,
             consumername=consumer_id,
             min_idle_time=60_000,  # ms
             start_id="0-0",
@@ -170,9 +177,9 @@ async def run_consumer(
             results: list[
                 tuple[str, list[tuple[str, dict[str, str]]]]
             ] = await redis.xreadgroup(
-                groupname=_CONSUMER_GROUP,
+                groupname=CONSUMER_GROUP,
                 consumername=consumer_id,
-                streams={_STREAM_KEY: ">"},
+                streams={STREAM_KEY: ">"},
                 count=1,
                 block=5000,  # ms — yields control every 5s when idle
             )

@@ -172,7 +172,7 @@ services:
   # OpenAI-compatible /asr endpoint — http://localhost:9000/docs
   # ASR_MODEL options: tiny | base | small | medium (larger = slower on CPU)
   whisper-asr:
-    image: ahmetoner/whisper-asr-webservice:latest-cpu
+    image: ahmetoner/whisper-asr-webservice:v1.9.1-cpu
     profiles: [models]
     ports:
       - "${WHISPER_PORT:-9000}:9000"
@@ -189,7 +189,7 @@ services:
   # Pull model: docker compose exec ollama ollama pull llama3.2:1b
   # OpenAI-compatible API: http://localhost:11434
   ollama:
-    image: ollama/ollama:latest
+    image: ollama/ollama:0.24.0
     profiles: [models]
     ports:
       - "${OLLAMA_PORT:-11434}:11434"

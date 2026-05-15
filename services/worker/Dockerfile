@@ -11,6 +11,7 @@ ENV UV_COMPILE_BYTECODE=1 \
 COPY pyproject.toml uv.lock ./
 COPY services/api-gateway/pyproject.toml ./services/api-gateway/pyproject.toml
 COPY services/worker/pyproject.toml       ./services/worker/pyproject.toml
+COPY services/shared/pyproject.toml      ./services/shared/pyproject.toml
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev --package worker
@@ -28,6 +29,7 @@ WORKDIR /app
 COPY --from=builder /app/.venv /app/.venv
 ENV PATH="/app/.venv/bin:$PATH"
 
+COPY services/shared ./services/shared
 COPY services/worker/app ./app
 
 # Pre-download the embedding model so the first job has no cold-start.

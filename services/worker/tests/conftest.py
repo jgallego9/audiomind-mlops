@@ -42,6 +42,15 @@ def worker_settings() -> Settings:
     )
 
 
+@pytest.fixture(autouse=True)
+def _mock_mlflow(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Prevent real MLflow HTTP calls during unit tests."""
+    monkeypatch.setattr(
+        "app.consumer.log_inference_metrics",
+        AsyncMock(return_value=None),
+    )
+
+
 @pytest.fixture
 def fake_redis() -> FakeRedis:
     return FakeRedis(decode_responses=True)
