@@ -136,6 +136,34 @@ moiraweave-labs/   ← GitHub organization
 
 ### FASE 10 — Tareas
 
+### Runbook de arranque F10 (operativo)
+
+1. **Publicar base estable antes del split**
+  - `git checkout develop`
+  - `git pull --rebase`
+  - `git push origin develop`
+
+2. **Crear infraestructura GitHub mínima (manual)**
+  - Crear org `moiraweave-labs`
+  - Crear repos vacíos: `moiraweave-core`, `moiraweave-steps`, `moiraweave-cli`, `moiraweave-docs`
+  - Activar branch protection en `main` + required checks
+
+3. **Ejecutar split en orden recomendado (uno por uno)**
+  - Primero `moiraweave-core`
+  - Segundo `moiraweave-steps`
+  - Tercero `moiraweave-cli`
+  - Cuarto `moiraweave-docs`
+
+4. **Validación de salida por cada repo**
+  - CI verde
+  - README y enlaces cruzados actualizados
+  - Primera release/tag inicial creada
+
+5. **Cierre de fase**
+  - Crear issue de seguimiento “F10 complete” en org
+  - Congelar cambios estructurales del monorepo original
+  - Dejar solo fixes críticos mientras dura la transición
+
 - [ ] **F10-1** `[MANUAL-GITHUB]` Crear organización GitHub `moiraweave-labs` y permisos base
   - Crear org en GitHub (Settings → New Organization → `moiraweave-labs`)
   - Crear equipo `@moiraweave-labs/maintainers` con permisos admin
@@ -216,7 +244,7 @@ moiraweave-labs/   ← GitHub organization
 
 ## FASE 0 — Rebrand MoiraWeave + Refactor Inicial de Referencias 🎨
 
-> **Objetivo**: sustituir completamente el naming `moiraweave` por `MoiraWeave` y `moira` en todo el proyecto.
+> **Objetivo**: sustituir completamente el naming `inferflow` por `MoiraWeave` y `moira` en todo el proyecto.
 
 > **Prioridad**: bloqueante y previa a cualquier split multi-repo (ejecutar antes de F10).
 >
@@ -226,11 +254,11 @@ moiraweave-labs/   ← GitHub organization
   - Canonical brand: `MoiraWeave`
   - Slug técnico: `moiraweave`
   - Reemplazo total: no mantener aliases legacy
-  - Documento de migration final (`moiraweave` → `moiraweave` / `moira`) en README principal
+  - Documento de migration final (`inferflow` → `moiraweave` / `moira`) en README principal
 
 - [x] **F0-2** `[REPO-LOCAL]` Refactor de CLI y packaging
-  - Renombrar comando principal de `moiraweave` a `moira`
-  - Eliminar aliases legacy (`moiraweave`, `moiraweave`) del entrypoint público (solo `moira`)
+  - Renombrar comando principal de `inferflow` a `moira`
+  - Eliminar aliases legacy (`inferflow`) del entrypoint público (solo `moira`)
   - Actualizar `pyproject.toml`, entry points y smoke tests
 
 - [x] **F0-3** `[REPO-LOCAL]` Refactor de documentación interna
@@ -250,7 +278,7 @@ moiraweave-labs/   ← GitHub organization
 
 - [ ] **F0-6** `[REPO-LOCAL + MANUAL-GITHUB]` Fase de transición y comunicación
   - Changelog: sección "Rebrand to MoiraWeave"
-  - Nota de migración: reemplazo total de comandos (`moiraweave` -> `moira`)
+  - Nota de migración: reemplazo total de comandos (`inferflow` -> `moira`)
   - Issue/Discussion pública con corte definitivo de naming legacy
 
 - [ ] **F0-7** `[REPO-LOCAL]` Creación de identidad visual (logo + guidelines)
@@ -287,10 +315,10 @@ Ver `docs/architecture-benchmark.md` para matriz completa de decisiones vs refer
 
 ## Próximos pasos recomendados
 
-**Inmediato** (post-F9):
-1. Ejecutar FASE 0 completa (rebrand MoiraWeave + reemplazo total de naming)
-2. Merge `develop` → `main` (confirmar todas las pruebas pasan)
-3. Crear release v1.0.0 vía `release-please` (genera tag + GitHub Release)
+**Inmediato** (post-limpieza y pre-migración):
+1. Publicar `develop` actualizado en remoto
+2. Ejecutar FASE 10 (split multi-repo) usando el runbook de arranque
+3. Mantener este monorepo en modo mantenimiento durante la transición
 
 **Después de F0 + F10** (multi-repo):
 1. Crear organización `moiraweave-labs` en GitHub
