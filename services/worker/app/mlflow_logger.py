@@ -53,9 +53,7 @@ def _log_run_sync(
                 mlflow.log_param("error_type", error_type)
     except Exception:  # noqa: BLE001
         # MLflow logging is best-effort — never fail the inference job.
-        logger.warning(
-            "mlflow_log_failed job_id=%s", job_id, exc_info=True
-        )
+        logger.warning("mlflow_log_failed job_id=%s", job_id, exc_info=True)
 
 
 async def log_inference_metrics(

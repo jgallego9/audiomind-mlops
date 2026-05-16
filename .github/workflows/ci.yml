@@ -61,6 +61,18 @@ jobs:
       - name: Install all dependencies (workspace root)
         run: uv sync --frozen --all-packages
 
+      - name: Pre-commit Ruff lint
+        shell: bash
+        run: |
+          uv run pre-commit run ruff --files \
+            $(find services/api-gateway services/worker -name "*.py" -type f)
+
+      - name: Pre-commit Ruff format
+        shell: bash
+        run: |
+          uv run pre-commit run ruff-format --files \
+            $(find services/api-gateway services/worker -name "*.py" -type f)
+
       - name: Ruff lint
         run: uv run ruff check services/api-gateway services/worker
 
