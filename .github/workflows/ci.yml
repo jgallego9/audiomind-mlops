@@ -80,9 +80,11 @@ jobs:
         run: uv run ruff format --check services/api-gateway services/worker
 
       - name: Mypy typecheck
+        shell: bash
         run: |
-          uv run --directory services/api-gateway mypy app/
-          uv run --directory services/worker     mypy app/
+          SHARED_PATH="${GITHUB_WORKSPACE}/services/shared"
+          MYPYPATH="$SHARED_PATH" uv run --directory services/api-gateway mypy app/
+          MYPYPATH="$SHARED_PATH" uv run --directory services/worker     mypy app/
 
       - name: Pytest
         run: uv run pytest
