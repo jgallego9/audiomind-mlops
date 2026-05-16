@@ -1,4 +1,4 @@
-# PodMonitor — scrapes the Inferflow worker Prometheus metrics server.
+# PodMonitor — scrapes the MoiraWeave worker Prometheus metrics server.
 # The worker exposes metrics via prometheus_client.start_http_server() on
 # port 9090 (named "metrics" in the Deployment container ports).
 # A Service is not required for PodMonitor discovery.
@@ -8,19 +8,19 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
-  name: inferflow-worker
+  name: moiraweave-worker
   namespace: monitoring
   labels:
-    app.kubernetes.io/name: inferflow
+    app.kubernetes.io/name: moiraweave
     app.kubernetes.io/component: worker
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: inferflow
+      app.kubernetes.io/name: moiraweave
       app.kubernetes.io/component: worker
   namespaceSelector:
     matchNames:
-      - inferflow
+      - moiraweave
   podMetricsEndpoints:
     - port: metrics
       path: /metrics
