@@ -31,7 +31,6 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 COPY services/shared ./services/shared
 COPY services/worker/app ./app
-COPY pipelines ./pipelines
 
 # Pre-download the embedding model so the first job has no cold-start.
 ENV FASTEMBED_CACHE_PATH=/app/.models

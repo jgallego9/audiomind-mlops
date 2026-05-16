@@ -37,7 +37,7 @@ services:
       QDRANT_URL: "http://qdrant:6333"
       QDRANT_COLLECTION: "transcriptions"
       EMBEDDING_MODEL: "BAAI/bge-small-en-v1.5"
-      PIPELINES_DIR: "/app/pipelines"
+      PIPELINES_DIR: "/workspace/pipelines"
       FASTEMBED_CACHE_PATH: "/app/.models"
     volumes:
       - fastembed_models:/app/.models
@@ -65,7 +65,7 @@ services:
       QDRANT_URL: "http://qdrant:6333"
       QDRANT_COLLECTION: "transcriptions"
       EMBEDDING_MODEL: "BAAI/bge-small-en-v1.5"
-      PIPELINES_DIR: "/app/pipelines"
+      PIPELINES_DIR: "/workspace/pipelines"
       FASTEMBED_CACHE_PATH: "/app/.models"
     volumes:
       - fastembed_models:/app/.models
