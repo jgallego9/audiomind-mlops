@@ -15,6 +15,7 @@ Runtime and infrastructure repository for the MoiraWeave platform.
 - **User pipelines**: You create and manage pipelines in your own workspace repo.
 - **User custom steps**: You develop custom steps in your own workspace, not here.
 - **User configuration**: Environment-specific config (moiraweave.yaml, .env, deploy overlays) belongs in your workspace.
+- **Step-specific model services**: Runtime integrations like Whisper/Ollama belong in user workspace compose/overlays.
 
 ## For Users: Getting Started
 
@@ -35,6 +36,9 @@ This repository is a reference for:
 uv sync --frozen --all-packages
 make ci
 ```
+
+`docker-compose.yml` in this repo is intentionally generic (core runtime + optional mlops profile).
+Step-specific services are configured by users in their own workspace.
 
 ## Releases
 
