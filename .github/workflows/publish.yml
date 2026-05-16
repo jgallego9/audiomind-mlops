@@ -32,7 +32,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install uv
-        run: pipx install uv
+        uses: astral-sh/setup-uv@v8.1.0
 
       - name: Build package (${{ matrix.package }})
         run: |
