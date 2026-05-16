@@ -1,0 +1,25 @@
+{{- if .Values.apiGateway.hpa.enabled }}
+# HPA requires metrics-server (or KEDA for custom metrics — see F2-5).
+# Enable with: apiGateway.hpa.enabled=true
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "moiraweave.apiGateway.fullname" . }}
+  labels:
+    {{- include "moiraweave.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api-gateway
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "moiraweave.apiGateway.fullname" . }}
+  minReplicas: {{ .Values.apiGateway.hpa.minReplicas }}
+  maxReplicas: {{ .Values.apiGateway.hpa.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.apiGateway.hpa.targetCPUUtilizationPercentage }}
+{{- end }}

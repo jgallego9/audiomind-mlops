@@ -12,7 +12,7 @@ import logging
 import signal
 import uuid
 
-from inferflow_shared.pipeline import load_pipelines
+from moiraweave_shared.pipeline import load_pipelines
 from prometheus_client import start_http_server
 from qdrant_client import AsyncQdrantClient
 from redis.asyncio import Redis

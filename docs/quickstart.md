@@ -13,10 +13,10 @@ Goal: first successful local run with minimal decisions.
 
 ```bash
 git clone <repo-url>
-cd inferflow-mlops
+cd moiraweave-mlops
 uv sync --all-packages --dev
-uv tool install ./tools/inferflow-cli
-inferflow init --non-interactive
+uv tool install ./tools/moira-cli
+moira init --non-interactive
 ```
 
 ## 3. Start local stack
@@ -35,8 +35,8 @@ curl -s http://localhost:8000/ready | jq
 ## 4. Validate a pipeline contract
 
 ```bash
-inferflow pipeline list
-inferflow pipeline validate image-search
+moira pipeline list
+moira pipeline validate image-search
 ```
 
 ## 5. Run end-to-end demo
@@ -59,7 +59,7 @@ make ci
 
 ## Troubleshooting
 
-- If `inferflow` command is not found, ensure `uv tool install ./tools/inferflow-cli` completed.
+- If `moira` command is not found, ensure `uv tool install ./tools/moira-cli` completed.
 - If `/ready` is not ready, wait for dependencies and retry.
 - If demo auth fails, check `.env` values and service logs:
 

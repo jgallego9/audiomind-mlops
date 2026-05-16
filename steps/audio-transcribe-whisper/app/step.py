@@ -1,6 +1,6 @@
 import httpx
-from inferflow_step_sdk.base import BaseStep
-from inferflow_step_sdk.models import (
+from moiraweave_step_sdk.base import BaseStep
+from moiraweave_step_sdk.models import (
     InferRequest,
     InferResponse,
     MetadataTensor,

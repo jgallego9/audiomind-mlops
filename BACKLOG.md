@@ -125,7 +125,7 @@ moiraweave-labs/   ← GitHub organization
 |---|---|---|---|
 | **moiraweave-core** | `services/`, `infra/` | Standalone | Runtime versionable independientemente; cambios en deploy no afectan CLI |
 | **moiraweave-steps** | `steps/`, `tasks/` | Standalone | Community puede contribuir steps sin tocar plataforma core; semantic versioning por step |
-| **moiraweave-cli** | `tools/inferflow-cli/` | Standalone | Instalable vía `uv tool install moiraweave-cli`; releases independientes; UI desacoplada de runtime |
+| **moiraweave-cli** | `tools/moira-cli/` | Standalone | Instalable vía `uv tool install moiraweave-cli`; releases independientes; UI desacoplada de runtime |
 | **moiraweave-docs** | `docs/`, `README.md` | Standalone + auto-deployed | Documentación pública; Netlify / Vercel auto-deploy en cada commit; versioning por release |
 
 **Impacto en desarrollo**:
@@ -157,12 +157,12 @@ moiraweave-labs/   ← GitHub organization
   - Crear: `version.txt`, `CHANGELOG.md`
   - GitHub issue template: "Report a step" `[MANUAL-GITHUB]`
 
-- [ ] **F10-4** `[MANUAL-GITHUB + REPO-LOCAL]` Preparar `moiraweave-cli` repo (split de `tools/inferflow-cli/`)
+- [ ] **F10-4** `[MANUAL-GITHUB + REPO-LOCAL]` Preparar `moiraweave-cli` repo (split de `tools/moira-cli/`)
   - Crear nuevo repo: `moiraweave-labs/moiraweave-cli` `[MANUAL-GITHUB]`
-  - Copiar: `inferflow_cli/`, `tests/`, `pyproject.toml`, `setup.py`
+  - Copiar: `moira_cli/`, `tests/`, `pyproject.toml`, `setup.py`
   - Crear: `.github/workflows/ci.yml` (lint, mypy, pytest, build dist)
   - Crear: `version.txt`, `CHANGELOG.md`, `README.md`
-  - Config: `moira = "inferflow_cli.main:app"` como entry point principal (`moiraweave` opcional)
+  - Config: `moira = "moira_cli.main:app"` como entry point principal
   - NO incluir `moiraweave-core` en deps (CLI es stateless, habla HTTP)
 
 - [ ] **F10-5** `[MANUAL-GITHUB + REPO-LOCAL]` Preparar `moiraweave-docs` repo (docs públicas con auto-deploy)
@@ -222,23 +222,23 @@ moiraweave-labs/   ← GitHub organization
 >
 > **Decisión de DX**: el comando CLI oficial será `moira` (corto) y único.
 
-- [ ] **F0-1** `[REPO-LOCAL]` Definir policy de naming final
+- [x] **F0-1** `[REPO-LOCAL]` Definir policy de naming final
   - Canonical brand: `MoiraWeave`
   - Slug técnico: `moiraweave`
   - Reemplazo total: no mantener aliases legacy
   - Documento de migration final (`inferflow` → `moiraweave` / `moira`) en README principal
 
-- [ ] **F0-2** `[REPO-LOCAL]` Refactor de CLI y packaging
+- [x] **F0-2** `[REPO-LOCAL]` Refactor de CLI y packaging
   - Renombrar comando principal de `inferflow` a `moira`
-  - Eliminar aliases legacy (`inferflow`, `moiraweave`) del entrypoint público
+  - Eliminar aliases legacy (`inferflow`, `moiraweave`) del entrypoint público (solo `moira`)
   - Actualizar `pyproject.toml`, entry points y smoke tests
 
-- [ ] **F0-3** `[REPO-LOCAL]` Refactor de documentación interna
+- [x] **F0-3** `[REPO-LOCAL]` Refactor de documentación interna
   - Sustituir referencias de marca en README, docs y ejemplos de comandos
   - Actualizar nombres de repos target en diagramas y snippets
   - Verificar consistencia de badges, URLs y textos de onboarding
 
-- [ ] **F0-4** `[REPO-LOCAL]` Refactor de CI/CD e imágenes
+- [x] **F0-4** `[REPO-LOCAL]` Refactor de CI/CD e imágenes
   - Actualizar nombres de imagen GHCR (`ghcr.io/moiraweave-labs/*`)
   - Actualizar Helm chart name, release metadata y artefactos
   - Ajustar release-please para nuevos componentes

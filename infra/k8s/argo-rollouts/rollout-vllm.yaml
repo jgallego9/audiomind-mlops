@@ -1,7 +1,7 @@
 # rollout-vllm.yaml — Argo Rollouts canary deployment for the vLLM inference service.
 #
 # Drop-in replacement for the apps/v1 Deployment produced by
-# infra/helm/inferflow/templates/vllm/deployment.yaml.  Apply AFTER the
+# infra/helm/moiraweave/templates/vllm/deployment.yaml.  Apply AFTER the
 # Helm-managed Deployment has been deleted (or set vllm.enabled=false in the
 # Helm chart and let ArgoCD sync before applying this manifest).
 #

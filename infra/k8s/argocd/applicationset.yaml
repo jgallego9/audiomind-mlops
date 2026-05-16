@@ -27,9 +27,9 @@ spec:
     spec:
       project: inferflow
       source:
-        repoURL: https://github.com/jgallego9/inferflow-mlops.git
+        repoURL: https://github.com/jgallego9/moiraweave-mlops.git
         targetRevision: "{{ .targetRevision }}"
-        path: infra/helm/inferflow
+        path: infra/helm/moiraweave
         helm:
           valueFiles:
             - values.yaml
@@ -76,9 +76,9 @@ spec:
     spec:
       project: inferflow
       source:
-        repoURL: https://github.com/jgallego9/inferflow-mlops.git
+        repoURL: https://github.com/jgallego9/moiraweave-mlops.git
         targetRevision: "{{ .targetRevision }}"
-        path: infra/helm/inferflow
+        path: infra/helm/moiraweave
         helm:
           valueFiles:
             - values.yaml

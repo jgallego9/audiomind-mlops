@@ -12,8 +12,8 @@ from typing import Annotated
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from inferflow_shared.pipeline import load_pipelines
-from inferflow_shared.schemas import PipelineJobMessage
+from moiraweave_shared.pipeline import load_pipelines
+from moiraweave_shared.schemas import PipelineJobMessage
 
 from app.config import Settings, get_settings
 from app.dependencies.auth import CurrentUser

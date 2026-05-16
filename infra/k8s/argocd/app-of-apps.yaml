@@ -17,7 +17,7 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/jgallego9/inferflow-mlops.git
+    repoURL: https://github.com/jgallego9/moiraweave-mlops.git
     targetRevision: HEAD
     # Points at the directory containing all ArgoCD manifests:
     # applicationset.yaml, project.yaml, and this file itself.

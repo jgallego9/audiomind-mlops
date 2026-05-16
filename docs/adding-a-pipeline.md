@@ -9,13 +9,13 @@ Create `pipelines/<name>/pipeline.yaml` with step IDs, tasks, and URLs.
 Run:
 
 ```bash
-inferflow pipeline validate <name>
+moira pipeline validate <name>
 ```
 
 This checks required input/output compatibility between adjacent steps.
 
 ## 3. Enable in Helm values
 
-Add `.Values.pipelines.<name>` in `infra/helm/inferflow/values.yaml`.
+Add `.Values.pipelines.<name>` in `infra/helm/moiraweave/values.yaml`.
 
-No template changes are required in `infra/helm/inferflow/templates/steps/`.
+No template changes are required in `infra/helm/moiraweave/templates/steps/`.

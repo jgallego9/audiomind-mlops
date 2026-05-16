@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Inferflow step: audio transcription via Whisper ASR Webservice"
 requires-python = ">=3.13"
 dependencies = [
-    "inferflow-step-sdk",
+    "moiraweave-step-sdk",
     "httpx>=0.27",
     "pydantic-settings>=2.0",
     "uvicorn[standard]>=0.30",
@@ -14,4 +14,4 @@ dependencies = [
 package = false
 
 [tool.uv.sources]
-inferflow-step-sdk = { workspace = true }
+moiraweave-step-sdk = { workspace = true }

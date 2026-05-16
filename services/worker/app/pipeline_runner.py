@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, Any
 import httpx
 
 if TYPE_CHECKING:
-    from inferflow_shared.pipeline import PipelineDefinition, StepConfig
+    from moiraweave_shared.pipeline import PipelineDefinition, StepConfig
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ _STEP_TIMEOUT_SECONDS = 300.0
 
 
 class PipelineRunner:
-    """Execute a :class:`~inferflow_shared.pipeline.PipelineDefinition` by calling
+    """Execute a :class:`~moiraweave_shared.pipeline.PipelineDefinition` by calling
     each step's ``/v2/models/{id}/infer`` endpoint in declaration order.
 
     :param pipeline: Validated pipeline definition.

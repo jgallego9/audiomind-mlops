@@ -1,10 +1,10 @@
 .DEFAULT_GOAL := help
 
-KIND_CLUSTER_NAME   ?= inferflow
+KIND_CLUSTER_NAME   ?= moiraweave
 KIND_CONFIG         ?= infra/kind/cluster.yaml
-HELM_RELEASE        ?= inferflow
-HELM_NAMESPACE      ?= inferflow
-HELM_CHART          ?= infra/helm/inferflow
+HELM_RELEASE        ?= moiraweave
+HELM_NAMESPACE      ?= moiraweave
+HELM_CHART          ?= infra/helm/moiraweave
 HELM_VALUES         ?= $(HELM_CHART)/values-dev.yaml
 
 # Infrastructure charts
@@ -82,7 +82,7 @@ STEP_SDK_PATH := $(shell pwd)/services/step-sdk
 typecheck:  ## Run mypy type checker per service (avoids dual-app namespace conflict)
 	cd services/api-gateway && MYPYPATH=$(SHARED_PATH) uv run mypy app/
 	cd services/worker && MYPYPATH=$(SHARED_PATH) uv run mypy app/
-	cd services/step-sdk && uv run mypy inferflow_step_sdk/
+	cd services/step-sdk && uv run mypy moiraweave_step_sdk/
 	cd steps/audio-transcribe-whisper && MYPYPATH=$(STEP_SDK_PATH) uv run mypy app/
 
 pre-commit-run:  ## Run pre-commit on all files
@@ -148,7 +148,7 @@ helm-lint:  ## Lint the Helm chart
 	@command -v helm >/dev/null 2>&1 || { echo "ERROR: helm is required."; exit 127; }
 	helm lint $(HELM_CHART) -f $(HELM_VALUES)
 
-helm-install:  ## Install the Inferflow Helm release
+helm-install:  ## Install the MoiraWeave Helm release
 	@test -f $(HELM_CHART)/Chart.yaml || { echo "ERROR: Helm chart not found at $(HELM_CHART). Complete F2-2 before running this target."; exit 2; }
 	@command -v helm >/dev/null 2>&1 || { echo "ERROR: helm is required. Install it from https://helm.sh/docs/intro/install/"; exit 127; }
 	helm dependency build $(HELM_CHART)
@@ -157,7 +157,7 @@ helm-install:  ## Install the Inferflow Helm release
 		--namespace $(HELM_NAMESPACE) --create-namespace \
 		-f $(HELM_VALUES)
 
-helm-upgrade:  ## Upgrade (or install if absent) the Inferflow Helm release
+helm-upgrade:  ## Upgrade (or install if absent) the MoiraWeave Helm release
 	@test -f $(HELM_CHART)/Chart.yaml || { echo "ERROR: Helm chart not found at $(HELM_CHART). Complete F2-2 before running this target."; exit 2; }
 	@command -v helm >/dev/null 2>&1 || { echo "ERROR: helm is required. Install it from https://helm.sh/docs/intro/install/"; exit 127; }
 	helm dependency build $(HELM_CHART)
@@ -179,7 +179,7 @@ helm-monitoring-deps:  ## Download monitoring chart dependencies (kube-prometheu
 
 helm-monitoring-install:  ## Install the monitoring stack
 	$(MAKE) helm-monitoring-deps
-	helm upgrade --install inferflow-monitoring $(HELM_MONITORING_CHART) \
+	helm upgrade --install moiraweave-monitoring $(HELM_MONITORING_CHART) \
 		--namespace $(HELM_MONITORING_NS) --create-namespace \
 		-f $(HELM_MONITORING_VALUES)
 
@@ -231,11 +231,11 @@ helm-ingress-deps:  ## Download ingress-nginx + cert-manager chart dependencies
 
 helm-ingress-install:  ## Install ingress-nginx and cert-manager
 	$(MAKE) helm-ingress-deps
-	helm upgrade --install inferflow-ingress $(HELM_INGRESS_CHART) \
+	helm upgrade --install moiraweave-ingress $(HELM_INGRESS_CHART) \
 		--namespace $(HELM_INGRESS_NS) --create-namespace \
 		-f $(HELM_INGRESS_VALUES)
 	@echo "Waiting for cert-manager webhook..."
-	kubectl wait --for=condition=Available deployment/inferflow-ingress-cert-manager-webhook \
+	kubectl wait --for=condition=Available deployment/moiraweave-ingress-cert-manager-webhook \
 		-n $(HELM_INGRESS_NS) --timeout=120s 2>/dev/null || true
 	kubectl apply -f infra/k8s/cert-manager/
 
@@ -256,10 +256,10 @@ helm-eso-install:  ## Install External Secrets Operator
 # ---------------------------------------------------------------------------
 # Namespace setup (F2-6)
 # ---------------------------------------------------------------------------
-infra-namespaces:  ## Apply ResourceQuota and LimitRange to the inferflow namespace
+infra-namespaces:  ## Apply ResourceQuota and LimitRange to the moiraweave namespace
 	@command -v kubectl >/dev/null 2>&1 || { echo "ERROR: kubectl is required."; exit 127; }
 	kubectl create namespace $(HELM_NAMESPACE) --dry-run=client -o yaml | kubectl apply -f -
-	kubectl apply -f infra/k8s/namespaces/inferflow/
+	kubectl apply -f infra/k8s/namespaces/moiraweave/
 
 # ---------------------------------------------------------------------------
 # Full local infra bootstrap (F2-3 through F2-8 in order)
@@ -272,7 +272,7 @@ infra-up:  ## Bootstrap the full local infra stack on a running kind cluster
 	$(MAKE) helm-eso-install
 	$(MAKE) helm-install
 	@echo ""
-	@echo "✓ Full Inferflow infra deployed. Run 'make kind-status' to verify."
+	@echo "✓ Full MoiraWeave infra deployed. Run 'make kind-status' to verify."
 
 # ---------------------------------------------------------------------------
 # CI gate (runs locally exactly what CI runs)

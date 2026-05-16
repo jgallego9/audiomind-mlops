@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from inferflow_step_sdk.models import InferRequest, Tensor
+from moiraweave_step_sdk.models import InferRequest, Tensor
 
 
 @pytest.fixture()

@@ -3,5 +3,5 @@
 env: staging
 namespace: inferflow-staging
 targetRevision: main          # follows main; same code as dev, isolated namespace
-helmChartPath: infra/helm/inferflow
+helmChartPath: infra/helm/moiraweave
 autoSync: false               # manual sync — triggered by a human or CI after QA gate

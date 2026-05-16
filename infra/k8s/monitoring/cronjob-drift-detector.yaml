@@ -4,21 +4,21 @@
 # The job:
 #   1. Samples recent and reference embedding vectors from Qdrant.
 #   2. Runs Evidently DataDriftPreset (PSI method).
-#   3. Pushes inferflow_embedding_drift_share and
-#      inferflow_embedding_drift_detected to the Prometheus Push Gateway.
+#   3. Pushes moiraweave_embedding_drift_share and
+#      moiraweave_embedding_drift_detected to the Prometheus Push Gateway.
 #   4. Exits non-zero (and the Job fails) when dataset drift is detected,
 #      which triggers a Prometheus alert via the PrometheusRule in
-#      prometheusrule-inferflow.yaml.
+#      prometheusrule-moiraweave.yaml.
 #
 # Push Gateway is part of kube-prometheus-stack.  Metrics are scraped from
 # it by the existing prometheus-pushgateway ServiceMonitor.
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: inferflow-drift-detector
-  namespace: inferflow
+  name: moiraweave-drift-detector
+  namespace: moiraweave
   labels:
-    app.kubernetes.io/name: inferflow
+    app.kubernetes.io/name: moiraweave
     app.kubernetes.io/component: drift-detector
 spec:
   # Run every 6 hours
@@ -37,14 +37,14 @@ spec:
       template:
         metadata:
           labels:
-            app.kubernetes.io/name: inferflow
+            app.kubernetes.io/name: moiraweave
             app.kubernetes.io/component: drift-detector
         spec:
           restartPolicy: OnFailure
-          serviceAccountName: inferflow
+          serviceAccountName: moiraweave
           containers:
             - name: drift-detector
-              image: ghcr.io/jgallego9/inferflow-mlops/drift-detector:latest
+              image: ghcr.io/jgallego9/moiraweave-mlops/drift-detector:latest
               imagePullPolicy: Always
               env:
                 - name: DRIFT_PUSHGATEWAY_URL
@@ -52,9 +52,9 @@ spec:
                 - name: DRIFT_JOB_NAME
                   value: "inferflow_drift_detector"
                 - name: DRIFT_QDRANT_URL
-                  value: "http://qdrant.inferflow.svc.cluster.local:6333"
+                  value: "http://qdrant.moiraweave.svc.cluster.local:6333"
                 - name: DRIFT_QDRANT_COLLECTION
-                  value: "inferflow"
+                  value: "moiraweave"
                 - name: DRIFT_QDRANT_SAMPLE_SIZE
                   value: "500"
                 - name: DRIFT_QDRANT_REFERENCE_SIZE

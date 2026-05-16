@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "moiraweave.worker.fullname" . }}
+  labels:
+    {{- include "moiraweave.labels" . | nindent 4 }}
+    app.kubernetes.io/component: worker
+spec:
+  replicas: {{ .Values.worker.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "moiraweave.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      labels:
+        {{- include "moiraweave.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: worker
+    spec:
+      serviceAccountName: {{ include "moiraweave.serviceAccountName" . }}
+      containers:
+        - name: worker
+          image: "{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}"
+          imagePullPolicy: {{ .Values.worker.image.pullPolicy }}
+          env:
+            # --- sourced from values (list, stable order) ---
+            {{- toYaml .Values.worker.env | nindent 12 }}
+            # --- internal service URLs derived from release name ---
+            - name: REDIS_URL
+              value: {{ include "moiraweave.redisUrl" . | quote }}
+            - name: QDRANT_URL
+              value: {{ include "moiraweave.qdrantUrl" . | quote }}
+          ports:
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.worker.resources | nindent 12 }}

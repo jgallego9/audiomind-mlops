@@ -1,5 +1,5 @@
 [project]
-name = "inferflow-mlops"
+name = "moiraweave-mlops"
 version = "0.1.0"
 description = "MLOps platform: audio → Whisper STT → LLM analysis → RAG search"
 requires-python = ">=3.13"
@@ -14,13 +14,13 @@ package = false
 members = ["services/*", "steps/*", "tools/*"]
 
 [tool.uv.sources]
-inferflow-shared = { workspace = true }
-inferflow-step-sdk = { workspace = true }
+moiraweave-shared = { workspace = true }
+moiraweave-step-sdk = { workspace = true }
 
 [dependency-groups]
 dev = [
-    "inferflow-shared",
-    "inferflow-step-sdk",
+    "moiraweave-shared",
+    "moiraweave-step-sdk",
     "fakeredis>=2.26",
     "httpx>=0.28",
     "mypy>=2.0",
@@ -71,7 +71,7 @@ python_version = "3.13"
 strict = true
 plugins = ["pydantic.mypy"]
 explicit_package_bases = true
-# Make inferflow-shared (editable install via .pth hook) visible to mypy.
+# Make moiraweave-shared (editable install via .pth hook) visible to mypy.
 mypy_path = ["services/shared"]
 
 [tool.pydantic-mypy]

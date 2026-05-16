@@ -1,11 +1,11 @@
-# Inferflow MLOps
+# MoiraWeave MLOps
 
-![Inferflow MLOps banner](docs/assets/banner.svg)
+![MoiraWeave MLOps banner](docs/assets/banner.svg)
 
 [![Python 3.13](https://img.shields.io/badge/python-3.13-blue.svg)](https://www.python.org/downloads/)
 [![License MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![CI](https://github.com/jgallego9/inferflow-mlops/actions/workflows/ci.yml/badge.svg)](https://github.com/jgallego9/inferflow-mlops/actions/workflows/ci.yml)
-[![Step CI](https://github.com/jgallego9/inferflow-mlops/actions/workflows/step-ci.yml/badge.svg)](https://github.com/jgallego9/inferflow-mlops/actions/workflows/step-ci.yml)
+[![CI](https://github.com/jgallego9/moiraweave-mlops/actions/workflows/ci.yml/badge.svg)](https://github.com/jgallego9/moiraweave-mlops/actions/workflows/ci.yml)
+[![Step CI](https://github.com/jgallego9/moiraweave-mlops/actions/workflows/step-ci.yml/badge.svg)](https://github.com/jgallego9/moiraweave-mlops/actions/workflows/step-ci.yml)
 
 A production-ready, pipeline-as-code ML inference platform.
 Define your AI pipeline in YAML, deploy with one command, and scale each step independently.
@@ -20,9 +20,9 @@ Define your AI pipeline in YAML, deploy with one command, and scale each step in
 
 ```bash
 git clone <repo-url>
-cd inferflow-mlops
-uv tool install ./tools/inferflow-cli
-inferflow init
+cd moiraweave-mlops
+uv tool install ./tools/moira-cli
+moira init
 ```
 
 If you want full local validation:
@@ -34,7 +34,7 @@ make ci
 
 ## Demo Snapshot
 
-![Inferflow CLI demo](docs/assets/inferflow-cli-demo.svg)
+![MoiraWeave CLI demo](docs/assets/moira-cli-demo.svg)
 
 ## Architecture
 
@@ -54,12 +54,12 @@ Detailed docs are in [docs/architecture.md](docs/architecture.md).
 2. Validate compatibility:
 
 ```bash
-inferflow pipeline validate <name>
+moira pipeline validate <name>
 ```
 
 3. Enable it in Helm values under `.Values.pipelines.<name>`.
 
-Generic templates in `infra/helm/inferflow/templates/steps/` already create Deployments, Services, optional HPA, PDB, and model cache PVC mounts.
+Generic templates in `infra/helm/moiraweave/templates/steps/` already create Deployments, Services, optional HPA, PDB, and model cache PVC mounts.
 
 ## Available Steps
 
@@ -83,27 +83,27 @@ Task schemas live in `tasks/<task>/schema.json`.
 | `vector-search` | Nearest-neighbor retrieval |
 | `vision-embedding` | Dense image vectors |
 
-## Inferflow CLI
+## MoiraWeave CLI
 
 Current command groups:
 
 ```text
-inferflow init [--non-interactive]
+moira init [--non-interactive]
 
-inferflow task list|show|new
-inferflow step list|new|test|build|push|show
+moira task list|show|new
+moira step list|new|test|build|push|show
 
-inferflow pipeline list|new|validate|dev|run|deploy|status|logs|scale|rollback|metrics
-inferflow models prefetch|status|clear
-inferflow job status|result
+moira pipeline list|new|validate|dev|run|deploy|status|logs|scale|rollback|metrics
+moira models prefetch|status|clear
+moira job status|result
 ```
 
-Tip: run `inferflow <group> --help` for command-specific flags and examples.
+Tip: run `moira <group> --help` for command-specific flags and examples.
 
 Install globally:
 
 ```bash
-uv tool install ./tools/inferflow-cli
+uv tool install ./tools/moira-cli
 ```
 
 ## Tech Stack
@@ -158,7 +158,7 @@ Project board (kanban): https://github.com/users/jgallego9/projects
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md).
 
-Good first issues: https://github.com/jgallego9/inferflow-mlops/labels/good%20first%20issue
+Good first issues: https://github.com/jgallego9/moiraweave-mlops/labels/good%20first%20issue
 
 ## Security
 
@@ -174,8 +174,5 @@ See [CHANGELOG.md](CHANGELOG.md).
 - [docs/adding-a-pipeline.md](docs/adding-a-pipeline.md)
 - [docs/adding-a-step.md](docs/adding-a-step.md)
 - [docs/quickstart.md](docs/quickstart.md)
-- [docs/engineering-audit.md](docs/engineering-audit.md)
 - [docs/architecture-benchmark.md](docs/architecture-benchmark.md)
 - [docs/repo-structure.md](docs/repo-structure.md)
-- [docs/final-quality-gate.md](docs/final-quality-gate.md)
-- [docs/github-manual-operations.md](docs/github-manual-operations.md)

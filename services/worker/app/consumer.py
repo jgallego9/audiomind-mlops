@@ -4,8 +4,8 @@ import logging
 import time
 from datetime import UTC, datetime
 
-from inferflow_shared.schemas import TranscribeStreamMessage
-from inferflow_shared.streams import CONSUMER_GROUP, JOB_KEY_PREFIX, STREAM_KEY
+from moiraweave_shared.schemas import TranscribeStreamMessage
+from moiraweave_shared.streams import CONSUMER_GROUP, JOB_KEY_PREFIX, STREAM_KEY
 from prometheus_client import Counter, Histogram
 from pydantic import ValidationError
 from qdrant_client import AsyncQdrantClient

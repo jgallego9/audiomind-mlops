@@ -1,5 +1,5 @@
 [project]
-name = "inferflow-step-sdk"
+name = "moiraweave-step-sdk"
 version = "0.1.0"
 description = "KServe V2 protocol base classes for inferflow pipeline steps"
 requires-python = ">=3.13"

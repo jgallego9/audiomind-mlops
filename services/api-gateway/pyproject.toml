@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Inferflow API Gateway"
 requires-python = ">=3.13"
 dependencies = [
-    "inferflow-shared",
+    "moiraweave-shared",
     "fastapi>=0.115",
     "uvicorn[standard]>=0.34",
     "slowapi>=0.1.9",
@@ -31,4 +31,4 @@ dependencies = [
 package = false
 
 [tool.uv.sources]
-inferflow-shared = { workspace = true }
+moiraweave-shared = { workspace = true }

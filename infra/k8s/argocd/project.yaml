@@ -11,7 +11,7 @@ spec:
 
   # Allowed source repos.
   sourceRepos:
-    - https://github.com/jgallego9/inferflow-mlops.git
+    - https://github.com/jgallego9/moiraweave-mlops.git
 
   # Allowed destination clusters and namespaces.
   destinations:

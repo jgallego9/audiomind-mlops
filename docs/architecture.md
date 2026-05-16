@@ -1,6 +1,6 @@
 # Architecture
 
-Inferflow MLOps is organized in three layers:
+MoiraWeave MLOps is organized in three layers:
 
 1. Step layer
 - Reusable KServe V2 steps in `steps/<task>-<impl>/`.

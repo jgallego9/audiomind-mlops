@@ -1,6 +1,6 @@
 # .github/workflows/ci.yml
 #
-# CI/CD pipeline for Inferflow MLOps.
+# CI/CD pipeline for MoiraWeave MLOps.
 #
 # Jobs:
 #   1. lint-test   — ruff + mypy + pytest (all branches & PRs)
@@ -35,7 +35,7 @@ permissions:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ghcr.io/jgallego9/inferflow
+  IMAGE_PREFIX: ghcr.io/jgallego9/moiraweave
   PYTHON_VERSION: "3.13"
 
 # ---------------------------------------------------------------------------
@@ -75,10 +75,10 @@ jobs:
       - name: Pytest
         run: uv run pytest
 
-      - name: Helm lint — inferflow chart
+      - name: Helm lint — moiraweave chart
         run: |
           curl -sSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-          helm lint infra/helm/inferflow
+          helm lint infra/helm/moiraweave
 
       - name: YAML lint — infra/k8s
         run: uv run yamllint -d relaxed infra/k8s/
@@ -209,18 +209,18 @@ jobs:
       - name: Bump api-gateway image tag
         run: |
           yq -i '.apiGateway.image.tag = "${{ steps.release.outputs.tag }}"' \
-            infra/helm/inferflow/values.yaml
+            infra/helm/moiraweave/values.yaml
 
       - name: Bump worker image tag
         run: |
           yq -i '.worker.image.tag = "${{ steps.release.outputs.tag }}"' \
-            infra/helm/inferflow/values.yaml
+            infra/helm/moiraweave/values.yaml
 
       - name: Commit & push
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add infra/helm/inferflow/values.yaml
+          git add infra/helm/moiraweave/values.yaml
           # Exit cleanly if nothing changed (idempotent).
           git diff --cached --quiet && exit 0
           git commit --no-verify \

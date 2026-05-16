@@ -3,5 +3,5 @@
 env: prod
 namespace: inferflow-prod
 targetRevision: release/stable # tracks a protected release branch — requires PR approval
-helmChartPath: infra/helm/inferflow
+helmChartPath: infra/helm/moiraweave
 autoSync: false               # manual approval required before production sync

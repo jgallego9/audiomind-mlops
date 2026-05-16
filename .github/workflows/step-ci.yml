@@ -135,7 +135,7 @@ jobs:
         id: image
         shell: bash
         run: |
-          echo "name=${{ env.REGISTRY }}/${{ github.repository_owner }}/inferflow-step-${{ matrix.step }}" >> "$GITHUB_OUTPUT"
+          echo "name=${{ env.REGISTRY }}/${{ github.repository_owner }}/moiraweave-step-${{ matrix.step }}" >> "$GITHUB_OUTPUT"
           echo "tag=v${{ matrix.version }}" >> "$GITHUB_OUTPUT"
           echo "sha_tag=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
 

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from inferflow_step_sdk.base import BaseStep
-from inferflow_step_sdk.models import (
+from moiraweave_step_sdk.base import BaseStep
+from moiraweave_step_sdk.models import (
     InferRequest,
     InferResponse,
     MetadataTensor,

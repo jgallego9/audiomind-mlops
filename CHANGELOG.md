@@ -10,11 +10,11 @@ The format is inspired by Keep a Changelog, and versions follow SemVer.
 - F7-4: Generic Helm step templates per pipeline.
 - F7-5: `vision-clip` step and `image-search` demo pipeline.
 - F7-6: Step CI workflow with dynamic matrix and per-step `VERSION` files.
-- F7-7: Initial `inferflow` CLI package (`init`, list commands, and pipeline validation).
+- F7-7: Initial `moira` CLI package (`init`, list commands, and pipeline validation).
 
 ### Changed
-- Image naming aligned toward `inferflow-*` conventions in CI/release workflows.
-- README rewritten to an inferflow-first onboarding flow.
+- Image naming aligned toward `moiraweave-*` conventions in CI/release workflows.
+- README rewritten to a moira-first onboarding flow.
 
 ## [0.1.0] - 2026-05-15
 

@@ -6,7 +6,7 @@ from unittest.mock import patch
 import pytest
 from fakeredis.aioredis import FakeRedis
 from httpx import AsyncClient
-from inferflow_shared.pipeline import PipelineDefinition
+from moiraweave_shared.pipeline import PipelineDefinition
 
 
 def _audio_rag_pipeline() -> PipelineDefinition:
@@ -29,7 +29,7 @@ def _audio_rag_pipeline() -> PipelineDefinition:
 
 @pytest.fixture
 def _patch_load_pipelines():
-    """Patch inferflow_shared.pipeline.load_pipelines everywhere it's imported."""
+    """Patch moiraweave_shared.pipeline.load_pipelines everywhere it's imported."""
     with (
         patch(
             "app.routes.pipelines.load_pipelines",

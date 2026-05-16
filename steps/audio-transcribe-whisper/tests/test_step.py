@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 from httpx import Request, Response
-from inferflow_step_sdk.models import InferRequest, Tensor
+from moiraweave_step_sdk.models import InferRequest, Tensor
 
 from app.config import Settings
 from app.step import AudioTranscribeWhisperStep, _get_bytes_tensor

@@ -4,7 +4,7 @@ from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
-from inferflow_shared.pipeline import PipelineDefinition
+from moiraweave_shared.pipeline import PipelineDefinition
 
 from app.pipeline_runner import PipelineRunner
 

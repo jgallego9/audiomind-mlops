@@ -1,5 +1,5 @@
 [project]
-name = "inferflow-shared"
+name = "moiraweave-shared"
 version = "0.1.0"
 description = "Shared constants and schemas for Inferflow services"
 requires-python = ">=3.13"

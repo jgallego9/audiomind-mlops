@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Inferflow async inference worker (Redis Streams consumer)"
 requires-python = ">=3.13"
 dependencies = [
-    "inferflow-shared",
+    "moiraweave-shared",
     "redis[hiredis]>=5.0",
     "pydantic-settings>=2.6",
     # Qdrant vector store (RAG pipeline)
@@ -21,4 +21,4 @@ dependencies = [
 package = false
 
 [tool.uv.sources]
-inferflow-shared = { workspace = true }
+moiraweave-shared = { workspace = true }

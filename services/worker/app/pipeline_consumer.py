@@ -14,14 +14,14 @@ import logging
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
-from inferflow_shared.schemas import PipelineJobMessage
+from moiraweave_shared.schemas import PipelineJobMessage
 from pydantic import ValidationError
 from redis.exceptions import ResponseError
 
 from app.pipeline_runner import PipelineRunner
 
 if TYPE_CHECKING:
-    from inferflow_shared.pipeline import PipelineDefinition
+    from moiraweave_shared.pipeline import PipelineDefinition
     from redis.asyncio import Redis
 
 logger = logging.getLogger(__name__)

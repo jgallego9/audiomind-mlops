@@ -1,9 +1,9 @@
-"""Tests for inferflow_step_sdk BaseStep and KServe V2 models."""
+"""Tests for moiraweave_step_sdk BaseStep and KServe V2 models."""
 
 import pytest
 from fastapi.testclient import TestClient
-from inferflow_step_sdk.base import BaseStep
-from inferflow_step_sdk.models import InferRequest, InferResponse
+from moiraweave_step_sdk.base import BaseStep
+from moiraweave_step_sdk.models import InferRequest, InferResponse
 
 # ---------------------------------------------------------------------------
 # Minimal concrete step used across all tests

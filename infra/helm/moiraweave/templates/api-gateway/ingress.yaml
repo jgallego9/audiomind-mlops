@@ -1,0 +1,36 @@
+{{- if .Values.apiGateway.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "moiraweave.apiGateway.fullname" . }}
+  labels:
+    {{- include "moiraweave.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api-gateway
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    {{- if .Values.apiGateway.ingress.tls }}
+    cert-manager.io/cluster-issuer: {{ .Values.apiGateway.ingress.clusterIssuer | default "moiraweave-ca-issuer" }}
+    {{- end }}
+    {{- with .Values.apiGateway.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ingressClassName: nginx
+  {{- if .Values.apiGateway.ingress.tls }}
+  tls:
+    - hosts:
+        - {{ .Values.apiGateway.ingress.host | quote }}
+      secretName: {{ include "moiraweave.apiGateway.fullname" . }}-tls
+  {{- end }}
+  rules:
+    - host: {{ .Values.apiGateway.ingress.host | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "moiraweave.apiGateway.fullname" . }}
+                port:
+                  number: {{ .Values.apiGateway.service.port }}
+{{- end }}

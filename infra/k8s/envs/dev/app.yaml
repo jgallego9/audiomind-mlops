@@ -4,5 +4,5 @@
 env: dev
 namespace: inferflow-dev
 targetRevision: main          # tracks HEAD of main — latest build always deploys
-helmChartPath: infra/helm/inferflow
+helmChartPath: infra/helm/moiraweave
 autoSync: true                # automated sync + self-heal for dev
