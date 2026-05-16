@@ -13,6 +13,8 @@ jobs:
   release-please:
     runs-on: ubuntu-24.04
     steps:
+      - name: Install uv
+        uses: astral-sh/setup-uv@v8.1.0
       - name: Run release-please
         id: release
         uses: googleapis/release-please-action@v4

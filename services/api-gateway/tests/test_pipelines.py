@@ -132,3 +132,58 @@ async def test_submit_job_requires_auth(
         json={"payload": {}},
     )
     assert resp.status_code == 401
+
+
+# ---------------------------------------------------------------------------
+# GET /v1/pipelines/jobs/{job_id}
+# ---------------------------------------------------------------------------
+
+
+async def test_get_pipeline_job_status_returns_payload(
+    auth_client: AsyncClient, fake_redis: FakeRedis
+) -> None:
+    job_id = "pipeline-job-1"
+    await fake_redis.hset(
+        f"pipeline:job:{job_id}",
+        mapping={
+            "status": "completed",
+            "pipeline_id": "audio-rag",
+            "user": "testuser",
+            "created_at": "2026-01-01T00:00:00+00:00",
+            "completed_at": "2026-01-01T00:01:00+00:00",
+            "result": json.dumps({"transcript": "ok"}),
+        },
+    )
+
+    resp = await auth_client.get(f"/v1/pipelines/jobs/{job_id}")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["job_id"] == job_id
+    assert body["pipeline_id"] == "audio-rag"
+    assert body["status"] == "completed"
+    assert body["result"]["transcript"] == "ok"
+
+
+async def test_get_pipeline_job_status_returns_404(
+    auth_client: AsyncClient,
+) -> None:
+    resp = await auth_client.get("/v1/pipelines/jobs/missing-job")
+    assert resp.status_code == 404
+
+
+async def test_get_pipeline_job_status_returns_403_for_other_user(
+    auth_client: AsyncClient, fake_redis: FakeRedis
+) -> None:
+    job_id = "pipeline-job-2"
+    await fake_redis.hset(
+        f"pipeline:job:{job_id}",
+        mapping={
+            "status": "pending",
+            "pipeline_id": "audio-rag",
+            "user": "another-user",
+            "created_at": "2026-01-01T00:00:00+00:00",
+        },
+    )
+
+    resp = await auth_client.get(f"/v1/pipelines/jobs/{job_id}")
+    assert resp.status_code == 403

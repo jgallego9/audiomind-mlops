@@ -83,7 +83,6 @@ typecheck:  ## Run mypy type checker per service (avoids dual-app namespace conf
 	cd services/api-gateway && MYPYPATH=$(SHARED_PATH) uv run mypy app/
 	cd services/worker && MYPYPATH=$(SHARED_PATH) uv run mypy app/
 	cd services/step-sdk && uv run mypy moiraweave_step_sdk/
-	cd steps/audio-transcribe-whisper && MYPYPATH=$(STEP_SDK_PATH) uv run mypy app/
 
 pre-commit-run:  ## Run pre-commit on all files
 	uv run pre-commit run --all-files
@@ -109,8 +108,8 @@ up:  ## Start core services (api-gateway, redis, qdrant, jaeger)
 up-mlops:  ## Start core + MLOps services (+ postgres, mlflow)
 	docker compose --profile mlops up -d
 
-up-all:  ## Start all services including AI models (+ whisper, ollama)
-	docker compose --profile mlops --profile models up -d
+up-all:  ## Start all core services (alias of up-mlops)
+	docker compose --profile mlops up -d
 
 down:  ## Stop and remove containers (preserves volumes)
 	docker compose down

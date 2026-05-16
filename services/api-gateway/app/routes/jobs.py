@@ -58,7 +58,6 @@ async def transcribe(
         language=body.language,
         user=current_user.subject,
     )
-    # model_dump(mode="json") returns dict[str, str] — compatible with Redis xadd.
     await redis.xadd(STREAM_KEY, msg.model_dump(mode="json"))  # type: ignore[arg-type]
 
     return TranscribeResponse(job_id=job_id, status="pending", created_at=created_at)

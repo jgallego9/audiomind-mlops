@@ -56,10 +56,22 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install uv
-        run: pipx install uv
+        uses: astral-sh/setup-uv@v8.1.0
 
       - name: Install all dependencies (workspace root)
         run: uv sync --frozen --all-packages
+
+      - name: Pre-commit Ruff lint
+        shell: bash
+        run: |
+          uv run pre-commit run ruff --files \
+            $(find services/api-gateway services/worker -name "*.py" -type f)
+
+      - name: Pre-commit Ruff format
+        shell: bash
+        run: |
+          uv run pre-commit run ruff-format --files \
+            $(find services/api-gateway services/worker -name "*.py" -type f)
 
       - name: Ruff lint
         run: uv run ruff check services/api-gateway services/worker
@@ -68,9 +80,11 @@ jobs:
         run: uv run ruff format --check services/api-gateway services/worker
 
       - name: Mypy typecheck
+        shell: bash
         run: |
-          uv run --directory services/api-gateway mypy app/
-          uv run --directory services/worker     mypy app/
+          SHARED_PATH="${GITHUB_WORKSPACE}/services/shared"
+          MYPYPATH="$SHARED_PATH" uv run --directory services/api-gateway mypy app/
+          MYPYPATH="$SHARED_PATH" uv run --directory services/worker     mypy app/
 
       - name: Pytest
         run: uv run pytest

@@ -8,13 +8,13 @@ fullnameOverride: ""
 # ---------------------------------------------------------------------------
 # Image registry used by CI/CD (F3-3 pushes here)
 # ---------------------------------------------------------------------------
-imageRegistry: ghcr.io/jgallego9
+imageRegistry: ghcr.io/moiraweave-labs
 # ---------------------------------------------------------------------------
 # api-gateway
 # ---------------------------------------------------------------------------
 apiGateway:
   image:
-    repository: ghcr.io/jgallego9/moiraweave-api-gateway
+    repository: ghcr.io/moiraweave-labs/moiraweave-core/api-gateway
     tag: sha-b5772f3
     pullPolicy: IfNotPresent
   replicaCount: 2
@@ -50,6 +50,8 @@ apiGateway:
       value: transcriptions
     - name: EMBEDDING_MODEL
       value: BAAI/bge-small-en-v1.5
+    - name: PIPELINES_DIR
+      value: /workspace/pipelines
     - name: OTEL_ENABLED
       value: "false"
     - name: OTEL_OTLP_ENDPOINT
@@ -89,7 +91,7 @@ apiGateway:
 # ---------------------------------------------------------------------------
 worker:
   image:
-    repository: ghcr.io/jgallego9/moiraweave-worker
+    repository: ghcr.io/moiraweave-labs/moiraweave-core/worker
     tag: sha-b5772f3
     pullPolicy: IfNotPresent
   replicaCount: 1
@@ -107,6 +109,8 @@ worker:
       value: BAAI/bge-small-en-v1.5
     - name: LOG_LEVEL
       value: INFO
+    - name: PIPELINES_DIR
+      value: /workspace/pipelines
   # PodDisruptionBudget for worker.
   pdb:
     enabled: true
@@ -209,109 +213,17 @@ modelsCache:
 # ---------------------------------------------------------------------------
 # MoiraWeave pipelines
 #
-# Each top-level key is a pipeline name (must match pipelines/<name>/pipeline.yaml).
-# Steps are keyed by their step ID.
+# Intentionally empty by default to keep the platform generic and
+# workspace-owned. Define pipelines/steps via user overlays.
 #
-# Step fields:
-#   image            (required) — fully-qualified container image
-#   replicas         default 1
-#   port             default 8080 — container port (KServe V2)
-#   imagePullPolicy  default IfNotPresent
-#   gpu              — number of nvidia.com/gpu to request (optional)
-#   modelVolume      — if set, mounts shared PVC models-cache at this path
-#   env              — map of extra env vars (merged on top of pipeline-level env)
-#   resources        — full Kubernetes ResourceRequirements block (overrides default)
-#   hpa.enabled      — enable HPA for this step
-#   hpa.minReplicas  default 1
-#   hpa.maxReplicas  default 5
-#   hpa.targetCPUUtilizationPercentage  default 70
-#   nodeSelector     — node selector map (e.g. for GPU nodes)
-#   tolerations      — list of tolerations
-#
-# Pipeline fields:
-#   enabled  — set to false to skip all resources for this pipeline
-#   env      — map of env vars injected into every step in the pipeline
+# Example:
+# pipelines:
+#   my-pipeline:
+#     enabled: true
+#     env:
+#       QDRANT_COLLECTION: "my-collection"
+#     steps:
+#       embed:
+#         image: "ghcr.io/moiraweave-labs/moiraweave-steps/step-text-embed-fastembed:v1.0.0"
 # ---------------------------------------------------------------------------
-pipelines:
-  audio-rag:
-    enabled: true
-    env:
-      QDRANT_COLLECTION: "transcriptions"
-      EMBEDDING_MODEL: "BAAI/bge-small-en-v1.5"
-    steps:
-      transcribe:
-        image: "ghcr.io/jgallego9/step-stt-whisper:1.0.0"
-        replicas: 1
-        modelVolume: "/models"
-        livenessInitialDelaySeconds: 60
-        readinessInitialDelaySeconds: 30
-        resources:
-          requests:
-            cpu: "500m"
-            memory: 1Gi
-          limits:
-            cpu: "2"
-            memory: 4Gi
-      embed:
-        image: "ghcr.io/jgallego9/step-embed-fastembed:1.0.0"
-        replicas: 2
-        modelVolume: "/models"
-        resources:
-          requests:
-            cpu: "200m"
-            memory: 512Mi
-          limits:
-            cpu: "1"
-            memory: 1Gi
-        hpa:
-          enabled: false
-          minReplicas: 2
-          maxReplicas: 6
-          targetCPUUtilizationPercentage: 70
-      index:
-        image: "ghcr.io/jgallego9/step-vector-index-qdrant:1.0.0"
-        replicas: 1
-        resources:
-          requests:
-            cpu: "100m"
-            memory: 256Mi
-          limits:
-            cpu: "500m"
-            memory: 512Mi
-      search:
-        image: "ghcr.io/jgallego9/step-vector-search-qdrant:1.0.0"
-        replicas: 1
-        resources:
-          requests:
-            cpu: "100m"
-            memory: 256Mi
-          limits:
-            cpu: "500m"
-            memory: 512Mi
-  image-search:
-    enabled: true
-    env:
-      QDRANT_COLLECTION: "images"
-      EMBEDDING_MODEL: "Qdrant/resnet50-onnx"
-    steps:
-      embed:
-        image: "ghcr.io/jgallego9/step-vision-clip:1.0.0"
-        replicas: 1
-        modelVolume: "/models"
-        resources:
-          requests:
-            cpu: "200m"
-            memory: 512Mi
-          limits:
-            cpu: "1"
-            memory: 1Gi
-      search:
-        image: "ghcr.io/jgallego9/step-vector-search-qdrant:1.0.0"
-        replicas: 1
-        resources:
-          requests:
-            cpu: "100m"
-            memory: 256Mi
-          limits:
-            cpu: "500m"
-            memory: 512Mi
+pipelines: {}

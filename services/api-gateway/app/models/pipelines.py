@@ -29,6 +29,27 @@ class PipelineJobResponse(BaseModel):
     created_at: str
 
 
+class PipelineJobStatus(BaseModel):
+    """Response body for ``GET /v1/pipelines/jobs/{job_id}``.
+
+    :param job_id: UUID of the job.
+    :param pipeline_id: Pipeline that processed (or is processing) the job.
+    :param status: Current job status.
+    :param result: Optional result payload for completed jobs.
+    :param error: Optional error message for failed jobs.
+    :param created_at: ISO-8601 timestamp when the job was accepted.
+    :param completed_at: ISO-8601 timestamp when processing finished.
+    """
+
+    job_id: str
+    pipeline_id: str
+    status: str
+    result: dict[str, object] | None = None
+    error: str | None = None
+    created_at: str
+    completed_at: str | None = None
+
+
 class StepInfo(BaseModel):
     """Summary of a single step inside a pipeline.
 

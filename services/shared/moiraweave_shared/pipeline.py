@@ -81,6 +81,9 @@ def load_pipelines(pipelines_dir: str | Path) -> list[PipelineDefinition]:
         by pipeline name.
     """
     base = Path(pipelines_dir)
+    if not base.exists() or not base.is_dir():
+        return []
+
     pipelines: list[PipelineDefinition] = []
     for yaml_path in sorted(base.glob("*/pipeline.yaml")):
         pipelines.append(PipelineDefinition.from_yaml(yaml_path))

@@ -3,6 +3,7 @@
 Routes:
     GET  /v1/pipelines                       — list declared pipelines
     POST /v1/pipelines/{pipeline_id}/jobs    — submit a job to a pipeline
+    GET  /v1/pipelines/jobs/{job_id}         — poll pipeline job status
 """
 
 import json
@@ -23,6 +24,7 @@ from app.models.pipelines import (
     PipelineInfo,
     PipelineJobRequest,
     PipelineJobResponse,
+    PipelineJobStatus,
     StepInfo,
 )
 
@@ -142,4 +144,50 @@ async def submit_pipeline_job(
         pipeline_id=pipeline_id,
         status="pending",
         created_at=created_at,
+    )
+
+
+@router.get(
+    "/jobs/{job_id}",
+    response_model=PipelineJobStatus,
+    summary="Poll pipeline job status",
+)
+async def get_pipeline_job_status(
+    job_id: str,
+    redis: RedisClient,
+    current_user: CurrentUser,
+) -> PipelineJobStatus:
+    """Return the current status and (when available) result for a pipeline job.
+
+    :param job_id: Pipeline job identifier.
+    :param redis: Async Redis client.
+    :param current_user: Authenticated user extracted from the JWT.
+    :returns: Pipeline job status snapshot.
+    :raises HTTPException 404: When the job key does not exist.
+    :raises HTTPException 403: When the job belongs to another user.
+    """
+    job_key = f"{_PIPELINE_JOB_KEY_PREFIX}:{job_id}"
+    data: dict[str, str] = await redis.hgetall(job_key)  # type: ignore[misc]
+
+    if not data:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Pipeline job not found",
+        )
+
+    if data.get("user") != current_user.subject:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+
+    result: dict[str, object] | None = None
+    if raw := data.get("result"):
+        result = json.loads(raw)
+
+    return PipelineJobStatus(
+        job_id=job_id,
+        pipeline_id=data.get("pipeline_id", ""),
+        status=data["status"],
+        result=result,
+        error=data.get("error"),
+        created_at=data["created_at"],
+        completed_at=data.get("completed_at"),
     )
