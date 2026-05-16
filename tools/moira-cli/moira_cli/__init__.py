@@ -1,1 +1,0 @@
-"""MoiraWeave CLI package."""

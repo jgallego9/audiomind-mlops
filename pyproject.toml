@@ -1,7 +1,7 @@
 [project]
-name = "moiraweave-mlops"
+name = "moiraweave-core"
 version = "0.1.0"
-description = "MLOps platform: audio → Whisper STT → LLM analysis → RAG search"
+description = "MoiraWeave runtime platform: API gateway, workers, infra, and pipelines"
 requires-python = ">=3.13"
 license = { text = "MIT" }
 dependencies = []
@@ -11,7 +11,7 @@ dependencies = []
 package = false
 
 [tool.uv.workspace]
-members = ["services/*", "steps/*", "tools/*"]
+members = ["services/*"]
 
 [tool.uv.sources]
 moiraweave-shared = { workspace = true }
@@ -87,15 +87,15 @@ ignore_missing_imports = true
 # Pytest + coverage
 # ---------------------------------------------------------------------------
 [tool.pytest.ini_options]
-testpaths = ["services", "steps", "tests"]
+testpaths = ["services", "tests"]
 asyncio_mode = "auto"
 # importlib avoids module-name collisions between same-named test packages
 # across multiple service directories.
-addopts = "--cov=services --cov=steps --cov-report=term-missing --cov-report=xml --import-mode=importlib"
+addopts = "--cov=services --cov-report=term-missing --cov-report=xml --import-mode=importlib"
 
 
 [tool.coverage.run]
-source = ["services", "steps"]
+source = ["services"]
 omit = ["*/tests/*", "*/__init__.py"]
 
 [tool.coverage.report]

@@ -35,7 +35,7 @@ permissions:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ghcr.io/jgallego9/moiraweave
+  IMAGE_PREFIX: ghcr.io/moiraweave-labs/moiraweave-core
   PYTHON_VERSION: "3.13"
 
 # ---------------------------------------------------------------------------
