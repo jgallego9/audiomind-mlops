@@ -67,30 +67,30 @@ pipelines:
     enabled: true
     steps:
       transcribe:
-        image: "ghcr.io/jgallego9/step-stt-whisper:latest"
+        image: "ghcr.io/moiraweave-labs/moiraweave-steps/step-audio-transcribe-whisper:latest"
         replicas: 1
         # modelVolume intentionally kept — even in dev we want the path mounted.
         # Set imagePullPolicy to Never if using a locally loaded image.
         imagePullPolicy: Never
       embed:
-        image: "ghcr.io/jgallego9/step-embed-fastembed:latest"
+        image: "ghcr.io/moiraweave-labs/moiraweave-steps/step-text-embed-fastembed:latest"
         replicas: 1
         imagePullPolicy: Never
         hpa:
           enabled: false
       index:
-        image: "ghcr.io/jgallego9/step-vector-index-qdrant:latest"
+        image: "ghcr.io/moiraweave-labs/moiraweave-steps/step-vector-index-qdrant:latest"
         imagePullPolicy: Never
       search:
-        image: "ghcr.io/jgallego9/step-vector-search-qdrant:latest"
+        image: "ghcr.io/moiraweave-labs/moiraweave-steps/step-vector-search-qdrant:latest"
         imagePullPolicy: Never
   image-search:
     enabled: true
     steps:
       embed:
-        image: "ghcr.io/jgallego9/step-vision-clip:latest"
+        image: "ghcr.io/moiraweave-labs/moiraweave-steps/step-vision-clip:latest"
         replicas: 1
         imagePullPolicy: Never
       search:
-        image: "ghcr.io/jgallego9/step-vector-search-qdrant:latest"
+        image: "ghcr.io/moiraweave-labs/moiraweave-steps/step-vector-search-qdrant:latest"
         imagePullPolicy: Never

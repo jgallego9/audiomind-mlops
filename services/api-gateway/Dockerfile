@@ -37,6 +37,7 @@ ENV PATH="/app/.venv/bin:$PATH"
 # Copy application source.
 COPY services/shared ./services/shared
 COPY services/api-gateway/app ./app
+COPY pipelines ./pipelines
 
 # Pre-download the embedding model so the first request has no cold-start.
 # Must run before switching to non-root user so files are owned by root and

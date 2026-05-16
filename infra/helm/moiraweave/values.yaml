@@ -8,13 +8,13 @@ fullnameOverride: ""
 # ---------------------------------------------------------------------------
 # Image registry used by CI/CD (F3-3 pushes here)
 # ---------------------------------------------------------------------------
-imageRegistry: ghcr.io/jgallego9
+imageRegistry: ghcr.io/moiraweave-labs
 # ---------------------------------------------------------------------------
 # api-gateway
 # ---------------------------------------------------------------------------
 apiGateway:
   image:
-    repository: ghcr.io/jgallego9/moiraweave-api-gateway
+    repository: ghcr.io/moiraweave-labs/moiraweave-core/api-gateway
     tag: sha-b5772f3
     pullPolicy: IfNotPresent
   replicaCount: 2
@@ -50,6 +50,8 @@ apiGateway:
       value: transcriptions
     - name: EMBEDDING_MODEL
       value: BAAI/bge-small-en-v1.5
+    - name: PIPELINES_DIR
+      value: /app/pipelines
     - name: OTEL_ENABLED
       value: "false"
     - name: OTEL_OTLP_ENDPOINT
@@ -89,7 +91,7 @@ apiGateway:
 # ---------------------------------------------------------------------------
 worker:
   image:
-    repository: ghcr.io/jgallego9/moiraweave-worker
+    repository: ghcr.io/moiraweave-labs/moiraweave-core/worker
     tag: sha-b5772f3
     pullPolicy: IfNotPresent
   replicaCount: 1
@@ -107,6 +109,8 @@ worker:
       value: BAAI/bge-small-en-v1.5
     - name: LOG_LEVEL
       value: INFO
+    - name: PIPELINES_DIR
+      value: /app/pipelines
   # PodDisruptionBudget for worker.
   pdb:
     enabled: true
@@ -240,7 +244,7 @@ pipelines:
       EMBEDDING_MODEL: "BAAI/bge-small-en-v1.5"
     steps:
       transcribe:
-        image: "ghcr.io/jgallego9/step-stt-whisper:1.0.0"
+        image: "ghcr.io/moiraweave-labs/moiraweave-steps/step-audio-transcribe-whisper:v1.0.0"
         replicas: 1
         modelVolume: "/models"
         livenessInitialDelaySeconds: 60
@@ -253,7 +257,7 @@ pipelines:
             cpu: "2"
             memory: 4Gi
       embed:
-        image: "ghcr.io/jgallego9/step-embed-fastembed:1.0.0"
+        image: "ghcr.io/moiraweave-labs/moiraweave-steps/step-text-embed-fastembed:v1.0.0"
         replicas: 2
         modelVolume: "/models"
         resources:
@@ -269,7 +273,7 @@ pipelines:
           maxReplicas: 6
           targetCPUUtilizationPercentage: 70
       index:
-        image: "ghcr.io/jgallego9/step-vector-index-qdrant:1.0.0"
+        image: "ghcr.io/moiraweave-labs/moiraweave-steps/step-vector-index-qdrant:v1.0.0"
         replicas: 1
         resources:
           requests:
@@ -279,7 +283,7 @@ pipelines:
             cpu: "500m"
             memory: 512Mi
       search:
-        image: "ghcr.io/jgallego9/step-vector-search-qdrant:1.0.0"
+        image: "ghcr.io/moiraweave-labs/moiraweave-steps/step-vector-search-qdrant:v1.0.0"
         replicas: 1
         resources:
           requests:
@@ -295,7 +299,7 @@ pipelines:
       EMBEDDING_MODEL: "Qdrant/resnet50-onnx"
     steps:
       embed:
-        image: "ghcr.io/jgallego9/step-vision-clip:1.0.0"
+        image: "ghcr.io/moiraweave-labs/moiraweave-steps/step-vision-clip:v1.0.0"
         replicas: 1
         modelVolume: "/models"
         resources:
