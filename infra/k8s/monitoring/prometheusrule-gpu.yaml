@@ -12,14 +12,14 @@
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
-  name: inferflow-gpu
+  name: moiraweave-gpu
   namespace: monitoring
   labels:
-    app.kubernetes.io/name: inferflow
-    release: inferflow-monitoring
+    app.kubernetes.io/name: moiraweave
+    release: moiraweave-monitoring
 spec:
   groups:
-    - name: inferflow.gpu
+    - name: moiraweave.gpu
       interval: 30s
       rules:
         - alert: GPUSustainedHighUtilization
@@ -27,7 +27,7 @@ spec:
           for: 10m
           labels:
             severity: warning
-            team: inferflow
+            team: moiraweave
           annotations:
             summary: "GPU {{ $labels.gpu }} on {{ $labels.Hostname }} sustained > 95% utilisation for 10 min"
             description: "Current utilisation: {{ $value }}%. Consider scaling vLLM replicas."
@@ -41,7 +41,7 @@ spec:
           for: 5m
           labels:
             severity: critical
-            team: inferflow
+            team: moiraweave
           annotations:
             summary: "GPU {{ $labels.gpu }} VRAM usage > 90%"
             description: "VRAM {{ $value | humanizePercentage }} used on {{ $labels.Hostname }}. OOM risk."
@@ -51,7 +51,7 @@ spec:
           for: 5m
           labels:
             severity: warning
-            team: inferflow
+            team: moiraweave
           annotations:
             summary: "GPU {{ $labels.gpu }} temperature > 85°C"
             description: "Temperature: {{ $value }}°C on {{ $labels.Hostname }}. Check cooling."
@@ -61,7 +61,7 @@ spec:
           for: 10m
           labels:
             severity: warning
-            team: inferflow
+            team: moiraweave
           annotations:
             summary: "GPU {{ $labels.gpu }} sustained power draw > 400W"
             description: "Power: {{ $value }}W on {{ $labels.Hostname }}."

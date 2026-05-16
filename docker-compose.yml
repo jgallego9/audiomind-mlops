@@ -1,4 +1,4 @@
-# Inferflow MLOps — local development stack
+# MoiraWeave MLOps — local development stack
 #
 # Profiles
 #   (none)           core services: api-gateway, redis, qdrant, jaeger
@@ -50,7 +50,7 @@ services:
         condition: service_started
     restart: unless-stopped
     networks:
-      - inferflow-net
+      - moiraweave-net
 
   # ── Worker ─────────────────────────────────────────────────────────────────
   # Async Redis Streams consumer — processes transcription jobs
@@ -75,7 +75,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     networks:
-      - inferflow-net
+      - moiraweave-net
 
   # ── Redis ───────────────────────────────────────────────────────────────────
   # Rate-limit storage (slowapi) + async job queue (Redis Streams, F1-5)
@@ -92,7 +92,7 @@ services:
       retries: 5
     restart: unless-stopped
     networks:
-      - inferflow-net
+      - moiraweave-net
 
   # ── Qdrant ──────────────────────────────────────────────────────────────────
   # Vector DB for RAG pipeline (F1-6)
@@ -111,7 +111,7 @@ services:
       start_period: 10s
     restart: unless-stopped
     networks:
-      - inferflow-net
+      - moiraweave-net
 
   # ── Jaeger (all-in-one) ─────────────────────────────────────────────────────
   # OTel trace collector + UI — http://localhost:16686
@@ -125,7 +125,7 @@ services:
       COLLECTOR_OTLP_ENABLED: "true"
     restart: unless-stopped
     networks:
-      - inferflow-net
+      - moiraweave-net
 
   # ── PostgreSQL (mlops profile) ──────────────────────────────────────────────
   postgres:
@@ -144,7 +144,7 @@ services:
       retries: 5
     restart: unless-stopped
     networks:
-      - inferflow-net
+      - moiraweave-net
 
   # ── MLflow tracking server (mlops profile) ──────────────────────────────────
   # UI: http://localhost:5001
@@ -166,7 +166,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     networks:
-      - inferflow-net
+      - moiraweave-net
 
   # ── Whisper ASR — CPU (models profile) ─────────────────────────────────────
   # OpenAI-compatible /asr endpoint — http://localhost:9000/docs
@@ -183,7 +183,7 @@ services:
       - whisper_models:/root/.cache/whisper
     restart: unless-stopped
     networks:
-      - inferflow-net
+      - moiraweave-net
 
   # ── AudioTranscribeWhisper step — KServe V2 inference step (models profile) ─
   # Exposes GET /v2/models/audio-transcribe-whisper + POST /v2/models/.../infer
@@ -199,7 +199,7 @@ services:
       - whisper-asr
     restart: unless-stopped
     networks:
-      - inferflow-net
+      - moiraweave-net
 
   # ── Ollama — local LLM (models profile) ─────────────────────────────────────
   # Pull model: docker compose exec ollama ollama pull llama3.2:1b
@@ -213,11 +213,11 @@ services:
       - ollama_data:/root/.ollama
     restart: unless-stopped
     networks:
-      - inferflow-net
+      - moiraweave-net
 
 # ── Networks ────────────────────────────────────────────────────────────────
 networks:
-  inferflow-net:
+  moiraweave-net:
     driver: bridge
 
 # ── Volumes ─────────────────────────────────────────────────────────────────

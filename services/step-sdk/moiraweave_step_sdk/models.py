@@ -96,21 +96,21 @@ class MetadataTensor(BaseModel):
 class ModelMetadataResponse(BaseModel):
     """``$metadata_model_response`` — body for ``GET /v2/models/{name}``.
 
-    Extends the KServe V2 spec with inferflow-specific fields
+    Extends the KServe V2 spec with moiraweave-specific fields
     (``task``, ``implementation``) to enable router introspection.
 
     :param name: Model (step) name.
-    :param versions: Supported versions list; single-element for inferflow steps.
-    :param platform: Backend identifier; always ``"inferflow"`` for our steps.
+    :param versions: Supported versions list; single-element for moiraweave steps.
+    :param platform: Backend identifier; always ``"moiraweave"`` for our steps.
     :param inputs: Input tensor descriptors from the task schema.
     :param outputs: Output tensor descriptors from the task schema.
-    :param task: Inferflow task name, e.g. ``"audio-transcribe"``.
+    :param task: MoiraWeave task name, e.g. ``"audio-transcribe"``.
     :param implementation: Implementation identifier, e.g. ``"whisper"``.
     """
 
     name: str
     versions: list[str] | None = None
-    platform: str = "inferflow"
+    platform: str = "moiraweave"
     inputs: list[MetadataTensor] = []
     outputs: list[MetadataTensor] = []
     task: str = ""

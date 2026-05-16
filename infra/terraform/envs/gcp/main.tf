@@ -136,9 +136,9 @@ module "gke" {
 
 # ─── Artifact Registry ────────────────────────────────────────────────────────
 
-resource "google_artifact_registry_repository" "inferflow" {
+resource "google_artifact_registry_repository" "moiraweave" {
   location      = var.region
-  repository_id = "inferflow"
+  repository_id = "moiraweave"
   format        = "DOCKER"
-  description   = "Inferflow MLOps container images"
+  description   = "MoiraWeave MLOps container images"
 }

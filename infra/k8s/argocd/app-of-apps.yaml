@@ -1,14 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: inferflow-root
+  name: moiraweave-root
   namespace: argocd
   # This is the "bootstrap" application installed manually once.
   # After installation, ArgoCD self-manages everything via GitOps.
   annotations:
     argocd.argoproj.io/sync-wave: "0"
   labels:
-    app.kubernetes.io/name: inferflow-root
+    app.kubernetes.io/name: moiraweave-root
     app.kubernetes.io/component: gitops-bootstrap
   # Remove the application AND its children when this object is deleted.
   finalizers:

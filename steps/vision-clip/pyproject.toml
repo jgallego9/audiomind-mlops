@@ -1,7 +1,7 @@
 [project]
 name = "step-vision-clip"
 version = "0.1.0"
-description = "Inferflow step: image embedding via FastEmbed CLIP-like models"
+description = "MoiraWeave step: image embedding via FastEmbed CLIP-like models"
 requires-python = ">=3.13"
 dependencies = [
     "moiraweave-step-sdk",

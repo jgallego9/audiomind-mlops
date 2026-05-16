@@ -1,7 +1,7 @@
 [project]
 name = "step-vector-index-qdrant"
 version = "0.1.0"
-description = "Inferflow step: vector indexing via Qdrant"
+description = "MoiraWeave step: vector indexing via Qdrant"
 requires-python = ">=3.13"
 dependencies = [
     "moiraweave-step-sdk",

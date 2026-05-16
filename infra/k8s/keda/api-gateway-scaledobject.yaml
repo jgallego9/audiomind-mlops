@@ -4,20 +4,20 @@
 #   1. HTTP request latency p95 (via Prometheus, requires kube-prometheus-stack F2-7)
 #   2. CPU utilisation as fallback
 #
-# Apply after both KEDA and inferflow chart are installed:
-#   kubectl apply -f infra/k8s/keda/ -n inferflow
+# Apply after both KEDA and moiraweave chart are installed:
+#   kubectl apply -f infra/k8s/keda/ -n moiraweave
 #
 # Ref: https://keda.sh/docs/latest/scalers/prometheus/
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
 metadata:
   name: api-gateway-scaledobject
-  namespace: inferflow
+  namespace: moiraweave
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: inferflow-api-gateway   # matches inferflow.apiGateway.fullname helper
+    name: moiraweave-api-gateway   # matches moiraweave.apiGateway.fullname helper
 
   minReplicaCount: 2
   maxReplicaCount: 10
@@ -41,7 +41,7 @@ spec:
         query: >-
           histogram_quantile(0.95,
             sum(rate(http_request_duration_seconds_bucket{
-              job="inferflow-api-gateway"
+              job="moiraweave-api-gateway"
             }[2m])) by (le)
           )
 

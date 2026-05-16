@@ -1,1 +1,1 @@
-"""Inferflow shared utilities — Redis stream constants and job schemas."""
+"""MoiraWeave shared utilities — Redis stream constants and job schemas."""

@@ -2,7 +2,7 @@
 # Override with values-dev.yaml or values-prod.yaml.
 argo-cd:
   global:
-    domain: argocd.inferflow.local
+    domain: argocd.moiraweave.local
     logging:
       format: json
       level: info
@@ -12,7 +12,7 @@ argo-cd:
     params:
       server.insecure: "true"
     # Allow ArgoCD to manage apps in all namespaces (required for ApplicationSet
-    # deploying to inferflow / monitoring / etc.).
+    # deploying to moiraweave / monitoring / etc.).
     cm:
       application.resourceTrackingMethod: annotation
 
@@ -29,13 +29,13 @@ argo-cd:
     ingress:
       enabled: true
       ingressClassName: nginx
-      hostname: argocd.inferflow.local
+      hostname: argocd.moiraweave.local
       annotations:
         nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
         nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
       extraTls:
         - hosts:
-            - argocd.inferflow.local
+            - argocd.moiraweave.local
           secretName: argocd-tls
 
   # ApplicationSet controller — bundled since argo-cd 4.0.0 / ArgoCD v2.3.

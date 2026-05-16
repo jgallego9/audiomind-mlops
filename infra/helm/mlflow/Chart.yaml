@@ -1,6 +1,6 @@
 apiVersion: v2
 name: mlflow
-description: Wrapper chart – MLflow tracking server for Inferflow MLOps
+description: Wrapper chart – MLflow tracking server for MoiraWeave MLOps
 type: application
 version: 0.1.0
 appVersion: "3.7.0"

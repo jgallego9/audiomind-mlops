@@ -21,15 +21,15 @@ logger = logging.getLogger(__name__)
 
 # Prometheus metrics
 JOBS_PROCESSED_TOTAL = Counter(
-    "inferflow_worker_jobs_processed_total",
+    "moiraweave_worker_jobs_processed_total",
     "Total number of jobs successfully processed",
 )
 JOBS_FAILED_TOTAL = Counter(
-    "inferflow_worker_jobs_failed_total",
+    "moiraweave_worker_jobs_failed_total",
     "Total number of jobs that failed processing",
 )
 JOB_DURATION_SECONDS = Histogram(
-    "inferflow_worker_job_duration_seconds",
+    "moiraweave_worker_job_duration_seconds",
     "Duration of job processing in seconds",
     buckets=[0.1, 0.5, 1.0, 2.0, 5.0, 10.0, 30.0, 60.0, 120.0],
 )

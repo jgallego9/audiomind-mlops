@@ -15,10 +15,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Rollout
 metadata:
-  name: inferflow-vllm
-  namespace: inferflow
+  name: moiraweave-vllm
+  namespace: moiraweave
   labels:
-    app.kubernetes.io/name: inferflow
+    app.kubernetes.io/name: moiraweave
     app.kubernetes.io/component: vllm
     app.kubernetes.io/managed-by: argo-rollouts
 spec:
@@ -26,15 +26,15 @@ spec:
   # Must match the Service selector used by the vLLM ClusterIP service.
   selector:
     matchLabels:
-      app.kubernetes.io/name: inferflow
+      app.kubernetes.io/name: moiraweave
       app.kubernetes.io/component: vllm
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: inferflow
+        app.kubernetes.io/name: moiraweave
         app.kubernetes.io/component: vllm
     spec:
-      serviceAccountName: inferflow
+      serviceAccountName: moiraweave
       containers:
         - name: vllm
           # Image tag is overridden by scripts/promote-model.sh via
@@ -59,7 +59,7 @@ spec:
             - name: HF_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: inferflow-hf-token
+                  name: moiraweave-hf-token
                   key: token
                   optional: true
           resources:
@@ -89,7 +89,7 @@ spec:
       volumes:
         - name: model-cache
           persistentVolumeClaim:
-            claimName: inferflow-vllm-model-cache
+            claimName: moiraweave-vllm-model-cache
   minReadySeconds: 30
   revisionHistoryLimit: 3
 

@@ -1,7 +1,7 @@
 [project]
 name = "worker"
 version = "0.1.0"
-description = "Inferflow async inference worker (Redis Streams consumer)"
+description = "MoiraWeave async inference worker (Redis Streams consumer)"
 requires-python = ">=3.13"
 dependencies = [
     "moiraweave-shared",

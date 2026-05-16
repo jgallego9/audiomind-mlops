@@ -7,7 +7,7 @@ variable "aws_region" {
 variable "cluster_name" {
   description = "Name of the EKS cluster (also used as a resource prefix)."
   type        = string
-  default     = "inferflow"
+  default     = "moiraweave"
 }
 
 variable "kubernetes_version" {

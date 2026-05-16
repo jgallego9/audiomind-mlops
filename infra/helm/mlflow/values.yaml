@@ -1,4 +1,4 @@
-# values.yaml — Inferflow MLflow tracking server
+# values.yaml — MoiraWeave MLflow tracking server
 # All keys are under "mlflow:" because this is a wrapper chart; the key maps
 # to the subchart alias declared in Chart.yaml.
 #
@@ -42,7 +42,7 @@ mlflow:
 
   # Point the MLflow S3 client at the in-cluster MinIO instance.
   extraEnvVars:
-    MLFLOW_S3_ENDPOINT_URL: "http://minio.inferflow.svc.cluster.local:9000"
+    MLFLOW_S3_ENDPOINT_URL: "http://minio.moiraweave.svc.cluster.local:9000"
 
   # ── Auth ─────────────────────────────────────────────────────────────────────
   # Disabled for local/staging; enable + set adminPassword for production.

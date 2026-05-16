@@ -1,10 +1,10 @@
-# ApplicationSet: inferflow-auto-sync
+# ApplicationSet: moiraweave-auto-sync
 # Manages environments that use automated sync (dev).
-# Separate from inferflow-manual-sync to allow independent pause/resume.
+# Separate from moiraweave-manual-sync to allow independent pause/resume.
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: inferflow-auto-sync
+  name: moiraweave-auto-sync
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "1"
@@ -15,17 +15,17 @@ spec:
     - list:
         elements:
           - env: dev
-            namespace: inferflow-dev
+            namespace: moiraweave-dev
             targetRevision: main
   template:
     metadata:
-      name: "inferflow-{{ .env }}"
+      name: "moiraweave-{{ .env }}"
       namespace: argocd
       labels:
-        app.kubernetes.io/name: inferflow
+        app.kubernetes.io/name: moiraweave
         env: "{{ .env }}"
     spec:
-      project: inferflow
+      project: moiraweave
       source:
         repoURL: https://github.com/jgallego9/moiraweave-mlops.git
         targetRevision: "{{ .targetRevision }}"
@@ -45,12 +45,12 @@ spec:
           - CreateNamespace=true
           - ServerSideApply=true
 ---
-# ApplicationSet: inferflow-manual-sync
+# ApplicationSet: moiraweave-manual-sync
 # Manages environments that require human approval before sync (staging, prod).
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: inferflow-manual-sync
+  name: moiraweave-manual-sync
   namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "1"
@@ -61,20 +61,20 @@ spec:
     - list:
         elements:
           - env: staging
-            namespace: inferflow-staging
+            namespace: moiraweave-staging
             targetRevision: main
           - env: prod
-            namespace: inferflow-prod
+            namespace: moiraweave-prod
             targetRevision: release/stable
   template:
     metadata:
-      name: "inferflow-{{ .env }}"
+      name: "moiraweave-{{ .env }}"
       namespace: argocd
       labels:
-        app.kubernetes.io/name: inferflow
+        app.kubernetes.io/name: moiraweave
         env: "{{ .env }}"
     spec:
-      project: inferflow
+      project: moiraweave
       source:
         repoURL: https://github.com/jgallego9/moiraweave-mlops.git
         targetRevision: "{{ .targetRevision }}"

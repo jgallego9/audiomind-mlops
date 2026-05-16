@@ -1,7 +1,7 @@
 [project]
 name = "step-audio-transcribe-whisper"
 version = "0.1.0"
-description = "Inferflow step: audio transcription via Whisper ASR Webservice"
+description = "MoiraWeave step: audio transcription via Whisper ASR Webservice"
 requires-python = ">=3.13"
 dependencies = [
     "moiraweave-step-sdk",

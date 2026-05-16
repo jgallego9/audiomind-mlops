@@ -64,7 +64,7 @@ class VisionClipStep(BaseStep):
 
     @property
     def task(self) -> str:
-        """Return the inferflow task name."""
+        """Return the moiraweave task name."""
         return "vision-embedding"
 
     @property

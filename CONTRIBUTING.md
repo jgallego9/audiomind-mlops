@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for contributing to Inferflow MLOps.
+Thanks for contributing to MoiraWeave MLOps.
 
 ## Workflow
 

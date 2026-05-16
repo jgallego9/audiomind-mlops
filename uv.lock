@@ -14,7 +14,7 @@ resolution-markers = [
 [manifest]
 members = [
     "api-gateway",
-    "inferflow-drift-detector",
+    "moiraweave-drift-detector",
     "moiraweave-mlops",
     "moiraweave-shared",
     "moiraweave-step-sdk",
@@ -1426,7 +1426,7 @@ wheels = [
 ]
 
 [[package]]
-name = "inferflow-drift-detector"
+name = "moiraweave-drift-detector"
 version = "0.1.0"
 source = { virtual = "services/drift-detector" }
 dependencies = [

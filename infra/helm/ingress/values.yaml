@@ -1,4 +1,4 @@
-# Inferflow Ingress — base values.
+# MoiraWeave Ingress — base values.
 
 ingressNginx:
   enabled: true

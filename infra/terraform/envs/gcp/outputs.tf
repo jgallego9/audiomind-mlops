@@ -26,7 +26,7 @@ output "service_account" {
 
 output "artifact_registry_url" {
   description = "Artifact Registry repository URL for Docker images."
-  value       = "${var.region}-docker.pkg.dev/${var.project_id}/inferflow"
+  value       = "${var.region}-docker.pkg.dev/${var.project_id}/moiraweave"
 }
 
 output "kubernetes_provider_config" {

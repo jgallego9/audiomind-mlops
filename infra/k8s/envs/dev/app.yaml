@@ -2,7 +2,7 @@
 # Source of truth for the 'dev' environment.
 # Consumed by infra/k8s/argocd/applicationset.yaml (Git File generator).
 env: dev
-namespace: inferflow-dev
+namespace: moiraweave-dev
 targetRevision: main          # tracks HEAD of main — latest build always deploys
 helmChartPath: infra/helm/moiraweave
 autoSync: true                # automated sync + self-heal for dev

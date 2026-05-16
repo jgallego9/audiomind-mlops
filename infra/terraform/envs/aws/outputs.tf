@@ -31,5 +31,5 @@ output "private_subnet_ids" {
 
 output "ecr_repository_urls" {
   description = "ECR repository URLs keyed by service name (api, worker, drift-detector)."
-  value       = { for k, v in aws_ecr_repository.inferflow : k => v.repository_url }
+  value       = { for k, v in aws_ecr_repository.moiraweave : k => v.repository_url }
 }

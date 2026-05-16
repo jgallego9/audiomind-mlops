@@ -50,7 +50,7 @@ spec:
                 - name: DRIFT_PUSHGATEWAY_URL
                   value: "http://prometheus-pushgateway.monitoring.svc.cluster.local:9091"
                 - name: DRIFT_JOB_NAME
-                  value: "inferflow_drift_detector"
+                  value: "moiraweave_drift_detector"
                 - name: DRIFT_QDRANT_URL
                   value: "http://qdrant.moiraweave.svc.cluster.local:6333"
                 - name: DRIFT_QDRANT_COLLECTION

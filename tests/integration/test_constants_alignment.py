@@ -19,23 +19,23 @@ class TestStreamConstants:
     def test_stream_key(self) -> None:
         from moiraweave_shared.streams import STREAM_KEY
 
-        assert STREAM_KEY == "inferflow:jobs"
+        assert STREAM_KEY == "moiraweave:jobs"
 
     def test_consumer_group(self) -> None:
         from moiraweave_shared.streams import CONSUMER_GROUP
 
-        assert CONSUMER_GROUP == "inferflow:workers"
+        assert CONSUMER_GROUP == "moiraweave:workers"
 
     def test_job_key_prefix(self) -> None:
         from moiraweave_shared.streams import JOB_KEY_PREFIX
 
-        assert JOB_KEY_PREFIX == "inferflow:job"
+        assert JOB_KEY_PREFIX == "moiraweave:job"
 
     def test_job_key_format(self) -> None:
         from moiraweave_shared.streams import JOB_KEY_PREFIX
 
         job_id = "abc-123"
-        assert f"{JOB_KEY_PREFIX}:{job_id}" == "inferflow:job:abc-123"
+        assert f"{JOB_KEY_PREFIX}:{job_id}" == "moiraweave:job:abc-123"
 
 
 class TestTranscribeStreamMessage:

@@ -18,7 +18,7 @@ variable "zones" {
 variable "cluster_name" {
   description = "Name of the GKE cluster (also used as a network/resource prefix)."
   type        = string
-  default     = "inferflow"
+  default     = "moiraweave"
 }
 
 variable "kubernetes_version" {

@@ -33,7 +33,7 @@ class StepInfo(BaseModel):
     """Summary of a single step inside a pipeline.
 
     :param id: Step identifier (equals the KServe V2 model name).
-    :param task: Inferflow task schema name.
+    :param task: MoiraWeave task schema name.
     :param url: Base URL of the step service.
     """
 

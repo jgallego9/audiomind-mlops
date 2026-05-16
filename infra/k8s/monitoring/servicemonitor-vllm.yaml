@@ -17,7 +17,7 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: inferflow-vllm
+  name: moiraweave-vllm
   namespace: monitoring
   labels:
     app.kubernetes.io/name: vllm
@@ -28,7 +28,7 @@ spec:
       app.kubernetes.io/name: vllm
   namespaceSelector:
     matchNames:
-      - inferflow
+      - moiraweave
   endpoints:
     - port: http
       path: /metrics

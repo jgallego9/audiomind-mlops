@@ -92,7 +92,7 @@ class VectorSearchQdrantStep(BaseStep):
 
     @property
     def task(self) -> str:
-        """Return the inferflow task name."""
+        """Return the moiraweave task name."""
         return "vector-search"
 
     @property

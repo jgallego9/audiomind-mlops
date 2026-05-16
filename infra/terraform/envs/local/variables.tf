@@ -1,7 +1,7 @@
 variable "cluster_name" {
   description = "Name of the kind cluster."
   type        = string
-  default     = "inferflow"
+  default     = "moiraweave"
 }
 
 variable "kubernetes_version" {

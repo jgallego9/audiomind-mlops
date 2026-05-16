@@ -70,8 +70,8 @@ Reglas clave aplicadas:
 - All Phases committed to git with verified CI (120/120 tests, 92.47% coverage)
 - Architectural decisions documented in `docs/architecture-benchmark.md`
 - Tech stack: FastAPI + Redis Streams + Qdrant + Kubernetes + Helm + ArgoCD + Argo Rollouts + NVIDIA GPU Operator
-- Rename to `inferflow-mlops` complete; GitHub community setup (labels, discussions, issue templates) done
-- `inferflow` CLI production-ready (Typer + Rich); deployment automation codified
+- Rename to `moiraweave-mlops` complete; GitHub community setup (labels, discussions, issue templates) done
+- `moiraweave` CLI production-ready (Typer + Rich); deployment automation codified
 
 **Archivos clave F1-F8**:
 - `services/api-gateway/`, `services/worker/`: Core runtime
@@ -79,7 +79,7 @@ Reglas clave aplicadas:
 - `steps/`, `pipelines/`, `tasks/`: Content / Pipeline-as-Code / Task contracts
 - `infra/helm/`, `infra/terraform/`: Infrastructure-as-Code
 - `.github/workflows/ci.yml`, `.github/workflows/release.yml`: Automation
-- `tools/inferflow-cli/`: Developer experience CLI
+- `tools/moiraweave-cli/`: Developer experience CLI
 
 ---
 
@@ -102,7 +102,7 @@ Reglas clave aplicadas:
 
 ## FASE 10 — Monorepo → Multi-Repo + Organization Launch 🚀
 
-> **Objetivo**: convertir el monorepo `inferflow-mlops` en una organización GitHub `moiraweave-labs` con repos enfocados y mantenibles de forma independiente. Cada repo tiene su propio ciclo de versioning, CI/CD y comunidad de contribuidores.
+> **Objetivo**: convertir el monorepo `moiraweave-mlops` en una organización GitHub `moiraweave-labs` con repos enfocados y mantenibles de forma independiente. Cada repo tiene su propio ciclo de versioning, CI/CD y comunidad de contribuidores.
 
 > **Prerequisito**: FASE 0 completada (rebrand base aplicado en naming, CLI, docs y artefactos).
 
@@ -216,7 +216,7 @@ moiraweave-labs/   ← GitHub organization
 
 ## FASE 0 — Rebrand MoiraWeave + Refactor Inicial de Referencias 🎨
 
-> **Objetivo**: sustituir completamente el naming `inferflow` por `MoiraWeave` y `moira` en todo el proyecto.
+> **Objetivo**: sustituir completamente el naming `moiraweave` por `MoiraWeave` y `moira` en todo el proyecto.
 
 > **Prioridad**: bloqueante y previa a cualquier split multi-repo (ejecutar antes de F10).
 >
@@ -226,11 +226,11 @@ moiraweave-labs/   ← GitHub organization
   - Canonical brand: `MoiraWeave`
   - Slug técnico: `moiraweave`
   - Reemplazo total: no mantener aliases legacy
-  - Documento de migration final (`inferflow` → `moiraweave` / `moira`) en README principal
+  - Documento de migration final (`moiraweave` → `moiraweave` / `moira`) en README principal
 
 - [x] **F0-2** `[REPO-LOCAL]` Refactor de CLI y packaging
-  - Renombrar comando principal de `inferflow` a `moira`
-  - Eliminar aliases legacy (`inferflow`, `moiraweave`) del entrypoint público (solo `moira`)
+  - Renombrar comando principal de `moiraweave` a `moira`
+  - Eliminar aliases legacy (`moiraweave`, `moiraweave`) del entrypoint público (solo `moira`)
   - Actualizar `pyproject.toml`, entry points y smoke tests
 
 - [x] **F0-3** `[REPO-LOCAL]` Refactor de documentación interna
@@ -250,7 +250,7 @@ moiraweave-labs/   ← GitHub organization
 
 - [ ] **F0-6** `[REPO-LOCAL + MANUAL-GITHUB]` Fase de transición y comunicación
   - Changelog: sección "Rebrand to MoiraWeave"
-  - Nota de migración: reemplazo total de comandos (`inferflow` -> `moira`)
+  - Nota de migración: reemplazo total de comandos (`moiraweave` -> `moira`)
   - Issue/Discussion pública con corte definitivo de naming legacy
 
 - [ ] **F0-7** `[REPO-LOCAL]` Creación de identidad visual (logo + guidelines)

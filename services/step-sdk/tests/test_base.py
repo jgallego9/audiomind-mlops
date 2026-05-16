@@ -135,7 +135,7 @@ def test_model_metadata_returns_correct_response(client: TestClient) -> None:
     assert resp.status_code == 200
     body = resp.json()
     assert body["name"] == "echo"
-    assert body["platform"] == "inferflow"
+    assert body["platform"] == "moiraweave"
     assert body["versions"] == ["1"]
     assert body["task"] == ""
     assert body["implementation"] == ""

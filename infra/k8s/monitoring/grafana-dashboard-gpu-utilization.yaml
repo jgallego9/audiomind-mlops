@@ -152,12 +152,12 @@ data:
       ],
       "refresh": "30s",
       "schemaVersion": 38,
-      "tags": ["inferflow", "gpu", "dcgm", "nvidia"],
+      "tags": ["moiraweave", "gpu", "dcgm", "nvidia"],
       "templating": {"list": []},
       "time": {"from": "now-1h", "to": "now"},
       "timepicker": {},
       "timezone": "UTC",
-      "title": "Inferflow — GPU Utilisation (DCGM)",
-      "uid": "inferflow-gpu-utilization",
+      "title": "MoiraWeave — GPU Utilisation (DCGM)",
+      "uid": "moiraweave-gpu-utilization",
       "version": 1
     }

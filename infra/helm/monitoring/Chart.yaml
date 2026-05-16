@@ -1,7 +1,7 @@
 apiVersion: v2
-name: inferflow-monitoring
+name: moiraweave-monitoring
 description: >
-  Umbrella chart for the Inferflow observability stack:
+  Umbrella chart for the MoiraWeave observability stack:
   kube-prometheus-stack (Prometheus + Alertmanager + Grafana),
   Loki (log aggregation), Promtail (log shipper) and Jaeger (tracing).
 type: application

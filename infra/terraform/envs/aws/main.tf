@@ -20,7 +20,7 @@ locals {
     {
       Terraform   = "true"
       Environment = "dev"
-      Project     = "inferflow"
+      Project     = "moiraweave"
     },
     var.tags,
   )
@@ -134,10 +134,10 @@ module "eks" {
 
 # ─── ECR repositories ─────────────────────────────────────────────────────────
 
-resource "aws_ecr_repository" "inferflow" {
+resource "aws_ecr_repository" "moiraweave" {
   for_each = toset(["api", "worker", "drift-detector"])
 
-  name                 = "inferflow/${each.key}"
+  name                 = "moiraweave/${each.key}"
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
@@ -147,8 +147,8 @@ resource "aws_ecr_repository" "inferflow" {
   tags = local.tags
 }
 
-resource "aws_ecr_lifecycle_policy" "inferflow" {
-  for_each   = aws_ecr_repository.inferflow
+resource "aws_ecr_lifecycle_policy" "moiraweave" {
+  for_each   = aws_ecr_repository.moiraweave
   repository = each.value.name
 
   policy = jsonencode({

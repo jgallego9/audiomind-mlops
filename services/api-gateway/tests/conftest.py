@@ -30,7 +30,7 @@ if _SERVICE_ROOT not in sys.path:
 # Set test env vars BEFORE any app module is imported.
 # ``jwt_secret_key`` has no default, so it must exist when Settings loads.
 # ---------------------------------------------------------------------------
-os.environ.setdefault("JWT_SECRET_KEY", "test-secret-key-inferflow-32chars!!")
+os.environ.setdefault("JWT_SECRET_KEY", "test-secret-key-moiraweave-32chars!!")
 os.environ.setdefault("OTEL_ENABLED", "false")
 
 # App imports must come AFTER env vars are set.

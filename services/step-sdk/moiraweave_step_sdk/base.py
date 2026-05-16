@@ -1,4 +1,4 @@
-"""BaseStep — abstract base class for all inferflow pipeline steps.
+"""BaseStep — abstract base class for all moiraweave pipeline steps.
 
 Each step exposes a KServe V2-compatible REST API via :meth:`build_app`.
 Concrete steps must implement :attr:`name`, :attr:`version`, and
@@ -71,7 +71,7 @@ class BaseStep(ABC):
 
     @property
     def task(self) -> str:
-        """Inferflow task name, e.g. ``"audio-transcribe"``.
+        """MoiraWeave task name, e.g. ``"audio-transcribe"``.
 
         Override in subclasses to expose task identity via ``GET /v2/models/{name}``.
         """
@@ -117,7 +117,7 @@ class BaseStep(ABC):
         app = FastAPI(
             title=step.name,
             version=step.version,
-            description=f"Inferflow step: {step.name}",
+            description=f"MoiraWeave step: {step.name}",
         )
 
         @app.get("/v2/health/live", response_model=ServerLiveResponse)
@@ -141,7 +141,7 @@ class BaseStep(ABC):
             return ModelMetadataResponse(
                 name=step.name,
                 versions=[step.version],
-                platform="inferflow",
+                platform="moiraweave",
                 inputs=step.inputs,
                 outputs=step.outputs,
                 task=step.task,

@@ -1,13 +1,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: inferflow
+  name: moiraweave
   namespace: argocd
   finalizers:
     # Prevent deletion while Applications exist.
     - resources-finalizer.argocd.argoproj.io
 spec:
-  description: "Inferflow MLOps workloads — dev / staging / prod"
+  description: "MoiraWeave MLOps workloads — dev / staging / prod"
 
   # Allowed source repos.
   sourceRepos:
@@ -16,11 +16,11 @@ spec:
   # Allowed destination clusters and namespaces.
   destinations:
     - server: https://kubernetes.default.svc
-      namespace: inferflow-dev
+      namespace: moiraweave-dev
     - server: https://kubernetes.default.svc
-      namespace: inferflow-staging
+      namespace: moiraweave-staging
     - server: https://kubernetes.default.svc
-      namespace: inferflow-prod
+      namespace: moiraweave-prod
 
   # Allowed cluster-scoped resource kinds (none needed beyond namespaced resources).
   clusterResourceWhitelist: []

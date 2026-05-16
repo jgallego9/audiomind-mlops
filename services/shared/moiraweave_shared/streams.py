@@ -5,10 +5,10 @@ guarantee they always agree on stream names, preventing silent job loss.
 """
 
 #: Redis Stream key where job messages are published.
-STREAM_KEY: str = "inferflow:jobs"
+STREAM_KEY: str = "moiraweave:jobs"
 
 #: Consumer group name for the worker fleet.
-CONSUMER_GROUP: str = "inferflow:workers"
+CONSUMER_GROUP: str = "moiraweave:workers"
 
 #: Prefix for per-job Redis hash keys  (full key: ``f"{JOB_KEY_PREFIX}:{job_id}"``).
-JOB_KEY_PREFIX: str = "inferflow:job"
+JOB_KEY_PREFIX: str = "moiraweave:job"

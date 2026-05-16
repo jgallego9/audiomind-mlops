@@ -13,7 +13,7 @@ data:
         {"type": "grafana", "id": "grafana", "name": "Grafana", "version": "10.0.0"},
         {"type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "1.0.0"}
       ],
-      "description": "Inferflow vLLM inference metrics: request latency, queue depth, KV-cache, token throughput",
+      "description": "MoiraWeave vLLM inference metrics: request latency, queue depth, KV-cache, token throughput",
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 1,
@@ -156,12 +156,12 @@ data:
       ],
       "refresh": "30s",
       "schemaVersion": 38,
-      "tags": ["inferflow", "vllm", "inference", "llm"],
+      "tags": ["moiraweave", "vllm", "inference", "llm"],
       "templating": {"list": []},
       "time": {"from": "now-1h", "to": "now"},
       "timepicker": {},
       "timezone": "UTC",
-      "title": "Inferflow — LLM Inference (vLLM)",
-      "uid": "inferflow-llm-inference",
+      "title": "MoiraWeave — LLM Inference (vLLM)",
+      "uid": "moiraweave-llm-inference",
       "version": 1
     }

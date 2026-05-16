@@ -1,7 +1,7 @@
 [project]
 name = "step-text-embed-fastembed"
 version = "0.1.0"
-description = "Inferflow step: text embedding via FastEmbed"
+description = "MoiraWeave step: text embedding via FastEmbed"
 requires-python = ">=3.13"
 dependencies = [
     "moiraweave-step-sdk",

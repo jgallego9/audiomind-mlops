@@ -1,6 +1,6 @@
-"""Inferflow async inference worker.
+"""MoiraWeave async inference worker.
 
-Consumes transcription jobs from the ``inferflow:jobs`` Redis Stream,
+Consumes transcription jobs from the ``moiraweave:jobs`` Redis Stream,
 processes them (mock ASR for now), and stores results in Redis Hashes.
 
 Usage:

@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-_CONSUMER_GROUP = "inferflow-pipeline"
+_CONSUMER_GROUP = "moiraweave-pipeline"
 
 
 async def _ensure_consumer_group(redis: Redis, stream: str) -> None:

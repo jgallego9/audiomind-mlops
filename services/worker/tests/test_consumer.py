@@ -17,9 +17,9 @@ from app.consumer import (
     run_consumer,
 )
 
-_STREAM = "inferflow:jobs"
-_GROUP = "inferflow:workers"
-_JOB_PREFIX = "inferflow:job"
+_STREAM = "moiraweave:jobs"
+_GROUP = "moiraweave:workers"
+_JOB_PREFIX = "moiraweave:job"
 
 _FAST_TRANSCRIPTION = {
     "transcript": "hello world",

@@ -14,7 +14,7 @@ data:
         {"type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "1.0.0"},
         {"type": "datasource", "id": "loki", "name": "Loki", "version": "1.0.0"}
       ],
-      "description": "Inferflow system overview: pod health, CPU/memory, API error rates, worker throughput",
+      "description": "MoiraWeave system overview: pod health, CPU/memory, API error rates, worker throughput",
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 1,
@@ -24,7 +24,7 @@ data:
         {
           "id": 1,
           "type": "stat",
-          "title": "Pods Running (inferflow namespace)",
+          "title": "Pods Running (moiraweave namespace)",
           "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
           "fieldConfig": {
             "defaults": {
@@ -40,7 +40,7 @@ data:
           "targets": [
             {
               "datasource": {"type": "prometheus"},
-              "expr": "count(kube_pod_status_phase{namespace=\"inferflow\",phase=\"Running\"})",
+              "expr": "count(kube_pod_status_phase{namespace=\"moiraweave\",phase=\"Running\"})",
               "legendFormat": "running pods"
             }
           ]
@@ -53,7 +53,7 @@ data:
           "targets": [
             {
               "datasource": {"type": "prometheus"},
-              "expr": "sum(rate(http_requests_total{job=\"inferflow-api-gateway\"}[1m]))",
+              "expr": "sum(rate(http_requests_total{job=\"moiraweave-api-gateway\"}[1m]))",
               "legendFormat": "req/s"
             }
           ]
@@ -79,7 +79,7 @@ data:
           "targets": [
             {
               "datasource": {"type": "prometheus"},
-              "expr": "sum(rate(http_requests_total{job=\"inferflow-api-gateway\",status_code=~\"5..\"}[5m])) / sum(rate(http_requests_total{job=\"inferflow-api-gateway\"}[5m]))",
+              "expr": "sum(rate(http_requests_total{job=\"moiraweave-api-gateway\",status_code=~\"5..\"}[5m])) / sum(rate(http_requests_total{job=\"moiraweave-api-gateway\"}[5m]))",
               "legendFormat": "5xx rate"
             }
           ]
@@ -92,7 +92,7 @@ data:
           "targets": [
             {
               "datasource": {"type": "prometheus"},
-              "expr": "sum(increase(inferflow_worker_jobs_processed_total[5m]))",
+              "expr": "sum(increase(moiraweave_worker_jobs_processed_total[5m]))",
               "legendFormat": "jobs"
             }
           ]
@@ -100,7 +100,7 @@ data:
         {
           "id": 5,
           "type": "timeseries",
-          "title": "CPU Usage by Container (inferflow namespace)",
+          "title": "CPU Usage by Container (moiraweave namespace)",
           "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
           "fieldConfig": {
             "defaults": {"unit": "percentunit"}
@@ -108,7 +108,7 @@ data:
           "targets": [
             {
               "datasource": {"type": "prometheus"},
-              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"inferflow\",container!=\"\"}[1m])) by (container)",
+              "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"moiraweave\",container!=\"\"}[1m])) by (container)",
               "legendFormat": "{{ container }}"
             }
           ]
@@ -116,7 +116,7 @@ data:
         {
           "id": 6,
           "type": "timeseries",
-          "title": "Memory Usage by Container (inferflow namespace)",
+          "title": "Memory Usage by Container (moiraweave namespace)",
           "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
           "fieldConfig": {
             "defaults": {"unit": "bytes"}
@@ -124,7 +124,7 @@ data:
           "targets": [
             {
               "datasource": {"type": "prometheus"},
-              "expr": "sum(container_memory_working_set_bytes{namespace=\"inferflow\",container!=\"\"}) by (container)",
+              "expr": "sum(container_memory_working_set_bytes{namespace=\"moiraweave\",container!=\"\"}) by (container)",
               "legendFormat": "{{ container }}"
             }
           ]
@@ -140,7 +140,7 @@ data:
           "targets": [
             {
               "datasource": {"type": "prometheus"},
-              "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"inferflow-api-gateway\"}[5m])) by (le, handler))",
+              "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"moiraweave-api-gateway\"}[5m])) by (le, handler))",
               "legendFormat": "p95 — {{ handler }}"
             }
           ]
@@ -156,7 +156,7 @@ data:
           "targets": [
             {
               "datasource": {"type": "prometheus"},
-              "expr": "histogram_quantile(0.95, sum(rate(inferflow_worker_job_duration_seconds_bucket[5m])) by (le))",
+              "expr": "histogram_quantile(0.95, sum(rate(moiraweave_worker_job_duration_seconds_bucket[5m])) by (le))",
               "legendFormat": "p95 job duration"
             }
           ]
@@ -164,7 +164,7 @@ data:
         {
           "id": 9,
           "type": "logs",
-          "title": "Application Logs (inferflow namespace)",
+          "title": "Application Logs (moiraweave namespace)",
           "gridPos": {"h": 10, "w": 24, "x": 0, "y": 20},
           "options": {
             "showTime": true,
@@ -176,7 +176,7 @@ data:
           "targets": [
             {
               "datasource": {"type": "loki"},
-              "expr": "{namespace=\"inferflow\"} | json | level != \"debug\"",
+              "expr": "{namespace=\"moiraweave\"} | json | level != \"debug\"",
               "legendFormat": ""
             }
           ]
@@ -184,12 +184,12 @@ data:
       ],
       "refresh": "30s",
       "schemaVersion": 38,
-      "tags": ["inferflow", "system", "overview"],
+      "tags": ["moiraweave", "system", "overview"],
       "templating": {"list": []},
       "time": {"from": "now-1h", "to": "now"},
       "timepicker": {},
       "timezone": "UTC",
-      "title": "Inferflow — System Overview",
-      "uid": "inferflow-system-overview",
+      "title": "MoiraWeave — System Overview",
+      "uid": "moiraweave-system-overview",
       "version": 1
     }

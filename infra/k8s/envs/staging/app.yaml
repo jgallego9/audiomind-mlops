@@ -1,7 +1,7 @@
 # infra/k8s/envs/staging/app.yaml
 # Source of truth for the 'staging' environment.
 env: staging
-namespace: inferflow-staging
+namespace: moiraweave-staging
 targetRevision: main          # follows main; same code as dev, isolated namespace
 helmChartPath: infra/helm/moiraweave
 autoSync: false               # manual sync — triggered by a human or CI after QA gate
