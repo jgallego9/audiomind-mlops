@@ -1,0 +1,45 @@
+name: Publish to PyPI
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.13"
+
+jobs:
+  publish-packages:
+    name: Publish Python packages to PyPI
+    runs-on: ubuntu-24.04
+    environment: publish
+    permissions:
+      id-token: write
+    strategy:
+      matrix:
+        package:
+          - services/step-sdk
+          - services/shared
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install uv
+        run: pipx install uv
+
+      - name: Build package (${{ matrix.package }})
+        run: |
+          cd ${{ matrix.package }}
+          uv build
+
+      - name: Publish ${{ matrix.package }} to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: ${{ matrix.package }}/dist
