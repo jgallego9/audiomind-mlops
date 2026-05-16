@@ -1,8 +1,8 @@
-# Inferflow MLOps Platform — Backlog
+# MoiraWeave MLOps Platform — Backlog
 
 > **Objetivo**: Portfolio project que posiciona como Senior MLOps Engineer.
 > **Caso de uso**: Audio → Whisper (STT) → LLM analysis → Embeddings → RAG search
-> **Estado actual**: F9 COMPLETE, F10 IN PLANNING
+> **Estado actual**: F9 COMPLETE, F0 IN PLANNING (BLOCKER), F10 IN PLANNING
 > **Python**: 3.13 · **Licencia**: MIT
 
 > **Workflow de commits**: tras cada tarea numerada se proporciona un mensaje de commit en formato Conventional Commits para mantener un historial granular y legible.
@@ -102,108 +102,166 @@ Reglas clave aplicadas:
 
 ## FASE 10 — Monorepo → Multi-Repo + Organization Launch 🚀
 
-> **Objetivo**: convertir el monorepo `inferflow-mlops` en una organización GitHub `inferflow-labs` con tres repos enfocados y mantenibles de forma independiente. Cada repo tiene su propio ciclo de versioning, CI/CD y comunidad de contribuidores.
+> **Objetivo**: convertir el monorepo `inferflow-mlops` en una organización GitHub `moiraweave-labs` con repos enfocados y mantenibles de forma independiente. Cada repo tiene su propio ciclo de versioning, CI/CD y comunidad de contribuidores.
+
+> **Prerequisito**: FASE 0 completada (rebrand base aplicado en naming, CLI, docs y artefactos).
+
+**Etiquetas de ejecución**:
+- `[MANUAL-GITHUB]`: requiere operación manual en GitHub (UI/org settings/branch protection/pages).
+- `[REPO-LOCAL]`: se puede ejecutar desde este entorno editando código/config del repo.
 
 ### Arquitectura target de F10
 
 ```
-inferflow-labs/   ← GitHub organization
-├── inferflow-core          # Runtime de la plataforma (API gateway + workers + shared libs)
-├── inferflow-steps         # Catálogo de steps (todas las implementaciones de tareas)
-├── inferflow-cli           # CLI tool para desarrolladores
-└── inferflow-docs          # Documentación + sitio público (auto-deployed)
+moiraweave-labs/   ← GitHub organization
+├── moiraweave-core          # Runtime de la plataforma (API gateway + workers + shared libs)
+├── moiraweave-steps         # Catálogo de steps (todas las implementaciones de tareas)
+├── moiraweave-cli           # CLI tool para desarrolladores
+└── moiraweave-docs          # Documentación + sitio público (auto-deployed)
 ```
 
 **Razones del split**:
 | Repo | Antes (monorepo) | Ahora (multi) | Beneficio |
 |---|---|---|---|
-| **inferflow-core** | `services/`, `infra/` | Standalone | Runtime versionable independientemente; cambios en deploy no afectan CLI |
-| **inferflow-steps** | `steps/`, `tasks/` | Standalone | Community puede contribuir steps sin tocar plataforma core; semantic versioning por step |
-| **inferflow-cli** | `tools/inferflow-cli/` | Standalone | Instalable vía `uv tool install inferflow-cli`; releases independientes; UI desacoplada de runtime |
-| **inferflow-docs** | `docs/`, `README.md` | Standalone + auto-deployed | Documentación pública; Netlify / Vercel auto-deploy en cada commit; versioning por release |
+| **moiraweave-core** | `services/`, `infra/` | Standalone | Runtime versionable independientemente; cambios en deploy no afectan CLI |
+| **moiraweave-steps** | `steps/`, `tasks/` | Standalone | Community puede contribuir steps sin tocar plataforma core; semantic versioning por step |
+| **moiraweave-cli** | `tools/inferflow-cli/` | Standalone | Instalable vía `uv tool install moiraweave-cli`; releases independientes; UI desacoplada de runtime |
+| **moiraweave-docs** | `docs/`, `README.md` | Standalone + auto-deployed | Documentación pública; Netlify / Vercel auto-deploy en cada commit; versioning por release |
 
 **Impacto en desarrollo**:
-- New contributor → puede aportar un step en `inferflow-steps` sin clonar 20GB de infra
-- Bug en runtime → merge rápido a `inferflow-core`, release v1.2.3, CLI automáticamente descubre versión nueva
-- Nuevo paso AI (e.g. speech-emotion-recognition) → PR en `inferflow-steps`, sin bloqueos de cambios en Helm
+- New contributor → puede aportar un step en `moiraweave-steps` sin clonar 20GB de infra
+- Bug en runtime → merge rápido a `moiraweave-core`, release v1.2.3, CLI automáticamente descubre versión nueva
+- Nuevo paso AI (e.g. speech-emotion-recognition) → PR en `moiraweave-steps`, sin bloqueos de cambios en Helm
 - Documentación desactualizada → contribuidores pueden arreglarla sin hacer CI de servicios
 
 ### FASE 10 — Tareas
 
-- [ ] **F10-1** Crear organización GitHub `inferflow-labs` y permisos base
-  - Crear org en GitHub (Settings → New Organization → `inferflow-labs`)
-  - Crear equipo `@inferflow-labs/maintainers` con permisos admin
+- [ ] **F10-1** `[MANUAL-GITHUB]` Crear organización GitHub `moiraweave-labs` y permisos base
+  - Crear org en GitHub (Settings → New Organization → `moiraweave-labs`)
+  - Crear equipo `@moiraweave-labs/maintainers` con permisos admin
   - Documentar seguridad: no secrets en env vars; usar OIDC para GHCR push
 
-- [ ] **F10-2** Preparar `inferflow-core` repo (split de `services/` + `infra/`)
-  - Crear nuevo repo: `inferflow-labs/inferflow-core`
+- [ ] **F10-2** `[MANUAL-GITHUB + REPO-LOCAL]` Preparar `moiraweave-core` repo (split de `services/` + `infra/`)
+  - Crear nuevo repo: `moiraweave-labs/moiraweave-core` `[MANUAL-GITHUB]`
   - Copiar: `services/`, `services/shared/`, `services/step-sdk/`, `infra/`
   - Copiar: `.github/workflows/` (sin CLI tests), `Makefile`, `pyproject.toml`, `README.md`
   - Crear: `version.txt` ("1.0.0"), `CHANGELOG.md`
   - Validar: `make ci` pasa en nuevo repo
-  - Branch protection: `main` requiere PR review + CI green
+  - Branch protection: `main` requiere PR review + CI green `[MANUAL-GITHUB]`
 
-- [ ] **F10-3** Preparar `inferflow-steps` repo (split de `steps/` + `tasks/`)
-  - Crear nuevo repo: `inferflow-labs/inferflow-steps`
+- [ ] **F10-3** `[MANUAL-GITHUB + REPO-LOCAL]` Preparar `moiraweave-steps` repo (split de `steps/` + `tasks/`)
+  - Crear nuevo repo: `moiraweave-labs/moiraweave-steps` `[MANUAL-GITHUB]`
   - Copiar: `steps/`, `tasks/`, `Makefile`, `README.md`
   - Crear: `.github/workflows/step-ci.yml` con matrix dinámico por step changed
-  - Crear: `pyproject.toml` con `inferflow-core` como git dep + CONTRIBUTING.md
+  - Crear: `pyproject.toml` con `moiraweave-core` como git dep + CONTRIBUTING.md
   - Crear: `version.txt`, `CHANGELOG.md`
-  - GitHub issue template: "Report a step"
+  - GitHub issue template: "Report a step" `[MANUAL-GITHUB]`
 
-- [ ] **F10-4** Preparar `inferflow-cli` repo (split de `tools/inferflow-cli/`)
-  - Crear nuevo repo: `inferflow-labs/inferflow-cli`
+- [ ] **F10-4** `[MANUAL-GITHUB + REPO-LOCAL]` Preparar `moiraweave-cli` repo (split de `tools/inferflow-cli/`)
+  - Crear nuevo repo: `moiraweave-labs/moiraweave-cli` `[MANUAL-GITHUB]`
   - Copiar: `inferflow_cli/`, `tests/`, `pyproject.toml`, `setup.py`
   - Crear: `.github/workflows/ci.yml` (lint, mypy, pytest, build dist)
   - Crear: `version.txt`, `CHANGELOG.md`, `README.md`
-  - Config: `inferflow = "inferflow_cli.main:app"` como entry point
-  - NO incluir `inferflow-core` en deps (CLI es stateless, habla HTTP)
+  - Config: `moira = "inferflow_cli.main:app"` como entry point principal (`moiraweave` opcional)
+  - NO incluir `moiraweave-core` en deps (CLI es stateless, habla HTTP)
 
-- [ ] **F10-5** Preparar `inferflow-docs` repo (docs públicas con auto-deploy)
-  - Crear nuevo repo: `inferflow-labs/inferflow-docs`
+- [ ] **F10-5** `[MANUAL-GITHUB + REPO-LOCAL]` Preparar `moiraweave-docs` repo (docs públicas con auto-deploy)
+  - Crear nuevo repo: `moiraweave-labs/moiraweave-docs` `[MANUAL-GITHUB]`
   - Copiar: `docs/` (architecture.md, quickstart.md, repo-structure.md, engineering-audit.md, etc)
   - Crear: `mkdocs.yml` (material theme, search, analytics)
   - Crear: `.github/workflows/deploy.yml` (build MkDocs → gh-pages)
   - Crear: `requirements.txt` (mkdocs, mkdocs-material, plugins)
-  - Setup Pages: Settings → Pages → Deploy from GitHub Actions
-  - URL pública: `https://inferflow-labs.github.io/`
+  - Setup Pages: Settings → Pages → Deploy from GitHub Actions `[MANUAL-GITHUB]`
+  - URL pública: `https://moiraweave-labs.github.io/`
 
-- [ ] **F10-6** Migración de contenido: actualizar referencias cruzadas
-  - `inferflow-core/pyproject.toml`: trae `inferflow-step-sdk` de local o git
-  - `inferflow-steps/pyproject.toml`: trae `inferflow-step-sdk` desde `inferflow-core`
-  - `inferflow-cli/pyproject.toml`: sin `inferflow-core` (comunicación HTTP)
+- [ ] **F10-6** `[REPO-LOCAL]` Migración de contenido: actualizar referencias cruzadas
+  - `moiraweave-core/pyproject.toml`: trae `moiraweave-step-sdk` de local o git
+  - `moiraweave-steps/pyproject.toml`: trae `moiraweave-step-sdk` desde `moiraweave-core`
+  - `moiraweave-cli/pyproject.toml`: sin `moiraweave-core` (comunicación HTTP)
   - README de cada repo apunta a los otros
-  - `inferflow-docs/docs/index.md`: enlaza a los tres repos + badges CI
-  - Mantener este BACKLOG en uno de los repos o en `/inferflow-labs/.github/`
+  - `moiraweave-docs/docs/index.md`: enlaza a los tres repos + badges CI
+  - Mantener este BACKLOG en uno de los repos o en `/moiraweave-labs/.github/`
 
-- [ ] **F10-7** Configurar GitHub Actions compartidas (reutilizables)
-  - Crear repo: `inferflow-labs/.github/` (privado)
+- [ ] **F10-7** `[MANUAL-GITHUB + REPO-LOCAL]` Configurar GitHub Actions compartidas (reutilizables)
+  - Crear repo: `moiraweave-labs/.github/` (privado) `[MANUAL-GITHUB]`
   - Workflows reutilizables:
     - `.github/workflows/ci-python.yml`: lint + mypy + pytest (coverage > 80%)
     - `.github/workflows/docker-build.yml`: buildx + Trivy + push GHCR
-  - Cada repo referencia: `uses: inferflow-labs/.github/workflows/ci-python.yml@main`
+  - Cada repo referencia: `uses: moiraweave-labs/.github/workflows/ci-python.yml@main`
 
-- [ ] **F10-8** Release workflow multi-repo
-  - **inferflow-core**: `release-please` v1.0.0
-    - GHCR: `ghcr.io/inferflow-labs/api-gateway:v1.0.0`
-    - Helm chart: `inferflow:v1.0.0`
-  - **inferflow-steps**: `release-please` per-step (v1.0.0, v2.1.0, etc.)
+- [ ] **F10-8** `[REPO-LOCAL + MANUAL-GITHUB]` Release workflow multi-repo
+  - **moiraweave-core**: `release-please` v1.0.0
+    - GHCR: `ghcr.io/moiraweave-labs/api-gateway:v1.0.0`
+    - Helm chart: `moiraweave:v1.0.0`
+  - **moiraweave-steps**: `release-please` per-step (v1.0.0, v2.1.0, etc.)
     - Config: `release-please-config.json` con `"components"`
-    - GHCR: `ghcr.io/inferflow-labs/step-stt-whisper:v1.0.0`
-  - **inferflow-cli**: `release-please` semver único
-    - `uv tool install git+https://github.com/inferflow-labs/inferflow-cli@v1.0.0`
+    - GHCR: `ghcr.io/moiraweave-labs/step-stt-whisper:v1.0.0`
+  - **moiraweave-cli**: `release-please` semver único
+    - `uv tool install git+https://github.com/moiraweave-labs/moiraweave-cli@v1.0.0`
+  - Crear GitHub Environments y rulesets de release `[MANUAL-GITHUB]`
 
-- [ ] **F10-9** Configurar security + compliance
+- [ ] **F10-9** `[MANUAL-GITHUB + REPO-LOCAL]` Configurar security + compliance
   - **CODEOWNERS** en cada repo (API experts, ML engineers, UX/DevExp)
-  - **Branch protection**: main requiere PR review + CI green
-  - **Dependabot**: activo en todos con auto-merge de patch updates
-  - **Secret scanning**: GitHub secret scanner activo
+  - **Branch protection**: main requiere PR review + CI green `[MANUAL-GITHUB]`
+  - **Dependabot**: activo en todos con auto-merge de patch updates `[MANUAL-GITHUB]`
+  - **Secret scanning**: GitHub secret scanner activo `[MANUAL-GITHUB]`
   - Documentar en `SECURITY.md` de cada repo
 
-- [ ] **F10-10** Crear monorepo agregador (opcional)
-  - Repo: `inferflow-labs/inferflow` con git submodules
+- [ ] **F10-10** `[MANUAL-GITHUB + REPO-LOCAL]` Crear monorepo agregador (opcional)
+  - Repo: `moiraweave-labs/moiraweave` con git submodules `[MANUAL-GITHUB]`
   - Estructura: `.gitmodules`, `Makefile` (meta-targets), `README.md`
   - Permite: `git clone --recurse-submodules` para local dev convenience
+
+---
+
+## FASE 0 — Rebrand MoiraWeave + Refactor Inicial de Referencias 🎨
+
+> **Objetivo**: sustituir completamente el naming `inferflow` por `MoiraWeave` y `moira` en todo el proyecto.
+
+> **Prioridad**: bloqueante y previa a cualquier split multi-repo (ejecutar antes de F10).
+>
+> **Decisión de DX**: el comando CLI oficial será `moira` (corto) y único.
+
+- [ ] **F0-1** `[REPO-LOCAL]` Definir policy de naming final
+  - Canonical brand: `MoiraWeave`
+  - Slug técnico: `moiraweave`
+  - Reemplazo total: no mantener aliases legacy
+  - Documento de migration final (`inferflow` → `moiraweave` / `moira`) en README principal
+
+- [ ] **F0-2** `[REPO-LOCAL]` Refactor de CLI y packaging
+  - Renombrar comando principal de `inferflow` a `moira`
+  - Eliminar aliases legacy (`inferflow`, `moiraweave`) del entrypoint público
+  - Actualizar `pyproject.toml`, entry points y smoke tests
+
+- [ ] **F0-3** `[REPO-LOCAL]` Refactor de documentación interna
+  - Sustituir referencias de marca en README, docs y ejemplos de comandos
+  - Actualizar nombres de repos target en diagramas y snippets
+  - Verificar consistencia de badges, URLs y textos de onboarding
+
+- [ ] **F0-4** `[REPO-LOCAL]` Refactor de CI/CD e imágenes
+  - Actualizar nombres de imagen GHCR (`ghcr.io/moiraweave-labs/*`)
+  - Actualizar Helm chart name, release metadata y artefactos
+  - Ajustar release-please para nuevos componentes
+
+- [ ] **F0-5** `[MANUAL-GITHUB]` Operaciones de GitHub fuera del entorno
+  - Crear/ajustar org y repos definitivos con naming MoiraWeave
+  - Configurar redirects (si aplica) y actualizar descripción de repos
+  - Revisar branch protections, rulesets, secrets, environments y Pages
+
+- [ ] **F0-6** `[REPO-LOCAL + MANUAL-GITHUB]` Fase de transición y comunicación
+  - Changelog: sección "Rebrand to MoiraWeave"
+  - Nota de migración: reemplazo total de comandos (`inferflow` -> `moira`)
+  - Issue/Discussion pública con corte definitivo de naming legacy
+
+- [ ] **F0-7** `[REPO-LOCAL]` Creación de identidad visual (logo + guidelines)
+  - Diseñar logo v1 (símbolo + wordmark) alineado con metáfora "tejer el destino"
+  - Definir paleta, tipografías y usos mínimos (README/docs/social)
+  - Exportables: SVG oscuro/claro, favicon, avatar org
+
+- [ ] **F0-8** `[MANUAL-GITHUB]` Aplicar branding en GitHub
+  - Actualizar avatar y descripción de la organización
+  - Actualizar social preview y README profile de la org
+  - Revisar naming en topics, labels y plantillas de issue/PR
 
 ---
 
@@ -217,7 +275,7 @@ inferflow-labs/   ← GitHub organization
 | Trivy vulnerabilities (critical) | 0 |
 | Tiempo de deploy canary completo | < 10 min |
 | Rollback automático | < 2 min |
-| Documentación pública accesible | https://inferflow-labs.github.io/ |
+| Documentación pública accesible | https://moiraweave-labs.github.io/ |
 
 ---
 
@@ -230,15 +288,15 @@ Ver `docs/architecture-benchmark.md` para matriz completa de decisiones vs refer
 ## Próximos pasos recomendados
 
 **Inmediato** (post-F9):
-1. Merge `develop` → `main` (confirmar todas las pruebas pasan)
-2. Crear release v1.0.0 vía `release-please` (genera tag + GitHub Release)
-3. Compartir el repositorio con portfolio/networking
+1. Ejecutar FASE 0 completa (rebrand MoiraWeave + reemplazo total de naming)
+2. Merge `develop` → `main` (confirmar todas las pruebas pasan)
+3. Crear release v1.0.0 vía `release-please` (genera tag + GitHub Release)
 
-**Después de F10** (multi-repo):
-1. Crear organización `inferflow-labs` en GitHub
+**Después de F0 + F10** (multi-repo):
+1. Crear organización `moiraweave-labs` en GitHub
 2. Split del monorepo en 4 repos según F10 tasks
 3. Configurar Actions compartidas y releases automáticas
-4. Publicar documentación en `https://inferflow-labs.github.io/`
+4. Publicar documentación en `https://moiraweave-labs.github.io/`
 5. Anunciar cambios a la comunidad early (si existe)
 
 **Futuro** (más allá de F10):
