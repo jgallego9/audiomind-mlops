@@ -153,8 +153,10 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # no-cache + pull ensure the OS upgrade layer is never served from
+          # the GHA cache, so Trivy always sees patched base packages.
+          no-cache: true
+          pull: true
           platforms: linux/amd64
 
       - name: Trivy — enforce policy (table)
