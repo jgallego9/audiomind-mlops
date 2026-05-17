@@ -197,13 +197,15 @@ jobs:
     # Only bump on main branch pushes.
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     permissions:
-      contents: write   # git push
+      contents: write   # git push to develop
     steps:
-      - name: Checkout
+      # Checkout `develop` — main is a protected branch that requires PRs,
+      # so the bot commits the Helm tag bump there instead.  The change flows
+      # to main on the next develop→main PR.
+      - name: Checkout develop
         uses: actions/checkout@v4
         with:
-          # Use a deploy token or PAT so the commit triggers CI on the pushed branch.
-          # Falls back to GITHUB_TOKEN (will not re-trigger this workflow by default).
+          ref: develop
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install yq
@@ -232,7 +234,7 @@ jobs:
           yq -i '.worker.image.tag = "${{ steps.release.outputs.tag }}"' \
             infra/helm/moiraweave/values.yaml
 
-      - name: Commit & push
+      - name: Commit & push to develop
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -241,4 +243,4 @@ jobs:
           git diff --cached --quiet && exit 0
           git commit --no-verify \
             -m "chore(helm): bump image tags to ${{ steps.release.outputs.tag }} [skip ci]"
-          git push
+          git push origin develop
